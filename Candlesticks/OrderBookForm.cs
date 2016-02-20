@@ -54,10 +54,20 @@ namespace Candlesticks {
 
 			ChartArea chartArea = new ChartArea();
 			chartArea.AxisX.Interval = 0.05d;
+			chartArea.AxisY.Maximum = 5.0f;
 
 
 			chart.ChartAreas.Add(chartArea);
 
+
+			Series seriesRate = new Series();
+			seriesRate.ChartType = SeriesChartType.Column;
+			var dataPoint = new DataPoint(pricePoints.rate, 5.0f);
+			seriesRate.SetCustomProperty("PointWidth", "0.01");
+			//			dataPoint["PointWidth"] = "1.0";
+			seriesRate.Points.Add(dataPoint);
+			seriesRate.Color = Color.Orange;
+			chart.Series.Add(seriesRate);
 
 			Series[] lines = new Series[4];
 			string[] titles = new string[] { "order_long", "order_short", "pos_long", "pos_short" };
@@ -82,6 +92,8 @@ namespace Candlesticks {
 				lines[2].Points.Add(new DataPoint(dprice, p.pl));
 				lines[3].Points.Add(new DataPoint(dprice, p.ps));
 			}
+
+
 
 		}
 

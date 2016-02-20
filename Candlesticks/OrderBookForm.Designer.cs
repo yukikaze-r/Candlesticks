@@ -24,12 +24,12 @@
 		/// </summary>
 		private void InitializeComponent() {
 			this.components = new System.ComponentModel.Container();
-			System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea7 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-			System.Windows.Forms.DataVisualization.Charting.Legend legend7 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-			System.Windows.Forms.DataVisualization.Charting.Series series7 = new System.Windows.Forms.DataVisualization.Charting.Series();
-			System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea8 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-			System.Windows.Forms.DataVisualization.Charting.Legend legend8 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-			System.Windows.Forms.DataVisualization.Charting.Series series8 = new System.Windows.Forms.DataVisualization.Charting.Series();
+			System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+			System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+			System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
+			System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+			System.Windows.Forms.DataVisualization.Charting.Legend legend2 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+			System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
 			this.splitContainer1 = new System.Windows.Forms.SplitContainer();
 			this.chart1 = new System.Windows.Forms.DataVisualization.Charting.Chart();
 			this.chart2 = new System.Windows.Forms.DataVisualization.Charting.Chart();
@@ -63,22 +63,22 @@
 			this.splitContainer1.Panel2.AutoScroll = true;
 			this.splitContainer1.Panel2.Controls.Add(this.chart2);
 			this.splitContainer1.Panel2.Scroll += new System.Windows.Forms.ScrollEventHandler(this.splitContainer1_Panel2_Scroll);
-			this.splitContainer1.Size = new System.Drawing.Size(1064, 764);
-			this.splitContainer1.SplitterDistance = 380;
+			this.splitContainer1.Size = new System.Drawing.Size(1064, 783);
+			this.splitContainer1.SplitterDistance = 389;
 			this.splitContainer1.TabIndex = 2;
 			// 
 			// chart1
 			// 
-			chartArea7.Name = "ChartArea1";
-			this.chart1.ChartAreas.Add(chartArea7);
-			legend7.Name = "Legend1";
-			this.chart1.Legends.Add(legend7);
+			chartArea1.Name = "ChartArea1";
+			this.chart1.ChartAreas.Add(chartArea1);
+			legend1.Name = "Legend1";
+			this.chart1.Legends.Add(legend1);
 			this.chart1.Location = new System.Drawing.Point(3, 3);
 			this.chart1.Name = "chart1";
-			series7.ChartArea = "ChartArea1";
-			series7.Legend = "Legend1";
-			series7.Name = "Series1";
-			this.chart1.Series.Add(series7);
+			series1.ChartArea = "ChartArea1";
+			series1.Legend = "Legend1";
+			series1.Name = "Series1";
+			this.chart1.Series.Add(series1);
 			this.chart1.Size = new System.Drawing.Size(797, 234);
 			this.chart1.TabIndex = 0;
 			this.chart1.TabStop = false;
@@ -86,16 +86,16 @@
 			// 
 			// chart2
 			// 
-			chartArea8.Name = "ChartArea1";
-			this.chart2.ChartAreas.Add(chartArea8);
-			legend8.Name = "Legend1";
-			this.chart2.Legends.Add(legend8);
+			chartArea2.Name = "ChartArea1";
+			this.chart2.ChartAreas.Add(chartArea2);
+			legend2.Name = "Legend1";
+			this.chart2.Legends.Add(legend2);
 			this.chart2.Location = new System.Drawing.Point(0, 3);
 			this.chart2.Name = "chart2";
-			series8.ChartArea = "ChartArea1";
-			series8.Legend = "Legend1";
-			series8.Name = "Series1";
-			this.chart2.Series.Add(series8);
+			series2.ChartArea = "ChartArea1";
+			series2.Legend = "Legend1";
+			series2.Name = "Series1";
+			this.chart2.Series.Add(series2);
 			this.chart2.Size = new System.Drawing.Size(842, 225);
 			this.chart2.TabIndex = 0;
 			this.chart2.TabStop = false;
@@ -120,7 +120,7 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(1088, 817);
+			this.ClientSize = new System.Drawing.Size(1088, 836);
 			this.Controls.Add(this.button1);
 			this.Controls.Add(this.splitContainer1);
 			this.Name = "OrderBookForm";

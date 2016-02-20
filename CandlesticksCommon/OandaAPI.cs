@@ -13,6 +13,12 @@ using System.Net;
 
 namespace Candlesticks {
 	class OandaAPI {
+		private static string BearerToken {
+			get {
+				return Setting.Instance.OandaBearerToken;
+			}
+		}
+
 		private static readonly DateTime UNIX_EPOCH = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
 		private HttpClient client;
@@ -27,7 +33,7 @@ namespace Candlesticks {
 			string endParam = WebUtility.UrlEncode(XmlConvert.ToString(end, XmlDateTimeSerializationMode.Utc));
 			
 			HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "v1/candles?instrument=USD_JPY&start="+ startParam+"&end="+endParam+"&candleFormat=midpoint&granularity=M1&dailyAlignment=0&alignmentTimezone=America%2FNew_York");
-			request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
+			request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", OandaAPI.BearerToken);
 			
 			Task<HttpResponseMessage> webTask = client.SendAsync(request);
 			webTask.Wait();
@@ -49,7 +55,7 @@ namespace Candlesticks {
 
 		public Dictionary<DateTime, PricePoints> GetOrderbookData(int period = 43200) {
 			HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "labs/v1/orderbook_data?instrument=USD_JPY&period=21600");
-			request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
+			request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", OandaAPI.BearerToken);
 			
 			Task<HttpResponseMessage> webTask = client.SendAsync(request);
 			webTask.Wait();
@@ -81,6 +87,8 @@ namespace Candlesticks {
 	class PricePoints {
 		[DataMember]
 		public Dictionary<float, PricePoint> price_points;
+		[DataMember]
+		public float rate;
 	}
 
 	[DataContract]

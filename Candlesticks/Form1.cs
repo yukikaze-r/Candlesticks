@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -11,7 +12,18 @@ using System.Windows.Forms;
 namespace Candlesticks {
 	public partial class Form1 : Form {
 
-		private string REPORT_PATH = @"C:\Users\玲\OneDrive\ドキュメント\finance";
+		public string REPORT_PATH {
+			get {
+				return Setting.Instance.DataFilePath;
+			}
+		}
+
+		public string DATA_PATH {
+			get {
+				return Setting.Instance.DataFilePath;
+			}
+		}
+
 		private Report report;
 
 		public Form1() {
@@ -22,7 +34,7 @@ namespace Candlesticks {
 
 		private void button1_Click(object sender, EventArgs e) {
 			int range = 8;
-			List<Candlestick> list = new List<Candlestick>(new CandlesticksReader().Read(@"C:\Users\玲\Desktop\h1.csv"));
+			List<Candlestick> list = new List<Candlestick>(new CandlesticksReader().Read(DATA_PATH + @"\h1.csv"));
 			for(int t = range; t < list.Count(); t++) {
 //				DoSettlement(t, list[t].Close);
 				float low = list.GetRange(t - range, range).Select(s => s.Low).Min();
@@ -84,7 +96,7 @@ namespace Candlesticks {
 		}
 
 		private void button2_Click(object sender, EventArgs e) {
-			List<Candlestick> list = new List<Candlestick>(new CandlesticksReader().Read(@"C:\Users\玲\Desktop\h1.csv"));
+			List<Candlestick> list = new List<Candlestick>(new CandlesticksReader().Read(DATA_PATH + @"\h1.csv"));
 			Dictionary<int, int> upD = new Dictionary<int, int>();
 			Dictionary<int, int> downD = new Dictionary<int, int>();
 			int c = 0;
@@ -125,7 +137,7 @@ namespace Candlesticks {
 		}
 
 		private void button3_Click(object sender, EventArgs e) {
-			List<Candlestick> list = new List<Candlestick>(new CandlesticksReader().Read(@"C:\Users\玲\Desktop\h1.csv"));
+			List<Candlestick> list = new List<Candlestick>(new CandlesticksReader().Read(DATA_PATH + @"\h1.csv"));
 			Dictionary<string, List<Candlestick>> dayOftheWeekTimeDict = new Dictionary<string, List<Candlestick>>();
 			foreach(var stick in list) {
 				string key = stick.Time.DayOfWeek + " " + stick.Time.Hour;
@@ -146,7 +158,7 @@ namespace Candlesticks {
 		}
 
 		private void button4_Click(object sender, EventArgs e) {
-			List<Candlestick> list = new List<Candlestick>(new CandlesticksReader().Read(@"C:\Users\玲\Desktop\h1.csv"));
+			List<Candlestick> list = new List<Candlestick>(new CandlesticksReader().Read(DATA_PATH + @"\h1.csv"));
 			List<Dictionary<string, Candlestick>> dayOfWeekTable = new List<Dictionary<string, Candlestick>>();
 			Dictionary<string, Candlestick> dict = new Dictionary<string, Candlestick>();
 			DayOfWeek oldDayOfWeek = DayOfWeek.Friday;
@@ -174,7 +186,7 @@ namespace Candlesticks {
 		private void button5_Click(object sender, EventArgs e) {
 
 			int range = 10;
-			List<Candlestick> list = new List<Candlestick>(new CandlesticksReader().Read(@"C:\Users\玲\Desktop\h1.csv"));
+			List<Candlestick> list = new List<Candlestick>(new CandlesticksReader().Read(DATA_PATH + @"\h1.csv"));
 			for (int t = range; t < list.Count(); t++) {
 				float low = list.GetRange(t - range, range).Select(s => s.Low).Min();
 				if (list[t].Close < low) {
@@ -192,7 +204,7 @@ namespace Candlesticks {
 
 		private void button6_Click(object sender, EventArgs e) {
 			int range = 10;
-			List<Candlestick> list = new List<Candlestick>(new CandlesticksReader().Read(@"C:\Users\玲\Desktop\h1.csv"));
+			List<Candlestick> list = new List<Candlestick>(new CandlesticksReader().Read(DATA_PATH + @"\h1.csv"));
 			List<TradePosition> positions = new List<TradePosition>();
 			for (int t = range; t < list.Count(); t++) {
 				float CurrentPrice = list[t].Close;
@@ -230,7 +242,7 @@ namespace Candlesticks {
 		private void button7_Click(object sender, EventArgs e) {
 
 			int range = 10;
-			List<Candlestick> list = new List<Candlestick>(new CandlesticksReader().Read(@"C:\Users\玲\Desktop\h1.csv"));
+			List<Candlestick> list = new List<Candlestick>(new CandlesticksReader().Read(DATA_PATH + @"\h1.csv"));
 			for (int t = range; t < list.Count(); t++) {
 				float low = list.GetRange(t - range, range).Select(s => s.Low).Min();
 				if (list[t].Close < low && t < list.Count() - range * 2) {
@@ -253,7 +265,7 @@ namespace Candlesticks {
 
 
 		private IEnumerable<Candlestick> GetByDateRangeM30(DateTime start, DateTime end) {
-			List<Candlestick> list = new List<Candlestick>(new CandlesticksReader().Read(@"C:\Users\玲\Desktop\m30-5y.csv"));
+			List<Candlestick> list = new List<Candlestick>(new CandlesticksReader().Read(DATA_PATH + @"\m30-5y.csv"));
 			foreach(var c in list) {
 				if(start <= c.Time && c.Time < end) {
 					yield return c;
@@ -403,7 +415,7 @@ namespace Candlesticks {
 				report.IsForceOverride = false;
 				report.Comment = "最短1h→30m";
 				report.SetHeader("start","end", "start", "end", "↑↑","↑↓","↓↑","↓↓");
-				foreach (var t in GetBestTradeTime((new CandlesticksReader().Read(@"C:\Users\玲\Desktop\m30-5y.csv")), 100)) {
+				foreach (var t in GetBestTradeTime((new CandlesticksReader().Read(DATA_PATH + @"\m30-5y.csv")), 100)) {
 					foreach (var time in t.Item1) {
 						report.Write(FormatHourMinute(time));
 					}
@@ -420,7 +432,7 @@ namespace Candlesticks {
 				report.Version = 1;
 				report.Comment = "0000-0430_0500-0700";
 				report.SetHeader("date", "balance", "isbuy", "isplus");
-				List<Candlestick> list = new List<Candlestick>(new CandlesticksReader().Read(@"C:\Users\玲\Desktop\m30-5y.csv"));
+				List<Candlestick> list = new List<Candlestick>(new CandlesticksReader().Read(DATA_PATH + @"\m30-5y.csv"));
 				DateTime oldDate = new DateTime();
 				Candlestick[] hmList = null;
 				List<Candlestick[]> dateList = new List<Candlestick[]>();
@@ -433,7 +445,7 @@ namespace Candlesticks {
 					hmList[c.Time.Hour * 2 + (c.Time.Minute == 30 ? 1 : 0)] = c;
 				}
 
-				foreach (var t in CheckTrade(new CandlesticksReader().Read(@"C:\Users\玲\Desktop\m30-5y.csv"), new int[] { 0, 9, 10, 14 })) {
+				foreach (var t in CheckTrade(new CandlesticksReader().Read(DATA_PATH + @"\m30-5y.csv"), new int[] { 0, 9, 10, 14 })) {
 					report.WriteLine(t.Item1.Year + "/" + t.Item1.Month + "/" + t.Item1.Day,t.Item2,(t.Item3 ? "1" : "0"),(t.Item2 > 0 ? "1" : "0"));
 				}
 
@@ -447,7 +459,7 @@ namespace Candlesticks {
 				report.Version = 1;
 				report.Comment = "";
 				report.SetHeader("limit","usable","total","ratio","avg");
-				List<Candlestick> list = new List<Candlestick>(new CandlesticksReader().Read(@"C:\Users\玲\Desktop\m30-5y.csv"));
+				List<Candlestick> list = new List<Candlestick>(new CandlesticksReader().Read(DATA_PATH + @"\m30-5y.csv"));
 				for (int limit = 1; limit <= 40; limit += 2) {
 					DateTime startTime = list[0].Time;
 					int total = 0;
@@ -481,7 +493,7 @@ namespace Candlesticks {
 				report.Comment = "";
 				report.IsForceOverride = true;
 				report.SetHeader("month", "usable", "total", "ratio", "avg", "max", "min");
-				List<Candlestick> list = new List<Candlestick>(new CandlesticksReader().Read(@"C:\Users\玲\Desktop\m30-5y.csv"));
+				List<Candlestick> list = new List<Candlestick>(new CandlesticksReader().Read(DATA_PATH + @"\m30-5y.csv"));
 				for (int month = 1; month <= 48; month++) {
 					DateTime startTime = list[0].Time;
 					int total = 0;
@@ -521,7 +533,7 @@ namespace Candlesticks {
 				report.IsForceOverride = true;
 				report.Comment = "";
 				report.SetHeader("date", "balance");
-				List<Candlestick> list = new List<Candlestick>(new CandlesticksReader().Read(@"C:\Users\玲\Desktop\m30-5y.csv"));
+				List<Candlestick> list = new List<Candlestick>(new CandlesticksReader().Read(DATA_PATH + @"\m30-5y.csv"));
 				DateTime startTime = list[0].Time;
 				int total = 0;
 				int usable = 0;
@@ -558,7 +570,7 @@ namespace Candlesticks {
 				report.Comment = "";
 				report.IsForceOverride = true;
 				report.SetHeader("start", "end", "start", "end", "↑↑", "↑↓", "↓↑", "↓↓", "ratio");
-				foreach (var t in GetBestTradeWeekTime((new CandlesticksReader().Read(@"C:\Users\玲\Desktop\m30-5y.csv")), 80)) {
+				foreach (var t in GetBestTradeWeekTime((new CandlesticksReader().Read(DATA_PATH + @"\m30-5y.csv")), 80)) {
 					foreach (var time in t.Item1) {
 						report.Write(FormatWeekHourMinute(time));
 					}
@@ -578,7 +590,7 @@ namespace Candlesticks {
 				report.IsForceOverride = false;
 				report.SetHeader("month", "usable", "total", "ratio", "avg", "max", "min");
 
-				List<Candlestick> list = new List<Candlestick>(new CandlesticksReader().Read(@"C:\Users\玲\Desktop\m30-5y.csv"));
+				List<Candlestick> list = new List<Candlestick>(new CandlesticksReader().Read(DATA_PATH + @"\m30-5y.csv"));
 				DateTime startTime = list[0].Time;
 				int total = 0;
 				int usable = 0;
@@ -734,7 +746,7 @@ namespace Candlesticks {
 					"↑↓", "↑上↓", "↑下↓",
 					"↓↑", "↓上↑", "↓下↑",
 					"↓↓", "↓上↓", "↓下↓");
-				foreach (var t in GetBestTradeTimePinBar((new CandlesticksReader().Read(@"C:\Users\玲\Desktop\m30-5y.csv")), 100)) {
+				foreach (var t in GetBestTradeTimePinBar((new CandlesticksReader().Read(DATA_PATH + @"\m30-5y.csv")), 100)) {
 					foreach (var time in t.Item1) {
 						report.Write(FormatHourMinute(time));
 					}
@@ -753,7 +765,7 @@ namespace Candlesticks {
 				report.IsForceOverride = true;
 				report.Comment = "";
 				report.SetHeader("start", "end", "start", "end", "↑↑", "↑↓", "↓↑", "↓↓");
-				BestTradeTime bestTradeTime = new BestTradeTime(new CandlesticksReader().Read(@"C:\Users\玲\Desktop\m30-5y.csv"));
+				BestTradeTime bestTradeTime = new BestTradeTime(new CandlesticksReader().Read(DATA_PATH + @"\m30-5y.csv"));
 				bestTradeTime.ShiftHour = 12;
 
 				foreach (var t in bestTradeTime.Calculate(100)) {
@@ -775,7 +787,7 @@ namespace Candlesticks {
 				report.IsForceOverride = true;
 				report.Comment = "";
 				report.SetHeader("start", "end", "start", "end", "↑↑", "↑↓", "↓↑", "↓↓");
-				BestTradeTime bestTradeTime = new BestTradeTime(new CandlesticksReader().Read(@"C:\Users\玲\Desktop\m30-5y.csv"));
+				BestTradeTime bestTradeTime = new BestTradeTime(new CandlesticksReader().Read(DATA_PATH + @"\m30-5y.csv"));
 				bestTradeTime.Comparator = f => f[1] - f[0];
 				foreach (var t in bestTradeTime.Calculate(100)) {
 					foreach (var time in t.Item1) {
@@ -794,5 +806,11 @@ namespace Candlesticks {
 			d.Show(this);
 //			d.ShowDialog(this);
 		}
+
+		private void 設定ToolStripMenuItem_Click(object sender, EventArgs e) {
+			var dialog = new SettingDialog();
+			dialog.ShowDialog(this);
+		}
+		
 	}
 }

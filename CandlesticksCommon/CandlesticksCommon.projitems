@@ -6,9 +6,10 @@
     <SharedGUID>cdfe3774-2e91-4297-ae24-ea77b17f6509</SharedGUID>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
-    <Import_RootNamespace>CandlesticksCommon</Import_RootNamespace>
+    <Import_RootNamespace>Candlesticks</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)OandaAPI.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)OrderBookUpdated.cs" />
   </ItemGroup>
 </Project>

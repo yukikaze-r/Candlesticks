@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Candlesticks {
+
 	class Setting {
 		public static Setting Instance = new Setting();
 

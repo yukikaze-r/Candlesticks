@@ -54,7 +54,7 @@ namespace Candlesticks {
 		}
 
 		public Dictionary<DateTime, PricePoints> GetOrderbookData(int period = 43200) {
-			HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "labs/v1/orderbook_data?instrument=USD_JPY&period=21600");
+			HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "labs/v1/orderbook_data?instrument=USD_JPY&period="+ period);
 			request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", OandaAPI.BearerToken);
 			
 			Task<HttpResponseMessage> webTask = client.SendAsync(request);
@@ -81,7 +81,22 @@ namespace Candlesticks {
 
 	}
 
-	
+	class Candles {
+		private string json;
+
+		public Candles(string json) {
+			this.json = json;
+		}
+
+		public IEnumerable<OandaCandle> Parse() {
+			var settings = new DataContractJsonSerializerSettings();
+			settings.UseSimpleDictionaryFormat = true;
+			var serializer = new DataContractJsonSerializer(typeof(OandaCandles), settings);
+			using (var ms = new MemoryStream(Encoding.UTF8.GetBytes(json))) {
+				return ((OandaCandles)serializer.ReadObject(ms)).candles;
+			}
+		}
+	}
 
 	[DataContract]
 	class PricePoints {

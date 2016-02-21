@@ -72,7 +72,6 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Report.cs" />
-    <Compile Include="Server.cs" />
     <Compile Include="Setting.cs" />
     <Compile Include="SettingDialog.cs">
       <SubType>Form</SubType>

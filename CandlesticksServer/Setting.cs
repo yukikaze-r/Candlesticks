@@ -1,36 +1,51 @@
-﻿using Microsoft.Win32;
+﻿
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Candlesticks {
+
+	[DataContract]
 	class Setting {
-		public static Setting Instance = new Setting();
+		public static Setting Instance;
 
-		private Setting() {
-			var registryKey = Registry.CurrentUser.CreateSubKey(@"Software\CandleSticks\Setting");
-			this.OandaBearerToken = (string)registryKey.GetValue("oandaBearerToken");
-			this.DataFilePath = (string)registryKey.GetValue("dataFilePath");
-			registryKey.Close();
+		public static void LoadInstance(string filePath) {
+			var settings = new DataContractJsonSerializerSettings();
+			settings.UseSimpleDictionaryFormat = true;
+			var serializer = new DataContractJsonSerializer(typeof(Setting), settings);
+			using (var stream = new FileStream(filePath, FileMode.Open)) {
+				Instance = (Setting)serializer.ReadObject(stream);
+			}
 		}
 
-		public void Save() {
-			var registryKey = Registry.CurrentUser.CreateSubKey(@"Software\CandleSticks\Setting");
-			registryKey.SetValue("oandaBearerToken", this.OandaBearerToken);
-			registryKey.SetValue("dataFilePath", this.DataFilePath);
-			registryKey.Close();
-		}
+		[DataMember]
+		public string LogFilePath = null;
 
-		public string OandaBearerToken {
-			get;
-			set;
-		}
+		[DataMember]
+		public int ListenPort = -1;
 
-		public string DataFilePath {
-			get;
-			set;
+		[DataMember]
+		public string OandaBearerToken = null;
+
+		[DataMember]
+		public DBConnectionSetting DBConnection = null;
+
+		[DataContract]
+		public class DBConnectionSetting {
+			[DataMember]
+			public string Host = null;
+			[DataMember]
+			public string UserName = null;
+			[DataMember]
+			public string Password = null;
+			[DataMember]
+			public string Database = null;
 		}
 	}
 }

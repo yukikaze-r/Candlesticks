@@ -23,8 +23,7 @@ namespace Candlesticks {
 
 			var orderbook = oandaApi.GetOrderbookData(3600);
 
-			this.connection = CreateConnection();
-			this.connection.Open();
+			this.connection = DBUtils.OpenConnection();
 
 			SaveOrderbook(orderbook);
 
@@ -43,16 +42,7 @@ namespace Candlesticks {
 			timer.Start();
 
 		}
-
-		private NpgsqlConnection CreateConnection() {
-			var dbSetting = Setting.Instance.DBConnection;
-			return new NpgsqlConnection(
-				"Host=" + dbSetting.Host +
-				";Username=" + dbSetting.UserName +
-				";Password=" + dbSetting.Password +
-				";Database=" + dbSetting.Database);
-		}
-
+		
 		private void Timer_FirstElapsed(object sender, ElapsedEventArgs e) {
 			try {
 				Trace.WriteLine("Timer_FirstElapsed");
@@ -79,27 +69,12 @@ namespace Candlesticks {
 
 		private void SaveOrderbook(Dictionary<DateTime,PricePoints> orderbook) {
 			DateTime? lastUpdated = null;
-
-			using (var cmd = new NpgsqlCommand()) {
-				cmd.Connection = connection;
-				cmd.CommandText = "select count(*) from order_book where date_time=:date_time";
-				cmd.Parameters.Add(new NpgsqlParameter("date_time", DbType.DateTime));
-
-				foreach (var time in orderbook.Keys.OrderBy(k => k)) {
-
-					cmd.Parameters["date_time"].Value = time;
-					NpgsqlDataReader dr = cmd.ExecuteReader();
-					Int64 count = 0;
-					while (dr.Read()) {
-						count = (Int64)dr[0];
-					}
-					dr.Close();
-					if ( count == 0) {
-						Trace.WriteLine(time+" is not exists");
-						Trace.Flush();
-						SavePricePoints(time,orderbook[time]);
-						lastUpdated = time;
-					}
+			foreach (var time in orderbook.Keys.OrderBy(k => k)) {
+				if ( new OrderBookDao(connection).GetCountByDateTime(time) == 0) {
+					Trace.WriteLine(time+" is not exists");
+					Trace.Flush();
+					SavePricePoints(time,orderbook[time]);
+					lastUpdated = time;
 				}
 			}
 

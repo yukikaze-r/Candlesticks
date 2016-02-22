@@ -19,12 +19,18 @@ namespace Candlesticks {
 			var setting = Setting.Instance;
 			oandaBearerToken.Text = setting.OandaBearerToken;
 			dataFilePath.Text = setting.DataFilePath;
+			dbHost.Text = setting.DBConnection.Host;
+			dbPort.Text = setting.DBConnection.Port.ToString();
+			dbPassword.Text = setting.DBConnection.Password;
 		}
 
 		private void button1_Click(object sender, EventArgs e) {
 			var setting = Setting.Instance;
 			setting.DataFilePath = dataFilePath.Text;
 			setting.OandaBearerToken = oandaBearerToken.Text;
+			setting.DBConnection.Host = dbHost.Text;
+			setting.DBConnection.Port = int.Parse(dbPort.Text);
+			setting.DBConnection.Password = dbPassword.Text;
 			setting.Save();
 			this.Close();
 		}

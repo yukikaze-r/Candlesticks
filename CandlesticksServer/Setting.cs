@@ -39,13 +39,15 @@ namespace Candlesticks {
 		[DataContract]
 		public class DBConnectionSetting {
 			[DataMember]
-			public string Host = null;
+			public string Host = "localhost";
 			[DataMember]
-			public string UserName = null;
+			public int Port = 5432;
+			[DataMember]
+			public string UserName = "candlesticks";
 			[DataMember]
 			public string Password = null;
 			[DataMember]
-			public string Database = null;
+			public string Database = "candlesticks";
 		}
 	}
 }

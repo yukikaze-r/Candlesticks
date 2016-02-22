@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Npgsql;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -11,7 +12,9 @@ using System.Windows.Forms.DataVisualization.Charting;
 
 namespace Candlesticks {
 	public partial class OrderBookForm : Form {
+		private NpgsqlConnection connection = null;
 		private DateTime latestTime;
+		private List<OrderBookDao.Entity> orderBooks;
 
 		public OrderBookForm() {
 			InitializeComponent();
@@ -22,12 +25,26 @@ namespace Candlesticks {
 		}
 
 		private void OrderBookForm_Load(object sender, EventArgs ev) {
-			LoadAllChart();
+			LoadOrderBookList();
+
+			orderBookList.SelectedIndex = 0;
+
+//			LoadAllChart();
 
 			splitContainer1.Panel2.HorizontalScroll.Value = splitContainer1.Panel1.HorizontalScroll.Value
 				= (splitContainer1.Panel1.HorizontalScroll.Maximum + splitContainer1.Panel1.HorizontalScroll.Minimum - splitContainer1.Panel1.ClientSize.Width) / 2;
 
 			
+		}
+
+		private void LoadOrderBookList() {
+			connection = DBUtils.OpenConnection();
+			orderBookList.Items.Clear();
+			orderBooks = new List<OrderBookDao.Entity>();
+			foreach (var entity in new OrderBookDao(connection).GetAllOrderByDateTimeDescendant()) {
+				orderBookList.Items.Add(entity.DateTime);
+				orderBooks.Add(entity);
+			}
 		}
 
 		private void LoadAllChart() {
@@ -48,13 +65,17 @@ namespace Candlesticks {
 			chart.ChartAreas.Clear();
 			chart.Titles.Clear();
 
-			chart.Size = new Size(8000, 400);
+			chart.Size = new Size(10000, 400);
 
 			chart.Titles.Add(new Title(dateTime.ToString()));
 
 			ChartArea chartArea = new ChartArea();
 			chartArea.AxisX.Interval = 0.05d;
+			chartArea.AxisX.Minimum = 100f;
+			chartArea.AxisX.Maximum= 125f;
 			chartArea.AxisY.Maximum = 5.0f;
+			chartArea.AxisY.Minimum = -1.0f;
+			chartArea.AxisY.Interval = 1.0f;
 
 
 			chart.ChartAreas.Add(chartArea);
@@ -68,6 +89,17 @@ namespace Candlesticks {
 			seriesRate.Points.Add(dataPoint);
 			seriesRate.Color = Color.Orange;
 			chart.Series.Add(seriesRate);
+
+			Series seriesDeltaPos = new Series();
+			seriesDeltaPos.ChartType = SeriesChartType.Column;
+			seriesDeltaPos.LegendText = "buy - sell position";
+			seriesDeltaPos.Color = Color.LightGreen;
+			foreach (var price in pricePoints.price_points.Keys.OrderBy(k => k)) {
+				var dprice = decimal.ToDouble((decimal)price);
+				var p = pricePoints.price_points[price];
+				seriesDeltaPos.Points.Add(new DataPoint(dprice, p.pl - p.ps));
+			}
+			chart.Series.Add(seriesDeltaPos);
 
 			Series[] lines = new Series[4];
 			string[] titles = new string[] { "order_long", "order_short", "pos_long", "pos_short" };
@@ -116,6 +148,35 @@ namespace Candlesticks {
 			if(now.Minute % 20 == 1 && now > latestTime.AddMinutes(1)) {
 				latestTime = now;
 				LoadAllChart();
+			}
+		}
+		
+		private void LoadChart(Chart chart, OrderBookDao.Entity orderBook) {
+			PricePoints pricePoints = new PricePoints();
+			pricePoints.rate = orderBook.Rate;
+			pricePoints.price_points = new Dictionary<float, PricePoint>();
+			foreach (var pp in orderBook.GetPricePointsOrderByPrice()) {
+				pricePoints.price_points[pp.Price] = new PricePoint() {
+					os = pp.Os,
+					ol = pp.Ol,
+					ps = pp.Ps,
+					pl = pp.Pl
+				};
+			}
+			LoadChart(chart, orderBook.DateTime, pricePoints);
+		}
+
+		private void orderBookList_SelectedIndexChanged(object sender, EventArgs e) {
+			LoadChart(chart1,orderBooks[orderBookList.SelectedIndex]);
+			if(orderBookList.SelectedIndex+1 < orderBooks.Count()) {
+				LoadChart(chart2, orderBooks[orderBookList.SelectedIndex + 1]);
+			}
+		}
+
+		private void OrderBookForm_FormClosing(object sender, FormClosingEventArgs e) {
+			if(connection != null) {
+				connection.Close();
+				connection = null;
 			}
 		}
 	}

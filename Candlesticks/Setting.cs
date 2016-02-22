@@ -14,6 +14,11 @@ namespace Candlesticks {
 			var registryKey = Registry.CurrentUser.CreateSubKey(@"Software\CandleSticks\Setting");
 			this.OandaBearerToken = (string)registryKey.GetValue("oandaBearerToken");
 			this.DataFilePath = (string)registryKey.GetValue("dataFilePath");
+			this.DBConnection = new DBConnectionSetting() {
+				Host = (string)registryKey.GetValue("dbHost","localhost"),
+				Port = (int)registryKey.GetValue("dbUserName",5432),
+				Password = (string)registryKey.GetValue("dbPassword"),
+			};
 			registryKey.Close();
 		}
 
@@ -21,6 +26,9 @@ namespace Candlesticks {
 			var registryKey = Registry.CurrentUser.CreateSubKey(@"Software\CandleSticks\Setting");
 			registryKey.SetValue("oandaBearerToken", this.OandaBearerToken);
 			registryKey.SetValue("dataFilePath", this.DataFilePath);
+			registryKey.SetValue("dbHost", this.DBConnection.Host);
+			registryKey.SetValue("dbPort", this.DBConnection.Port);
+			registryKey.SetValue("dbPassword", this.DBConnection.Password);
 			registryKey.Close();
 		}
 
@@ -32,6 +40,19 @@ namespace Candlesticks {
 		public string DataFilePath {
 			get;
 			set;
+		}
+
+		public DBConnectionSetting DBConnection {
+			get;
+			set;
+		}
+
+		public class DBConnectionSetting {
+			public string Host = "localhost";
+			public int Port = 5432;
+			public string UserName = "candlesticks";
+			public string Password = null;
+			public string Database = "candlesticks";
 		}
 	}
 }

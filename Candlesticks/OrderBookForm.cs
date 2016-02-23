@@ -4,8 +4,10 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Net.Sockets;
+using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading;
@@ -41,22 +43,26 @@ namespace Candlesticks {
 		private void ReceiveEvent() {
 			Console.WriteLine("receive start");
 			tcpClient = new TcpClient("localhost", 4444);
-			var stream = tcpClient.GetStream();
+			var reader = new BinaryReader(tcpClient.GetStream());
 
 			try {
 				while (true) {
-					BinaryFormatter f = new BinaryFormatter();
-					var receivedObject = f.Deserialize(stream);
-					Console.WriteLine("received: " + receivedObject);
-					if (receivedObject is OrderBookUpdated) {
-						var orderBookUpdated = (OrderBookUpdated)receivedObject;
-						Invoke(new Action(() => {
-							int selectedIndex = orderBookList.SelectedIndex;
-							LoadOrderBookList(orderBookUpdated.DateTime);
-							if(selectedIndex == 0) {
-								orderBookList.SelectedIndex = 0;
-							}
-						}));
+					int length = reader.ReadInt32();
+					byte[] body = reader.ReadBytes(length);
+					using(var memStream = new MemoryStream(body)) {
+						DataContractSerializer ser = new DataContractSerializer(typeof(ServerEvent), new Type[] { typeof(OrderBookUpdated) });
+						var receivedObject = ((ServerEvent) ser.ReadObject(memStream)).Body;
+						Console.WriteLine("received: " + receivedObject);
+						if (receivedObject is OrderBookUpdated) {
+							var orderBookUpdated = (OrderBookUpdated)receivedObject;
+							Invoke(new Action(() => {
+								int selectedIndex = orderBookList.SelectedIndex;
+								LoadOrderBookList(orderBookUpdated.DateTime);
+								if (selectedIndex == 0) {
+									orderBookList.SelectedIndex = 0;
+								}
+							}));
+						}
 					}
 
 				}
@@ -80,7 +86,7 @@ namespace Candlesticks {
 			if(orderBooks.Count(e=>e.DateTime==dateTime) == 0) {
 				var entity = new OrderBookDao(connection).GetByDateTime(dateTime);
 				orderBookList.Items.Insert(0,entity.DateTime);
-				orderBooks.Add(entity);
+				orderBooks.Insert(0, entity);
 			}
 		}
 		
@@ -98,9 +104,16 @@ namespace Candlesticks {
 			chartArea.AxisX.Interval = 0.05d;
 			chartArea.AxisX.Minimum = 100f;
 			chartArea.AxisX.Maximum= 125f;
+			chartArea.AxisX.LabelStyle.Format = "f2";
+			chartArea.AxisX.MajorGrid.Enabled = true;
+			chartArea.AxisX.MajorGrid.Interval = 0.1d;
+			chartArea.AxisX.MinorGrid.Enabled = true;
+			chartArea.AxisX.MinorGrid.LineColor = Color.LightGray;
+			chartArea.AxisX.MinorGrid.Interval = 0.05d;
 			chartArea.AxisY.Maximum = 5.0f;
 			chartArea.AxisY.Minimum = -1.0f;
 			chartArea.AxisY.Interval = 1.0f;
+			chartArea.AxisY.MajorGrid.LineColor = Color.LightGray;
 
 
 			chart.ChartAreas.Add(chartArea);

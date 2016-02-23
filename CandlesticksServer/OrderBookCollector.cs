@@ -84,7 +84,6 @@ namespace Candlesticks {
 			}
 
 			if (lastUpdated != null) {
-				Trace.WriteLine("send OrderBookUpdated event");
 				eventServer.Send(new OrderBookUpdated() { DateTime = lastUpdated.Value });
 			}
 		}

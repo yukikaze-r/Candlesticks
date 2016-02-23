@@ -15,5 +15,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)OandaAPI.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)OrderBookDao.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)OrderBookPricePointDao.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)OrderBookUpdated.cs" />
   </ItemGroup>
 </Project>

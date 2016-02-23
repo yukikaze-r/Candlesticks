@@ -50,12 +50,12 @@ namespace Candlesticks
 		private DateTime GetAlignTime(DateTime time) {
 			if(Granularity[0]=='S') {
 				int s = int.Parse(Granularity.Substring(1));
-				int alignedSecond = time.Second / s * s;
-				return time.AddMilliseconds(-time.Millisecond).AddSeconds(-time.Second + alignedSecond);
+				int aligned = (int)Math.Ceiling((double)time.Second / s) * s;
+				return time.AddMilliseconds(-time.Millisecond).AddSeconds(-time.Second + aligned);
 			} else if (Granularity[0] == 'M') {
 				int s = int.Parse(Granularity.Substring(1));
-				int alignedSecond = time.Second / s * s;
-				return time.AddMilliseconds(-time.Millisecond).AddSeconds(-time.Second + alignedSecond);
+				int aligned = time.Minute / s * s;
+				return time.AddMilliseconds(-time.Millisecond).AddSeconds(-time.Second).AddMinutes(-time.Minute + aligned);
 			}
 
 

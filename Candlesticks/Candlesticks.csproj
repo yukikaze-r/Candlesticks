@@ -59,12 +59,6 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
-    <Compile Include="OrderBookCollectorForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="OrderBookCollectorForm.Designer.cs">
-      <DependentUpon>OrderBookCollectorForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="OrderBookForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -84,9 +78,6 @@
     <Compile Include="TradePosition.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="OrderBookCollectorForm.resx">
-      <DependentUpon>OrderBookCollectorForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="OrderBookForm.resx">
       <DependentUpon>OrderBookForm.cs</DependentUpon>
@@ -115,12 +106,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\CandlesticksServer\CandlesticksServer.csproj">
-      <Project>{e074bbed-7f32-4fee-9a4e-412efeb1b166}</Project>
-      <Name>CandlesticksServer</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="..\CandlesticksCommon\CandlesticksCommon.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

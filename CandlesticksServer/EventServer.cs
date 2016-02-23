@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading;
@@ -65,20 +67,26 @@ namespace Candlesticks {
 		class EventSession {
 			private EventServer server;
 			private TcpClient client;
-			private NetworkStream stream;
+			private BinaryWriter writer;
 
 			public EventSession(EventServer server, TcpClient tcpClient) {
 				this.server = server;
 				this.client = tcpClient;
-				this.stream = this.client.GetStream();
+				this.writer = new BinaryWriter(this.client.GetStream());
 				Trace.WriteLine("EventServer Session start " + tcpClient.Client.RemoteEndPoint);
 			}
 
 			public bool Send(object packet) {
 				try {
-					BinaryFormatter f = new BinaryFormatter();
-					f.Serialize(stream, packet);
-					stream.Flush();
+					Trace.WriteLine("send " + packet +" to "+client.Client.RemoteEndPoint);
+					using (var memStream = new MemoryStream()) {
+						DataContractSerializer ser = new DataContractSerializer(typeof(ServerEvent));
+						ser.WriteObject(memStream, new ServerEvent() { Body = packet });
+						byte [] bytes = memStream.ToArray();
+						writer.Write(bytes.Count());
+						writer.Write(bytes);
+						writer.Flush();
+					}
 
 				} catch(Exception e) {
 					Trace.WriteLine("EventServer Session closed: " + e.Message);

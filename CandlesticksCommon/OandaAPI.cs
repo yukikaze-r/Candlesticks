@@ -28,11 +28,13 @@ namespace Candlesticks {
 			client.BaseAddress = new Uri("https://api-fxpractice.oanda.com/");
 		}
 
-		public IEnumerable<OandaCandle> GetCandles(DateTime start, DateTime end) {
+		// http://www.oanda.com/lang/ja/forex-trading/analysis/currency-units-calculator
+		// JP225_USD  SPX500_USD BCO_USD SGD_HKD  NAS100_USD USB10Y_USD US30_USD
+		public IEnumerable<OandaCandle> GetCandles(DateTime start, DateTime end, string instrument="USD_JPY", string granularity="M30") {
 			string startParam = WebUtility.UrlEncode(XmlConvert.ToString(start, XmlDateTimeSerializationMode.Utc));
 			string endParam = WebUtility.UrlEncode(XmlConvert.ToString(end, XmlDateTimeSerializationMode.Utc));
 			
-			HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "v1/candles?instrument=USD_JPY&start="+ startParam+"&end="+endParam+"&candleFormat=midpoint&granularity=M1&dailyAlignment=0&alignmentTimezone=America%2FNew_York");
+			HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "v1/candles?instrument="+ instrument + "&start="+ startParam+"&end="+endParam+"&candleFormat=midpoint&granularity="+ granularity+"&dailyAlignment=0&alignmentTimezone=America%2FNew_York");
 			request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", OandaAPI.BearerToken);
 			
 			Task<HttpResponseMessage> webTask = client.SendAsync(request);
@@ -143,5 +145,12 @@ namespace Candlesticks {
 
 		[DataMember]
 		public float volume;
+
+		public DateTime DateTime {
+			get {
+				return XmlConvert.ToDateTime(time, XmlDateTimeSerializationMode.Local);
+			}
+		}
+
 	}
 }

@@ -46,6 +46,26 @@ namespace Candlesticks
 			}
 		}
 
+		public Entity GetByDateTime(DateTime dateTime) {
+			using (var cmd = new NpgsqlCommand()) {
+				cmd.Connection = connection;
+				cmd.CommandText = "select id, date_time, rate from order_book where date_time = :date_time";
+				cmd.Parameters.Add(new NpgsqlParameter("date_time", DbType.DateTime));
+				cmd.Parameters["date_time"].Value = dateTime;
+				using (var dr = cmd.ExecuteReader()) {
+					while (dr.Read()) {
+						var entity = new Entity();
+						entity.Connection = connection;
+						entity.Id = (Int64)dr[0];
+						entity.DateTime = (DateTime)dr[1];
+						entity.Rate = (float)((decimal)dr[2]);
+						return entity;
+					}
+				}
+			}
+			return null;
+		}
+
 		public class Entity {
 			public NpgsqlConnection Connection;
 			public Int64 Id;

@@ -12,6 +12,7 @@ namespace Candlesticks {
 
 		public void Execute() {
 			try {
+				Trace.WriteLine("Candlesticks Server starting...");
 				this.eventServer = new EventServer();
 				new OrderBookCollector(eventServer);
 				new Thread(new ThreadStart(() => { eventServer.Execute(); })).Start();
@@ -19,10 +20,18 @@ namespace Candlesticks {
 				Trace.WriteLine(e.ToString());
 				throw e;
 			}
+			Trace.WriteLine("Candlesticks Server started");
 		}
 
 		public void Stop() {
-			this.eventServer.Close();
+			Trace.WriteLine("Candlesticks Server stopping...");
+			try {
+				this.eventServer.Close();
+			} catch (Exception e) {
+				Trace.WriteLine(e.ToString());
+				throw e;
+			}
+			Trace.WriteLine("Candlesticks Server setopped");
 		}
 	}
 }

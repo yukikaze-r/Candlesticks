@@ -50,6 +50,7 @@
   <ItemGroup>
     <Compile Include="EventServer.cs" />
     <Compile Include="OrderBookCollector.cs" />
+    <Compile Include="OrderBookUpdated.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Service.cs">

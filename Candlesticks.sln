@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Candlesticks", "Candlesticks\Candlesticks.csproj", "{8BADD7C3-B424-42B8-BC3B-09F8ED80E569}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E074BBED-7F32-4FEE-9A4E-412EFEB1B166} = {E074BBED-7F32-4FEE-9A4E-412EFEB1B166}
+	EndProjectSection
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "CandlesticksCommon", "CandlesticksCommon\CandlesticksCommon.shproj", "{CDFE3774-2E91-4297-AE24-EA77B17F6509}"
 EndProject

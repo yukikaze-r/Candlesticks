@@ -640,8 +640,9 @@ namespace Candlesticks {
 
 				DateTime current = DateTime.UtcNow;
 
-				foreach (var c in new OandaAPI().GetCandles(current.AddHours(-1), current)) {
-					report.WriteLine(c.time, c.openMid, c.highMid, c.lowMid, c.closeMid, c.volume);
+
+				foreach (var c in new OandaAPI().GetCandles(current.AddHours(-6), current, "JP225_USD","M30")) {
+					report.WriteLine(c.DateTime, c.openMid, c.highMid, c.lowMid, c.closeMid, c.volume);
 				}
 			});
 		}

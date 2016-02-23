@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Candlesticks {
@@ -21,24 +22,33 @@ namespace Candlesticks {
 			listener.Start();
 			Trace.WriteLine("EventServer listen start port: "+ Setting.Instance.ListenPort);
 			while (true) {
-				EventSession session = new EventSession(this, listener.AcceptTcpClient());
-				lock(sessions) {
-					sessions.Add(session);
+				try {
+					EventSession session = new EventSession(this, listener.AcceptTcpClient());
+					lock (sessions) {
+						sessions.Add(session);
+					}
+				} catch(Exception e) {
+					Trace.WriteLine("EventServer stopped:"+e.Message);
+					return;
 				}
+/*				new Thread(new ThreadStart(() => {
+					session.ReceiveLoop();
+					lock(sessions) {
+						sessions.Remove(session);
+					}
+				}));*/
 			}
 		}
 
 		public void Send(object packet) {
 			lock (sessions) {
+				List<EventSession> removes = new List<EventSession>();
 				foreach (var session in sessions) {
-					session.Send(packet);
+					if(session.Send(packet) == false) {
+						removes.Add(session);
+					}
 				}
-			}
-		}
-
-		private void CloseSession(EventSession session) {
-			lock (sessions) {
-				sessions.Remove(session);
+				sessions.RemoveWhere(item => removes.Contains(item));
 			}
 		}
 
@@ -64,19 +74,34 @@ namespace Candlesticks {
 				Trace.WriteLine("EventServer Session start " + tcpClient.Client.RemoteEndPoint);
 			}
 
-			public void Send(object packet) {
+			public bool Send(object packet) {
 				try {
 					BinaryFormatter f = new BinaryFormatter();
 					f.Serialize(stream, packet);
 					stream.Flush();
 
 				} catch(Exception e) {
-					Trace.WriteLine("EventServer Session close: " + e);
-					server.CloseSession(this);
+					Trace.WriteLine("EventServer Session closed: " + e.Message);
+					client.Close();
+					return false;
+				}
+				return true;
+			}
+			/*
+			public void ReceiveLoop() {
+				try {
+					while (true) {
+						BinaryFormatter f = new BinaryFormatter();
+						var request = f.Deserialize(stream);
+
+
+					}
+				} catch(Exception e) {
+					Trace.WriteLine("EventServer Session closed: " + e.Message);
 					client.Close();
 				}
 			}
-
+			*/
 			public void Close() {
 				client.Close();
 			}

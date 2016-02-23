@@ -5,7 +5,10 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Net.Sockets;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
@@ -13,7 +16,7 @@ using System.Windows.Forms.DataVisualization.Charting;
 namespace Candlesticks {
 	public partial class OrderBookForm : Form {
 		private NpgsqlConnection connection = null;
-		private DateTime latestTime;
+		private TcpClient tcpClient = null;
 		private List<OrderBookDao.Entity> orderBooks;
 
 		public OrderBookForm() {
@@ -29,12 +32,38 @@ namespace Candlesticks {
 
 			orderBookList.SelectedIndex = 0;
 
-//			LoadAllChart();
-
 			splitContainer1.Panel2.HorizontalScroll.Value = splitContainer1.Panel1.HorizontalScroll.Value
 				= (splitContainer1.Panel1.HorizontalScroll.Maximum + splitContainer1.Panel1.HorizontalScroll.Minimum - splitContainer1.Panel1.ClientSize.Width) / 2;
 
-			
+			new Thread(new ThreadStart(ReceiveEvent)).Start();
+		}
+
+		private void ReceiveEvent() {
+			Console.WriteLine("receive start");
+			tcpClient = new TcpClient("localhost", 4444);
+			var stream = tcpClient.GetStream();
+
+			try {
+				while (true) {
+					BinaryFormatter f = new BinaryFormatter();
+					var receivedObject = f.Deserialize(stream);
+					Console.WriteLine("received: " + receivedObject);
+					if (receivedObject is OrderBookUpdated) {
+						var orderBookUpdated = (OrderBookUpdated)receivedObject;
+						Invoke(new Action(() => {
+							int selectedIndex = orderBookList.SelectedIndex;
+							LoadOrderBookList(orderBookUpdated.DateTime);
+							if(selectedIndex == 0) {
+								orderBookList.SelectedIndex = 0;
+							}
+						}));
+					}
+
+				}
+
+			} catch(Exception e) {
+				Console.WriteLine(e);
+			}
 		}
 
 		private void LoadOrderBookList() {
@@ -47,18 +76,14 @@ namespace Candlesticks {
 			}
 		}
 
-		private void LoadAllChart() {
-			Console.WriteLine("LoadAllChart");
-
-			DateTime current = DateTime.UtcNow;
-			var data = new OandaAPI().GetOrderbookData(3600);
-
-			DateTime[] times = data.Keys.OrderByDescending(t => t).Take(2).ToArray();
-			LoadChart(chart1, times[0], data[times[0]]);
-			LoadChart(chart2, times[1], data[times[1]]);
-
+		private void LoadOrderBookList(DateTime dateTime) {
+			if(orderBooks.Count(e=>e.DateTime==dateTime) == 0) {
+				var entity = new OrderBookDao(connection).GetByDateTime(dateTime);
+				orderBookList.Items.Insert(0,entity.DateTime);
+				orderBooks.Add(entity);
+			}
 		}
-
+		
 		private void LoadChart(Chart chart, DateTime dateTime, PricePoints pricePoints) {
 
 			chart.Series.Clear();
@@ -142,14 +167,6 @@ namespace Candlesticks {
 		{
 		    return splitContainer1.Panel1.AutoScrollPosition;
 		}
-
-		private void timer1_Tick(object sender, EventArgs e) {
-			DateTime now = DateTime.Now;
-			if(now.Minute % 20 == 1 && now > latestTime.AddMinutes(1)) {
-				latestTime = now;
-				LoadAllChart();
-			}
-		}
 		
 		private void LoadChart(Chart chart, OrderBookDao.Entity orderBook) {
 			PricePoints pricePoints = new PricePoints();
@@ -177,6 +194,10 @@ namespace Candlesticks {
 			if(connection != null) {
 				connection.Close();
 				connection = null;
+			}
+			if(tcpClient != null) {
+				tcpClient.Close();
+				tcpClient = null;
 			}
 		}
 	}

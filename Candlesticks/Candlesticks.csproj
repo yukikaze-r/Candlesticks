@@ -52,7 +52,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BestTradeTime.cs" />
-    <Compile Include="Candlestick.cs" />
     <Compile Include="CandlesticksReader.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
@@ -116,6 +115,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CandlesticksServer\CandlesticksServer.csproj">
+      <Project>{e074bbed-7f32-4fee-9a4e-412efeb1b166}</Project>
+      <Name>CandlesticksServer</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="..\CandlesticksCommon\CandlesticksCommon.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

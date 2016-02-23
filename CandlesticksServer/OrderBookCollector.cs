@@ -53,6 +53,7 @@ namespace Candlesticks {
 				timer.Elapsed += Timer_Elapsed;
 				timer.Start();
 				SaveOrderbook(oandaApi.GetOrderbookData(3600));
+				Trace.WriteLine("Timer_FirstElapsed end");
 			} catch(Exception ex) {
 				Trace.WriteLine(ex);
 			}
@@ -62,6 +63,7 @@ namespace Candlesticks {
 			try {
 				Trace.WriteLine("Timer_Elapsed");
 				SaveOrderbook(oandaApi.GetOrderbookData(3600));
+				Trace.WriteLine("Timer_Elapsed end");
 			} catch (Exception ex) {
 				Trace.WriteLine(ex);
 			}
@@ -69,17 +71,21 @@ namespace Candlesticks {
 
 		private void SaveOrderbook(Dictionary<DateTime,PricePoints> orderbook) {
 			DateTime? lastUpdated = null;
+			Trace.WriteLine("order book count:"+orderbook.Keys.Count());
 			foreach (var time in orderbook.Keys.OrderBy(k => k)) {
 				if ( new OrderBookDao(connection).GetCountByDateTime(time) == 0) {
 					Trace.WriteLine(time+" is not exists");
 					Trace.Flush();
 					SavePricePoints(time,orderbook[time]);
 					lastUpdated = time;
+				} else {
+					Trace.WriteLine(time + " is exists");
 				}
 			}
 
-			if(lastUpdated != null) {
-				this.eventServer.Send(new OrderBookUpdated());
+			if (lastUpdated != null) {
+				Trace.WriteLine("send OrderBookUpdated event");
+				eventServer.Send(new OrderBookUpdated() { DateTime = lastUpdated.Value });
 			}
 		}
 

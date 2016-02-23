@@ -9,10 +9,11 @@
     <Import_RootNamespace>Candlesticks</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Candlestick.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CandlesticksGetter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DBUtils.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)OandaAPI.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)OrderBookDao.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)OrderBookPricePointDao.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)OrderBookUpdated.cs" />
   </ItemGroup>
 </Project>

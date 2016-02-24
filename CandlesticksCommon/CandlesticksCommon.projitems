@@ -10,6 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Candlestick.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CandlestickDao.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CandlesticksGetter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DBUtils.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)OandaAPI.cs" />

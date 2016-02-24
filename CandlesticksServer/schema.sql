@@ -26,7 +26,7 @@ create table candlestick (
 	open numeric(6,3),
 	high numeric(6,3),
 	low numeric(6,3),
-	close numeric(6,3)
+	close numeric(6,3),
+	volume integer,
+	unique(instrument,granularity,date_time)
 );
-
-create index candlestick_instrument_granularity_date_time_idx on candlestick(instrument,granularity,date_time);

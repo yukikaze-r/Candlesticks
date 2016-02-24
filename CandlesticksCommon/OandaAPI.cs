@@ -34,7 +34,7 @@ namespace Candlesticks {
 			string startParam = WebUtility.UrlEncode(XmlConvert.ToString(start, XmlDateTimeSerializationMode.Utc));
 			string endParam = WebUtility.UrlEncode(XmlConvert.ToString(end, XmlDateTimeSerializationMode.Utc));
 			
-			HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "v1/candles?instrument="+ instrument + "&start="+ startParam+"&end="+endParam+"&candleFormat=midpoint&granularity="+ granularity+"&dailyAlignment=0&alignmentTimezone=America%2FNew_York");
+			HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "v1/candles?instrument="+ instrument + "&start="+ startParam+"&end="+endParam+"&candleFormat=midpoint&granularity="+ granularity+"&dailyAlignment=0&alignmentTimezone=Asia%2FTokyo");
 			request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", OandaAPI.BearerToken);
 			
 			Task<HttpResponseMessage> webTask = client.SendAsync(request);
@@ -144,13 +144,27 @@ namespace Candlesticks {
 		public float closeMid;
 
 		[DataMember]
-		public float volume;
+		public int volume;
 
 		public DateTime DateTime {
 			get {
 				return XmlConvert.ToDateTime(time, XmlDateTimeSerializationMode.Local);
 			}
 		}
+
+		public Candlestick Candlestick {
+			get {
+				Candlestick s = new Candlestick();
+				s.Time = this.DateTime;
+				s.Open = this.openMid;
+				s.Close = this.closeMid;
+				s.High = this.highMid;
+				s.Low = this.lowMid;
+				s.Volume = this.volume;
+				return s;
+			}
+		}
+
 
 	}
 }

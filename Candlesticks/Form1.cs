@@ -638,12 +638,28 @@ namespace Candlesticks {
 				report.IsForceOverride = true;
 				report.SetHeader("time","open","high","low","close","volume");
 
-				DateTime current = DateTime.UtcNow;
+				DateTime current = DateTime.Now;
+				
+				using(var connection = DBUtils.OpenConnection()) {
+					foreach(var c in new CandlesticksGetter() {
+						Connection = connection,
+						Instrument = "USD_JPY",
+						Granularity = "M5",
+						Start = current.AddHours(-3),
+						End = current
+					}.Execute()) {
+						report.WriteLine(c.Time, c.Open, c.High, c.Low, c.Close, c.Volume);
+					}
 
-
-				foreach (var c in new OandaAPI().GetCandles(current.AddHours(-6), current, "JP225_USD","M30")) {
-					report.WriteLine(c.DateTime, c.openMid, c.highMid, c.lowMid, c.closeMid, c.volume);
 				}
+				/*
+				var end = (new CandlesticksGetter() {
+					Granularity = "H1"
+				}.GetAlignTime(current.AddHours(-11)));
+
+				foreach (var c in new OandaAPI().GetCandles(current.AddHours(-12), end, "USD_JPY","H1")) {
+					report.WriteLine(c.DateTime, c.openMid, c.highMid, c.lowMid, c.closeMid, c.volume);
+				}*/
 			});
 		}
 

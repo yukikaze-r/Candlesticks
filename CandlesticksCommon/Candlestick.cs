@@ -11,6 +11,7 @@ namespace Candlesticks {
 		public float Close;
 		public float High;
 		public float Low;
+		public int Volume;
 
 		public bool IsUp() {
 			return Close > Open;

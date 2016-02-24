@@ -1,11 +1,11 @@
-﻿using System;
+﻿using Npgsql;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Candlesticks
-{
-    class CandlesticksGetter
-    {
+namespace Candlesticks {
+	class CandlesticksGetter {
+		public NpgsqlConnection Connection;
 		public string Instrument = "USD_JPY";
 
 		/*
@@ -40,27 +40,89 @@ namespace Candlesticks
 		public DateTime Start;
 		public DateTime End;
 
-/*
-		public IEnumerable<Candlestick> Execute() {
+
+		private void SaveOandaCandle(CandlestickDao dao, OandaCandle oandaCandle) {
+			var entity = dao.CreateNewEntity();
+			entity.Instrument = this.Instrument;
+			entity.Granularity = this.Granularity;
+			entity.DateTime = oandaCandle.DateTime;
+			entity.Open = oandaCandle.openMid;
+			entity.High = oandaCandle.openMid;
+			entity.Low = oandaCandle.openMid;
+			entity.Close = oandaCandle.openMid;
+			entity.Volume = oandaCandle.volume;
 			
+			entity.Save();
+		}
 
+		public IEnumerable<Candlestick> Execute() {
+			var dao = new CandlestickDao(this.Connection);
+			using(var transaction = Connection.BeginTransaction()) {
+				TimeSpan granularitySpan = GetGranularitySpan();
+				DateTime t = GetAlignTime(Start);
 
+				foreach (var entity in dao.GetBy(Instrument, Granularity, t, End)) {
+					if(entity.DateTime != t) {
+						foreach (var oandaCandle in new OandaAPI().GetCandles(t, entity.DateTime.AddSeconds(-1), Instrument, Granularity)) {
+							SaveOandaCandle(dao, oandaCandle);
+							yield return oandaCandle.Candlestick;
+						}
+						t = entity.DateTime;
+					}
+					yield return entity.Candlestick;
+					t = t.Add(granularitySpan);
+				}
+				if (t < End) {
+					foreach (var oandaCandle in new OandaAPI().GetCandles(t, End, Instrument, Granularity)) {
+						SaveOandaCandle(dao, oandaCandle);
+						yield return oandaCandle.Candlestick;
+					}
+				}
+				transaction.Commit();
+			}
+		}
 
-		}*/
-		private DateTime GetAlignTime(DateTime time) {
-			if(Granularity[0]=='S') {
+		public DateTime GetAlignTime(DateTime time) {
+			if (Granularity[0] == 'S') {
 				int s = int.Parse(Granularity.Substring(1));
-				int aligned = (int)Math.Ceiling((double)time.Second / s) * s;
-				return time.AddMilliseconds(-time.Millisecond).AddSeconds(-time.Second + aligned);
+				int aligned = (int)Math.Floor((double)time.Second / s) * s;
+				return new DateTime(time.Year, time.Month, time.Day, time.Hour, time.Minute, aligned, 0, time.Kind);
+
+//				return time.AddMilliseconds(-time.Millisecond).AddSeconds(-time.Second + aligned);
 			} else if (Granularity[0] == 'M') {
 				int s = int.Parse(Granularity.Substring(1));
-				int aligned = time.Minute / s * s;
-				return time.AddMilliseconds(-time.Millisecond).AddSeconds(-time.Second).AddMinutes(-time.Minute + aligned);
+				int aligned = (int)Math.Floor((double)time.Minute / s) * s;
+				return new DateTime(time.Year, time.Month, time.Day, time.Hour, aligned, 0, 0, time.Kind);
+//				return time.AddMilliseconds(-time.Millisecond).AddSeconds(-time.Second).AddMinutes(-time.Minute + aligned);
+			} else if (Granularity[0] == 'H' || Granularity == "D") {
+				int s = Granularity == "D" ? 24 : int.Parse(Granularity.Substring(1));
+				int aligned = (int)Math.Floor((double)time.Hour / s) * s;
+				Console.WriteLine("align:" + aligned + " s:" + s + " hour:" + time.Hour);
+				return new DateTime(time.Year, time.Month, time.Day, aligned, 0, 0, 0, time.Kind);
+//				return time.AddMilliseconds(-time.Millisecond).AddSeconds(-time.Second).AddMinutes(-time.Minute).AddHours(-time.Hour + aligned);
 			}
 
 
-			throw new Exception();
+			throw new Exception("not supported granularity:" + Granularity);
 		}
 
+		public TimeSpan GetGranularitySpan() {
+			if (Granularity[0] == 'S') {
+				return new TimeSpan(0, 0, int.Parse(Granularity.Substring(1)));
+			}
+			if (Granularity[0] == 'M') {
+				return new TimeSpan(0, int.Parse(Granularity.Substring(1)), 0);
+			}
+			if (Granularity[0] == 'H') {
+				return new TimeSpan(int.Parse(Granularity.Substring(1)), 0, 0);
+			}
+			if (Granularity == "D") {
+				return new TimeSpan(24, 0, 0);
+			}
+			throw new Exception("not supported granularity:" + Granularity);
+
+
+
+		}
 	}
 }

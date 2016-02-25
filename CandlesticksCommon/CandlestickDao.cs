@@ -23,8 +23,6 @@ namespace Candlesticks
 				cmd.Parameters["granularity"].Value = granularity;
 				cmd.Parameters["start"].Value = start;
 				cmd.Parameters["end"].Value = end;
-				Console.WriteLine(cmd.CommandText);
-				Console.WriteLine("start:"+start+" end:"+end);
 
 				using (var dr = cmd.ExecuteReader()) {
 					while (dr.Read()) {
@@ -64,7 +62,6 @@ namespace Candlesticks
 
 			public void Save() {
 				using (var cmd = new NpgsqlCommand()) {
-					Console.WriteLine("save:"+this.DateTime);
 					cmd.Connection = DBUtils.GetConnection();
 					cmd.CommandText = "insert into candlestick(instrument,granularity,date_time,open,high,low,close,volume) values(:instrument,:granularity,:date_time,:open,:high,:low,:close,:volume) returning id";
 					cmd.Parameters.Add(new NpgsqlParameter("instrument", DbType.String));

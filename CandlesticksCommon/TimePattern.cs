@@ -24,19 +24,22 @@ namespace Candlesticks
 			if(CheckStartTime.Todays > CheckEndTime.Todays) {
 				throw new Exception("checkStartDateTime > checkEndDateTime");
 			}
-			if(CheckEndTime.Todays >= DateTime.Now) {
+			if (CheckStartTime.Todays >= DateTime.Now) {
+				return false;
+			}
+			signal = new Signal() {
+				Pattern = this,
+			};
+			float startPrice = GetPrice(CheckStartTime.Todays);
+			signal.CheckStartPrice = startPrice;
+			if (CheckEndTime.Todays >= DateTime.Now) {
 				return false;
 			}
 
-			float startPrice = GetPrice(CheckStartTime.Todays);
 			float endPrice = GetPrice(CheckEndTime.Todays);
-			signal = new Signal() {
-				Pattern = this,
-				CheckStartPrice = startPrice,
-				CheckEndPrice = endPrice
-			};
+			signal.CheckEndPrice = endPrice;
 
-			if(this.IsCheckUp) {
+			if (this.IsCheckUp) {
 				return endPrice > startPrice;
 			} else {
 				return endPrice < startPrice;
@@ -50,13 +53,13 @@ namespace Candlesticks
 
 		public class Signal {
 			public TimeOfDayPattern Pattern;
-			public float CheckStartPrice;
-			public float CheckEndPrice;
+			public float CheckStartPrice = float.NaN;
+			public float CheckEndPrice = float.NaN;
 
 			public string GetCheckResultDescription() {
 				return CheckStartPrice.ToString("F3") + "[" + Pattern.CheckStartTime + "]→"
-					+ CheckEndPrice.ToString("F3") + "[" + Pattern.CheckEndTime + "](" + 
-					(CheckStartPrice<CheckEndPrice?"+":"") + (CheckEndPrice - CheckStartPrice).ToString("F3") + ")"; 
+					+ CheckEndPrice.ToString("F3") + "[" + Pattern.CheckEndTime + "](" +
+					(CheckStartPrice < CheckEndPrice ? "+" : "") + (CheckEndPrice - CheckStartPrice).ToString("F3") + ")";
 			}
 
 			public bool IsInTradeTime {

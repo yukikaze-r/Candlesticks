@@ -647,7 +647,7 @@ namespace Candlesticks {
 						Start = current.AddYears(-7),
 						End = current,
 					}.Execute()) {
-						report.WriteLine(c.Time, c.Open, c.High, c.Low, c.Close, c.Volume);
+//						report.WriteLine(c.Time, c.Open, c.High, c.Low, c.Close, c.Volume);
 					}
 				}
 				/*

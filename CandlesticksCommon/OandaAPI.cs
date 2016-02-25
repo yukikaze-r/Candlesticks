@@ -36,7 +36,9 @@ namespace Candlesticks {
 			
 			HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "v1/candles?instrument="+ instrument + "&start="+ startParam+"&end="+endParam+"&candleFormat=midpoint&granularity="+ granularity+"&dailyAlignment=0&alignmentTimezone=Asia%2FTokyo");
 			request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", OandaAPI.BearerToken);
-			
+
+			Console.WriteLine(request.ToString());
+
 			Task<HttpResponseMessage> webTask = client.SendAsync(request);
 			webTask.Wait();
 
@@ -44,6 +46,7 @@ namespace Candlesticks {
 			readTask.Wait();
 
 			if (webTask.Result.StatusCode != HttpStatusCode.OK) {
+				Console.WriteLine("HttpStatus:" + webTask.Result.StatusCode+" "+ readTask.Result);
 				throw new Exception(readTask.Result);
 			}
 

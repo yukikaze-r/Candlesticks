@@ -15,16 +15,16 @@ namespace Candlesticks {
 	}
 
 	enum TradeType {
-		Sell, Buy
+		Bid, Ask
 	}
 
 	static class TradeTypeExt {
 		public static TradeType Reverse(this TradeType t) {
-			if(t == TradeType.Sell) {
-				return TradeType.Buy;
+			if(t == TradeType.Bid) {
+				return TradeType.Ask;
 			}
 			else {
-				return TradeType.Sell;
+				return TradeType.Bid;
 			}
 		}
 	}

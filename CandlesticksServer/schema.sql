@@ -30,3 +30,15 @@ create table candlestick (
 	volume integer,
 	unique(instrument,granularity,date_time)
 );
+
+create table time_of_day_pattern (
+	id bigserial primary key,
+	check_start_time time,
+	check_end_time time,
+	is_check_up boolean,
+	trade_start_time time,
+	trade_end_time time,
+	trade_type text,
+	total_verification integer,
+	match_verification integer
+);

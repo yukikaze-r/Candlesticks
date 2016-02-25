@@ -75,7 +75,12 @@
     <Compile Include="SettingDialog.Designer.cs">
       <DependentUpon>SettingDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="TradePosition.cs" />
+    <Compile Include="SignalForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SignalForm.Designer.cs">
+      <DependentUpon>SignalForm.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
@@ -93,6 +98,9 @@
     </Compile>
     <EmbeddedResource Include="SettingDialog.resx">
       <DependentUpon>SettingDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SignalForm.resx">
+      <DependentUpon>SignalForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

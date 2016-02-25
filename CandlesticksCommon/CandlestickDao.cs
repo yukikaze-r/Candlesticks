@@ -7,16 +7,13 @@ using System.Text;
 namespace Candlesticks
 {
     class CandlestickDao {
-		private NpgsqlConnection connection;
-
-		public CandlestickDao(NpgsqlConnection connection) {
-			this.connection = connection;
+		public CandlestickDao() {
 		}
 
 		public IEnumerable<Entity> GetBy(string instrument, string granularity, DateTime start, DateTime end) {
 
 			using (var cmd = new NpgsqlCommand()) {
-				cmd.Connection = connection;
+				cmd.Connection = DBUtils.GetConnection();
 				cmd.CommandText = "select id,date_time,open,high,low,close,volume from candlestick where instrument = :instrument and granularity = :granularity and :start <= date_time and date_time < :end order by date_time";
 				cmd.Parameters.Add(new NpgsqlParameter("instrument", DbType.String));
 				cmd.Parameters.Add(new NpgsqlParameter("granularity", DbType.String));
@@ -26,7 +23,8 @@ namespace Candlesticks
 				cmd.Parameters["granularity"].Value = granularity;
 				cmd.Parameters["start"].Value = start;
 				cmd.Parameters["end"].Value = end;
-				
+				Console.WriteLine(cmd.CommandText);
+				Console.WriteLine("start:"+start+" end:"+end);
 
 				using (var dr = cmd.ExecuteReader()) {
 					while (dr.Read()) {
@@ -66,7 +64,8 @@ namespace Candlesticks
 
 			public void Save() {
 				using (var cmd = new NpgsqlCommand()) {
-					cmd.Connection = Dao.connection;
+					Console.WriteLine("save:"+this.DateTime);
+					cmd.Connection = DBUtils.GetConnection();
 					cmd.CommandText = "insert into candlestick(instrument,granularity,date_time,open,high,low,close,volume) values(:instrument,:granularity,:date_time,:open,:high,:low,:close,:volume) returning id";
 					cmd.Parameters.Add(new NpgsqlParameter("instrument", DbType.String));
 					cmd.Parameters.Add(new NpgsqlParameter("granularity", DbType.String));

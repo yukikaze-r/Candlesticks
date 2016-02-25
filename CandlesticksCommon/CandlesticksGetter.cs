@@ -5,7 +5,6 @@ using System.Text;
 
 namespace Candlesticks {
 	class CandlesticksGetter {
-		public NpgsqlConnection Connection;
 		public string Instrument = "USD_JPY";
 
 		/*
@@ -36,9 +35,10 @@ namespace Candlesticks {
 			1か月の初めにアライン (その月の最初の日)
 			“M” - 1 か月
 		*/
-		public string Granularity = "M30";
+		public string Granularity = "M10";
 		public DateTime Start;
 		public DateTime End;
+		public int Count = -1;
 
 
 		private void SaveOandaCandle(CandlestickDao dao, OandaCandle oandaCandle) {
@@ -56,30 +56,50 @@ namespace Candlesticks {
 		}
 
 		public IEnumerable<Candlestick> Execute() {
-			var dao = new CandlestickDao(this.Connection);
-			using(var transaction = Connection.BeginTransaction()) {
-				TimeSpan granularitySpan = GetGranularitySpan();
+			List<Candlestick> result = new List<Candlestick>();
+
+			TimeSpan granularitySpan = GetGranularitySpan();
+			if (Count != -1) {
+				End = Start.AddTicks(granularitySpan.Ticks * Count);
+			}
+
+			var dao = new CandlestickDao();
+			using(var transaction = DBUtils.GetConnection().BeginTransaction()) {
 				DateTime t = GetAlignTime(Start);
 
 				foreach (var entity in dao.GetBy(Instrument, Granularity, t, End)) {
 					if(entity.DateTime != t) {
-						foreach (var oandaCandle in new OandaAPI().GetCandles(t, entity.DateTime.AddSeconds(-1), Instrument, Granularity)) {
+						foreach (var oandaCandle in GetCandles(t, entity.DateTime.AddSeconds(-1))) {
 							SaveOandaCandle(dao, oandaCandle);
-							yield return oandaCandle.Candlestick;
+							result.Add(oandaCandle.Candlestick);
 						}
 						t = entity.DateTime;
 					}
-					yield return entity.Candlestick;
+					result.Add(entity.Candlestick);
 					t = t.Add(granularitySpan);
 				}
 				if (t < End) {
-					foreach (var oandaCandle in new OandaAPI().GetCandles(t, End, Instrument, Granularity)) {
+					foreach (var oandaCandle in GetCandles(t, End)) {
 						SaveOandaCandle(dao, oandaCandle);
-						yield return oandaCandle.Candlestick;
+						result.Add(oandaCandle.Candlestick);
 					}
 				}
 				transaction.Commit();
 			}
+			return result;
+		}
+
+		private IEnumerable<OandaCandle> GetCandles(DateTime start, DateTime end) {
+			TimeSpan granularitySpan = GetGranularitySpan();
+			long count;
+			do {
+				count = (end - start).Ticks / granularitySpan.Ticks;
+				DateTime e = start.AddTicks(granularitySpan.Ticks * Math.Min(count, 5000));
+				foreach (var c in new OandaAPI().GetCandles(start, e, Instrument, Granularity)) {
+					yield return c;
+				}
+				start = e;
+			} while (count > 5000);
 		}
 
 		public DateTime GetAlignTime(DateTime time) {

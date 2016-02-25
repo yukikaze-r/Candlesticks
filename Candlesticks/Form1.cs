@@ -39,12 +39,12 @@ namespace Candlesticks {
 //				DoSettlement(t, list[t].Close);
 				float low = list.GetRange(t - range, range).Select(s => s.Low).Min();
 				if(list[t].Close < low) {
-					DoTrade(t, TradeType.Buy, list[t].Close);
+					DoTrade(t, TradeType.Ask, list[t].Close);
 					// sell list[t].Close
 				}
 				float high = list.GetRange(t - range, range).Select(s => s.High).Max();
 				if (list[t].Close > high) {
-					DoTrade(t, TradeType.Sell, list[t].Close);
+					DoTrade(t, TradeType.Bid, list[t].Close);
 				}
 			}
 		}
@@ -54,7 +54,7 @@ namespace Candlesticks {
 			float money = 0;
 			foreach (var position in positions) {
 				f = true;
-				if (position.TradeType == TradeType.Buy) {
+				if (position.TradeType == TradeType.Ask) {
 					money += price - position.Price;
 				} else {
 					money += position.Price - price;
@@ -71,7 +71,7 @@ namespace Candlesticks {
 			float money = 0;
 			int score = 0;
 			foreach (var position in positions.Where(p => p.TradeType == tradeType.Reverse())) {
-				if (position.TradeType == TradeType.Buy) {
+				if (position.TradeType == TradeType.Ask) {
 					money += price - position.Price;
 					score += price - position.Price > 0 ? 1 : -1;
 				} else {
@@ -230,7 +230,7 @@ namespace Candlesticks {
 				float low = list.GetRange(t - range, range).Select(s => s.Low).Min();
 				if (CurrentPrice < low && positions.Count() == 0) {
 					positions.Add(new TradePosition() {
-						Time = t, TradeType = TradeType.Buy, Price = CurrentPrice,
+						Time = t, TradeType = TradeType.Ask, Price = CurrentPrice,
 						HighSettlementPrice = CurrentPrice + 0.2f,
 						LowSettlementPrice = CurrentPrice - 0.2f
 					});
@@ -640,17 +640,15 @@ namespace Candlesticks {
 
 				DateTime current = DateTime.Now;
 				
-				using(var connection = DBUtils.OpenConnection()) {
+				using(DBUtils.OpenThreadConnection()) {
 					foreach(var c in new CandlesticksGetter() {
-						Connection = connection,
 						Instrument = "USD_JPY",
-						Granularity = "M5",
-						Start = current.AddHours(-3),
-						End = current
+						Granularity = "M10",
+						Start = current.AddYears(-7),
+						End = current,
 					}.Execute()) {
 						report.WriteLine(c.Time, c.Open, c.High, c.Low, c.Close, c.Volume);
 					}
-
 				}
 				/*
 				var end = (new CandlesticksGetter() {
@@ -819,8 +817,6 @@ namespace Candlesticks {
 		}
 
 		private void オーダーブックビュー(object sender, EventArgs e) {
-			var d = new OrderBookForm();
-			d.Show(this);
 //			d.ShowDialog(this);
 		}
 
@@ -828,6 +824,13 @@ namespace Candlesticks {
 			var dialog = new SettingDialog();
 			dialog.ShowDialog(this);
 		}
-		
+
+		private void オーダーブックToolStripMenuItem_Click(object sender, EventArgs e) {
+			new OrderBookForm().Show(this);
+		}
+
+		private void シグナルToolStripMenuItem_Click(object sender, EventArgs e) {
+			new SignalForm().Show(this);
+		}
 	}
 }

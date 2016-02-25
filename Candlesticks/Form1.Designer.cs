@@ -45,9 +45,11 @@
 			this.button17 = new System.Windows.Forms.Button();
 			this.button18 = new System.Windows.Forms.Button();
 			this.button19 = new System.Windows.Forms.Button();
-			this.button20 = new System.Windows.Forms.Button();
 			this.menuStrip1 = new System.Windows.Forms.MenuStrip();
 			this.設定ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.ウィンドウToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.オーダーブックToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.シグナルToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
 			this.menuStrip1.SuspendLayout();
 			this.SuspendLayout();
@@ -274,39 +276,52 @@
 			this.button19.UseVisualStyleBackColor = true;
 			this.button19.Click += new System.EventHandler(this.オーダーブック取得);
 			// 
-			// button20
-			// 
-			this.button20.Location = new System.Drawing.Point(15, 235);
-			this.button20.Name = "button20";
-			this.button20.Size = new System.Drawing.Size(129, 23);
-			this.button20.TabIndex = 23;
-			this.button20.Text = "オーダーブックビュー";
-			this.button20.UseVisualStyleBackColor = true;
-			this.button20.Click += new System.EventHandler(this.オーダーブックビュー);
-			// 
 			// menuStrip1
 			// 
 			this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.設定ToolStripMenuItem});
+            this.設定ToolStripMenuItem,
+            this.ウィンドウToolStripMenuItem});
 			this.menuStrip1.Location = new System.Drawing.Point(0, 0);
 			this.menuStrip1.Name = "menuStrip1";
-			this.menuStrip1.Size = new System.Drawing.Size(722, 24);
+			this.menuStrip1.Size = new System.Drawing.Size(722, 26);
 			this.menuStrip1.TabIndex = 24;
 			this.menuStrip1.Text = "menuStrip1";
 			// 
 			// 設定ToolStripMenuItem
 			// 
 			this.設定ToolStripMenuItem.Name = "設定ToolStripMenuItem";
-			this.設定ToolStripMenuItem.Size = new System.Drawing.Size(43, 20);
+			this.設定ToolStripMenuItem.Size = new System.Drawing.Size(44, 22);
 			this.設定ToolStripMenuItem.Text = "設定";
 			this.設定ToolStripMenuItem.Click += new System.EventHandler(this.設定ToolStripMenuItem_Click);
+			// 
+			// ウィンドウToolStripMenuItem
+			// 
+			this.ウィンドウToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.オーダーブックToolStripMenuItem,
+            this.シグナルToolStripMenuItem});
+			this.ウィンドウToolStripMenuItem.Name = "ウィンドウToolStripMenuItem";
+			this.ウィンドウToolStripMenuItem.Size = new System.Drawing.Size(80, 22);
+			this.ウィンドウToolStripMenuItem.Text = "ウィンドウ";
+			// 
+			// オーダーブックToolStripMenuItem
+			// 
+			this.オーダーブックToolStripMenuItem.Name = "オーダーブックToolStripMenuItem";
+			this.オーダーブックToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+			this.オーダーブックToolStripMenuItem.Text = "オーダーブック";
+			this.オーダーブックToolStripMenuItem.Click += new System.EventHandler(this.オーダーブックToolStripMenuItem_Click);
+			// 
+			// シグナルToolStripMenuItem
+			// 
+			this.シグナルToolStripMenuItem.Name = "シグナルToolStripMenuItem";
+			this.シグナルToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+			this.シグナルToolStripMenuItem.Text = "シグナル";
+			this.シグナルToolStripMenuItem.Click += new System.EventHandler(this.シグナルToolStripMenuItem_Click);
 			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(722, 597);
-			this.Controls.Add(this.button20);
 			this.Controls.Add(this.button19);
 			this.Controls.Add(this.button18);
 			this.Controls.Add(this.button17);
@@ -365,9 +380,11 @@
 		private System.Windows.Forms.Button button17;
 		private System.Windows.Forms.Button button18;
 		private System.Windows.Forms.Button button19;
-		private System.Windows.Forms.Button button20;
 		private System.Windows.Forms.MenuStrip menuStrip1;
 		private System.Windows.Forms.ToolStripMenuItem 設定ToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem ウィンドウToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem オーダーブックToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem シグナルToolStripMenuItem;
 	}
 }
 

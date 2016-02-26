@@ -1,6 +1,7 @@
 ﻿using Npgsql;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Candlesticks {
@@ -67,7 +68,7 @@ namespace Candlesticks {
 			using(var transaction = DBUtils.GetConnection().BeginTransaction()) {
 				DateTime t = GetAlignTime(Start);
 
-				foreach (var entity in dao.GetBy(Instrument, Granularity, t, End)) {
+				foreach (var entity in dao.GetBy(Instrument, Granularity, t, End).ToList()) {
 					if(entity.DateTime != t) {
 						foreach (var oandaCandle in GetCandles(t, entity.DateTime.AddSeconds(-1))) {
 							SaveOandaCandle(dao, oandaCandle);

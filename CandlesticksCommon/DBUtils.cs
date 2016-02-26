@@ -16,7 +16,7 @@ namespace Candlesticks
 				";Port=" + dbSetting.Port +
 				";Username=" + dbSetting.UserName +
 				";Password=" + dbSetting.Password +
-				";Database=" + dbSetting.Database);
+				";Database=" + dbSetting.Database );
 			conn.Open();
 			return conn;
 		}

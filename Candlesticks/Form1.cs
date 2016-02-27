@@ -273,8 +273,8 @@ namespace Candlesticks {
 			}
 		}
 
-		private IEnumerable<Tuple<int[], int[]>> GetBestTradeTime(IEnumerable<Candlestick> list, int limit) {
-			return new BestTradeTime(list).Calculate(limit);
+		private IEnumerable<Tuple<int[], int[]>> GetBestTradeTime(IEnumerable<Candlestick> list, int limit, bool isSummerTime) {
+			return new BestTradeTime(list) { IsSummerTime = isSummerTime }.Calculate(limit);
 		}
 
 		private IEnumerable<Tuple<int[], int[]>> GetBestTradeWeekTime(IEnumerable<Candlestick> list, int limit) {
@@ -282,6 +282,7 @@ namespace Candlesticks {
 			Candlestick[] hmList = null;
 			List<Candlestick[]> dateList = new List<Candlestick[]>();
 			foreach (var c in list) {
+
 				if (hmList==null || oldDayOfWeek > c.Time.DayOfWeek) {
 					hmList = new Candlestick[48*7];
 					dateList.Add(hmList);
@@ -411,11 +412,11 @@ namespace Candlesticks {
 
 		private void 日時ベスト(object sender, EventArgs ev) {
 			RunTask(sender, (Report report) => {
-				report.Version = 4;
-				report.IsForceOverride = false;
-				report.Comment = "最短1h→30m";
+				report.Version = 6;
+//				report.IsForceOverride = false;
+				report.Comment = "夏時間";
 				report.SetHeader("start","end", "start", "end", "↑↑","↑↓","↓↑","↓↓");
-				foreach (var t in GetBestTradeTime((new CandlesticksReader().Read(DATA_PATH + @"\m30-5y.csv")), 100)) {
+				foreach (var t in GetBestTradeTime((new CandlesticksReader().Read(DATA_PATH + @"\m30-5y.csv")), 100, true)) {
 					foreach (var time in t.Item1) {
 						report.Write(FormatHourMinute(time));
 					}
@@ -473,7 +474,7 @@ namespace Candlesticks {
 						if (checkList.Count == 0) {
 							break;
 						}
-						foreach (var t in GetBestTradeTime(targetList, limit)) {
+						foreach (var t in GetBestTradeTime(targetList, limit, false)) {
 							float m = CheckTrade(checkList, t.Item1).Sum(r => r.Item2);
 							if (m > 1 * 30 * 0.003f) {
 								usable++;
@@ -509,7 +510,7 @@ namespace Candlesticks {
 						if (checkList.Count == 0) {
 							break;
 						}
-						foreach (var t in GetBestTradeTime(targetList, 5)) {
+						foreach (var t in GetBestTradeTime(targetList, 5, false)) {
 							float m = CheckTrade(checkList, t.Item1).Sum(r => r.Item2) - 1 * 20 * 0.003f;
 							if (m > 0) {
 								usable++;
@@ -548,7 +549,7 @@ namespace Candlesticks {
 					if (checkList.Count == 0) {
 						break;
 					}
-					foreach (var t in GetBestTradeTime(targetList, 5)) {
+					foreach (var t in GetBestTradeTime(targetList, 5, false)) {
 						float m = CheckTrade(checkList, t.Item1).Sum(r => r.Item2) - 1 * 20 * 0.003f;
 						report.WriteLine(endTime.Year + "-" + endTime.Month, m);
 						if (m > 0) {
@@ -831,6 +832,275 @@ namespace Candlesticks {
 
 		private void シグナルToolStripMenuItem_Click(object sender, EventArgs e) {
 			new SignalForm().Show(this);
+		}
+
+		private void 原油因果_Click(object sender, EventArgs ev) {
+
+			RunTask(sender, (Report report) => {
+				report.Version = 3;
+				report.IsForceOverride = true;
+				report.Comment = "時間帯";
+				report.SetHeader("開始","終了","原油t","ドル円t","上昇量", "↑↑", "↑↓", "↓↑", "↓↓");
+
+				using (DBUtils.OpenThreadConnection()) {
+					DateTime start = DateTime.Now.AddYears(-1);
+					DateTime end = DateTime.Now.AddHours(-1);
+
+					var wtico = new CandlesticksGetter() {
+						Instrument = "WTICO_USD",
+						Granularity = "M10",
+						Start = start,
+						End = end
+					}.Execute().ToList();
+
+					var usdjpy = new CandlesticksGetter() {
+						Instrument = "USD_JPY",
+						Granularity = "M10",
+						Start = start,
+						End = end
+					}.Execute().ToList();
+
+
+					Console.WriteLine("wtico:" + wtico.Count() + " usdjpy:" + usdjpy.Count());
+
+					for(TimeSpan s = new TimeSpan(0,0,0); s < new TimeSpan(24,0,0); s += new TimeSpan(1,0,0)) {
+						for (TimeSpan e = s + new TimeSpan(1, 0, 0); e < new TimeSpan(24, 0, 0); e += new TimeSpan(1, 0, 0)) {
+							StiUsdJpy(s,e, wtico, usdjpy, report, 6, 4, 0);
+						}
+					}
+/*					for (float d = 0; d < 1f; d += 0.01f) {
+						StiUsdJpy(wtico, usdjpy, report, 6, 4, d);
+					}*/
+
+				}
+			});
+		}
+
+		private void StiUsdJpy(TimeSpan start, TimeSpan end, List<Candlestick> wtico, List<Candlestick> usdjpy, Report report, int n, int m, float thrashold) {
+
+			int upup = 0;
+			int updown = 0;
+			int downup = 0;
+			int downdown = 0;
+			for (int i = 0; i < wtico.Count() - (n + m); i++) {
+				if (wtico[i].Time != usdjpy[i].Time) {
+					Console.WriteLine("different time");
+				}
+				TimeSpan t = wtico[i].Time.TimeOfDay;
+				if(!(start <= t && t < end)) {
+					continue;
+				}
+
+				var w = TakeRange(wtico, i, i + n);
+				if (w.Count(c => c.IsNull) >= 1) {
+					continue;
+				}
+				if (Candlestick.Create(w).IsUp(thrashold)) {
+					var u = TakeRange(usdjpy, i + n, i + n + m);
+					if (u.Count(c => c.IsNull) >= 1) {
+						continue;
+					}
+					if (Candlestick.Create(u).IsUp()) {
+						upup++;
+					} else {
+						updown++;
+					}
+				} else {
+					var u = TakeRange(usdjpy, i + n, i + n + m);
+					if (u.Count(c => c.IsNull) >= 1) {
+						continue;
+					}
+					if (Candlestick.Create(u).IsUp()) {
+						downup++;
+					} else {
+						downdown++;
+					}
+				}
+			}
+
+			report.WriteLine(start,end,n,m,thrashold, upup, updown, downup, downdown);
+		}
+
+		private IEnumerable<T> TakeRange<T>(List<T> list, int s, int e) {
+			for(int i= s; i< e; i++) {
+				yield return list[i];
+			}
+		}
+
+		private void くるくる_Click(object sender, EventArgs e) {
+			Simulator simulator = new Simulator(null);
+
+			bool first = true;
+
+			foreach(var current in simulator) {
+				if(first) {
+					current.Ask(10);
+					current.Bid(5);
+					first = false;
+				} else {
+
+				}
+			}
+
+		}
+
+		private class CheckRange {
+			public TimeSpan start;
+			public TimeSpan end;
+			public bool isInRange = false;
+			public Candlestick sum;
+			public Action<CheckRange> endTimeFunc = delegate { };
+			public float maxUp = float.MinValue;
+			public float maxDown = float.MaxValue;
+			public int upCount;
+			public int downCount;
+			public float totalInUp;
+			public float totalInDown;
+
+			public void Check(Candlestick candle) {
+				if (candle.Time.TimeOfDay == start && candle.IsNull == false) {
+					isInRange = true;
+					sum = candle;
+				} else if (isInRange) {
+					if (candle.IsNull) {
+						isInRange = false;
+					} else if (candle.Time.TimeOfDay == end) {
+						isInRange = false;
+						endTimeFunc(this);
+					} else {
+						sum = sum.Add(candle);
+					}
+				}
+			}
+		}
+
+		private void 区間の特徴_Click(object sender, EventArgs e) {
+
+			RunTask(sender, (Report report) => {
+				using(DBUtils.OpenThreadConnection()) {
+					report.Version = 6;
+//					report.IsForceOverride = true;
+					report.Comment = "夏時間";
+					report.SetHeader("区間1", "区間2", "区間3", "区間4", "最高値", "最安値", "終値");
+
+					DateTime start = DateTime.Now.AddYears(-5);
+					DateTime end = DateTime.Now.AddHours(-1);
+
+/*					CheckRange signal = new CheckRange() {
+						start = new TimeSpan(0, 0, 0),
+						end = new TimeSpan(5,30,0)
+					};*/
+
+					CheckRange[] sub = new CheckRange[] {
+						new CheckRange() {
+							start = new TimeSpan(5, 30, 0),
+							end = new TimeSpan(6, 00, 0)
+						},
+						new CheckRange() {
+							start = new TimeSpan(6, 00, 0),
+							end = new TimeSpan(6, 30, 0)
+						},
+						new CheckRange() {
+							start = new TimeSpan(6, 30, 0),
+							end = new TimeSpan(7, 00, 0)
+						},
+						new CheckRange() {
+							start = new TimeSpan(7, 00, 0),
+							end = new TimeSpan(7, 30, 0)
+						}
+
+					};
+
+					CheckRange total = new CheckRange() {
+						start = new TimeSpan(5, 30, 0),
+						end = new TimeSpan(7, 30, 0),
+						endTimeFunc = new Action<CheckRange>((range) => {
+							foreach(var s in sub) {
+								report.Write(s.sum.Close - s.sum.Open);
+							}
+							report.WriteLine(
+								range.sum.High - range.sum.Open, range.sum.Low - range.sum.Open, range.sum.Close - range.sum.Open);
+						})
+					};
+
+					TimeZoneInfo est = TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time");
+					foreach (var candle in new CandlesticksGetter() {
+						Instrument = "USD_JPY",
+						Granularity = "M10",
+						Start = start,
+						End = end
+					}.Execute()) {
+						if(est.IsDaylightSavingTime(candle.Time)==false) {
+							continue;
+						}
+//						signal.Check(candle);
+						foreach(var s in sub) {
+							s.Check(candle);
+						}
+						total.Check(candle);
+
+					}
+				}
+			});
+
+		}
+
+		private void ベスト区間_Click(object sender, EventArgs e) {
+
+			RunTask(sender, (Report report) => {
+				using (DBUtils.OpenThreadConnection()) {
+					report.Version = 1;
+					report.IsForceOverride = true;
+					report.Comment = "直近1年";
+					report.SetHeader("時間範囲", "夏時間?", "上昇率", "平均変動額", "平均上昇額", "平均下降額","最大上昇", "最大下降");
+
+					DateTime start = DateTime.Now.AddYears(-1);
+					DateTime end = DateTime.Now.AddHours(-1);
+
+
+					foreach (bool isSummerTime in new bool[] { true, false }) {
+						List<CheckRange> ranges = new List<CheckRange>();
+						for (int i = 0; i < 48; i++) {
+							ranges.Add(new CheckRange() {
+								start = new TimeSpan(i / 2, (i % 2) * 30, 0),
+								end = new TimeSpan((i + 1) / 2, ((i + 1) % 2) * 30, 0),
+								endTimeFunc = new Action<CheckRange>((range) => {
+									float delta = range.sum.Close - range.sum.Open;
+									if (delta > 0) {
+										range.upCount++;
+										range.maxUp = Math.Max(range.maxUp, delta);
+										range.totalInUp += delta;
+									} else {
+										range.downCount++;
+										range.maxDown = Math.Min(range.maxDown, delta);
+										range.totalInDown += delta;
+									}
+
+								})
+							});
+						}
+
+						TimeZoneInfo est = TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time");
+						foreach (var candle in new CandlesticksGetter() {
+							Instrument = "USD_JPY",
+							Granularity = "M10",
+							Start = start,
+							End = end
+						}.Execute()) {
+							if (est.IsDaylightSavingTime(candle.Time) != isSummerTime) {
+								continue;
+							}
+							foreach (var s in ranges) {
+								s.Check(candle);
+							}
+						}
+						foreach (var s in ranges) {
+							report.WriteLine(s.start + "-" + s.end, isSummerTime, (float)s.upCount / (s.upCount + s.downCount), (s.totalInUp + s.totalInDown) / (s.upCount + s.downCount), s.totalInUp / s.upCount, s.totalInDown / s.downCount, s.maxUp, s.maxDown);
+						}
+					}
+				}
+			});
+
 		}
 	}
 }

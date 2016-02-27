@@ -17,6 +17,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)OrderBookDao.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)OrderBookPricePointDao.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)OrderBookUpdated.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Simulator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ThreadConnectionManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimeOfDayPatternDao.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimePattern.cs" />

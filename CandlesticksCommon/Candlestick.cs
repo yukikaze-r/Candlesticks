@@ -13,8 +13,14 @@ namespace Candlesticks {
 		public float Low;
 		public int Volume;
 
-		public bool IsUp() {
-			return Close > Open;
+		public bool IsNull {
+			get {
+				return Open == 0f;
+			}
+		}
+
+		public bool IsUp(float d=0) {
+			return Close > Open + d;
 		}
 
 		public bool IsPinbar(bool isUp, float minPositivePinRatio, float maxNegativePinRatio) {
@@ -49,14 +55,16 @@ namespace Candlesticks {
 				if(isOpen) {
 					result.Open = c.Open;
 					isOpen = false;
-				} else {
-					result.Close = c.Close;
 				}
+				result.Close = c.Close;
 				result.High = Math.Max(result.High, c.High);
 				result.Low = Math.Min(result.Low, c.Low);
 			}
 			return result;
 		}
 
+		public Candlestick Add(Candlestick candle) {
+			return Candlestick.Create(new Candlestick[] { this, candle });
+		}
 	}
 }

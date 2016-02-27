@@ -50,6 +50,10 @@
 			this.ウィンドウToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.オーダーブックToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.シグナルToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.原油因果 = new System.Windows.Forms.Button();
+			this.くるくる = new System.Windows.Forms.Button();
+			this.区間の特徴 = new System.Windows.Forms.Button();
+			this.ベスト区間 = new System.Windows.Forms.Button();
 			((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
 			this.menuStrip1.SuspendLayout();
 			this.SuspendLayout();
@@ -248,7 +252,7 @@
 			// 
 			// button17
 			// 
-			this.button17.Location = new System.Drawing.Point(527, 205);
+			this.button17.Location = new System.Drawing.Point(527, 158);
 			this.button17.Name = "button17";
 			this.button17.Size = new System.Drawing.Size(128, 23);
 			this.button17.TabIndex = 20;
@@ -283,14 +287,14 @@
             this.ウィンドウToolStripMenuItem});
 			this.menuStrip1.Location = new System.Drawing.Point(0, 0);
 			this.menuStrip1.Name = "menuStrip1";
-			this.menuStrip1.Size = new System.Drawing.Size(722, 26);
+			this.menuStrip1.Size = new System.Drawing.Size(722, 24);
 			this.menuStrip1.TabIndex = 24;
 			this.menuStrip1.Text = "menuStrip1";
 			// 
 			// 設定ToolStripMenuItem
 			// 
 			this.設定ToolStripMenuItem.Name = "設定ToolStripMenuItem";
-			this.設定ToolStripMenuItem.Size = new System.Drawing.Size(44, 22);
+			this.設定ToolStripMenuItem.Size = new System.Drawing.Size(43, 20);
 			this.設定ToolStripMenuItem.Text = "設定";
 			this.設定ToolStripMenuItem.Click += new System.EventHandler(this.設定ToolStripMenuItem_Click);
 			// 
@@ -300,28 +304,72 @@
             this.オーダーブックToolStripMenuItem,
             this.シグナルToolStripMenuItem});
 			this.ウィンドウToolStripMenuItem.Name = "ウィンドウToolStripMenuItem";
-			this.ウィンドウToolStripMenuItem.Size = new System.Drawing.Size(80, 22);
+			this.ウィンドウToolStripMenuItem.Size = new System.Drawing.Size(60, 20);
 			this.ウィンドウToolStripMenuItem.Text = "ウィンドウ";
 			// 
 			// オーダーブックToolStripMenuItem
 			// 
 			this.オーダーブックToolStripMenuItem.Name = "オーダーブックToolStripMenuItem";
-			this.オーダーブックToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+			this.オーダーブックToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
 			this.オーダーブックToolStripMenuItem.Text = "オーダーブック";
 			this.オーダーブックToolStripMenuItem.Click += new System.EventHandler(this.オーダーブックToolStripMenuItem_Click);
 			// 
 			// シグナルToolStripMenuItem
 			// 
 			this.シグナルToolStripMenuItem.Name = "シグナルToolStripMenuItem";
-			this.シグナルToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+			this.シグナルToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
 			this.シグナルToolStripMenuItem.Text = "シグナル";
 			this.シグナルToolStripMenuItem.Click += new System.EventHandler(this.シグナルToolStripMenuItem_Click);
+			// 
+			// 原油因果
+			// 
+			this.原油因果.Location = new System.Drawing.Point(30, 225);
+			this.原油因果.Name = "原油因果";
+			this.原油因果.Size = new System.Drawing.Size(75, 23);
+			this.原油因果.TabIndex = 25;
+			this.原油因果.Text = "原油因果";
+			this.原油因果.UseVisualStyleBackColor = true;
+			this.原油因果.Click += new System.EventHandler(this.原油因果_Click);
+			// 
+			// くるくる
+			// 
+			this.くるくる.Location = new System.Drawing.Point(30, 257);
+			this.くるくる.Name = "くるくる";
+			this.くるくる.Size = new System.Drawing.Size(75, 23);
+			this.くるくる.TabIndex = 26;
+			this.くるくる.Text = "くるくる";
+			this.くるくる.UseVisualStyleBackColor = true;
+			this.くるくる.Click += new System.EventHandler(this.くるくる_Click);
+			// 
+			// 区間の特徴
+			// 
+			this.区間の特徴.Location = new System.Drawing.Point(537, 225);
+			this.区間の特徴.Name = "区間の特徴";
+			this.区間の特徴.Size = new System.Drawing.Size(75, 23);
+			this.区間の特徴.TabIndex = 27;
+			this.区間の特徴.Text = "区間の特徴";
+			this.区間の特徴.UseVisualStyleBackColor = true;
+			this.区間の特徴.Click += new System.EventHandler(this.区間の特徴_Click);
+			// 
+			// ベスト区間
+			// 
+			this.ベスト区間.Location = new System.Drawing.Point(635, 225);
+			this.ベスト区間.Name = "ベスト区間";
+			this.ベスト区間.Size = new System.Drawing.Size(75, 23);
+			this.ベスト区間.TabIndex = 28;
+			this.ベスト区間.Text = "ベスト区間";
+			this.ベスト区間.UseVisualStyleBackColor = true;
+			this.ベスト区間.Click += new System.EventHandler(this.ベスト区間_Click);
 			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(722, 597);
+			this.Controls.Add(this.ベスト区間);
+			this.Controls.Add(this.区間の特徴);
+			this.Controls.Add(this.くるくる);
+			this.Controls.Add(this.原油因果);
 			this.Controls.Add(this.button19);
 			this.Controls.Add(this.button18);
 			this.Controls.Add(this.button17);
@@ -385,6 +433,10 @@
 		private System.Windows.Forms.ToolStripMenuItem ウィンドウToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem オーダーブックToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem シグナルToolStripMenuItem;
+		private System.Windows.Forms.Button 原油因果;
+		private System.Windows.Forms.Button くるくる;
+		private System.Windows.Forms.Button 区間の特徴;
+		private System.Windows.Forms.Button ベスト区間;
 	}
 }
 

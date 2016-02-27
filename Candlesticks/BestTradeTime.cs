@@ -13,6 +13,7 @@ namespace Candlesticks {
 			this.candlesticksM30 = candlesticksM30;
 			this.ShiftHour = 0;
 			this.Comparator = f => f[1] - f[0] + f[2] - f[3];
+			this.IsSummerTime = null;
 		}
 
 		public int ShiftHour {
@@ -25,11 +26,25 @@ namespace Candlesticks {
 			set;
 		}
 
+		public bool? IsSummerTime {
+			get;
+			set;
+		}
+
 		public List<Candlestick[]> GetCandlesticksEachDate() {
 			DateTime oldDate = new DateTime();
 			Candlestick[] hmList = null;
 			List<Candlestick[]> result = new List<Candlestick[]>();
+			TimeZoneInfo est = TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time");
+
 			foreach (var c in candlesticksM30) {
+
+				if (IsSummerTime!=null && IsSummerTime.Value ==false && est.IsDaylightSavingTime(c.Time)) {
+					continue;
+				}
+
+
+
 				DateTime shiftedTime = c.Time.AddHours(this.ShiftHour);
 
 				if (!oldDate.Equals(shiftedTime.Date)) {

@@ -48,11 +48,26 @@ namespace Candlesticks {
 			entity.Granularity = this.Granularity;
 			entity.DateTime = oandaCandle.DateTime;
 			entity.Open = oandaCandle.openMid;
-			entity.High = oandaCandle.openMid;
-			entity.Low = oandaCandle.openMid;
-			entity.Close = oandaCandle.openMid;
+			entity.High = oandaCandle.highMid;
+			entity.Low = oandaCandle.lowMid;
+			entity.Close = oandaCandle.closeMid;
 			entity.Volume = oandaCandle.volume;
 			
+			entity.Save();
+		}
+
+
+		private void SaveNullCandle(CandlestickDao dao, DateTime t) {
+			var entity = dao.CreateNewEntity();
+			entity.Instrument = this.Instrument;
+			entity.Granularity = this.Granularity;
+			entity.DateTime = t;
+			entity.Open = 0;
+			entity.High = 0;
+			entity.Low = 0;
+			entity.Close = 0;
+			entity.Volume = 0;
+
 			entity.Save();
 		}
 
@@ -71,8 +86,19 @@ namespace Candlesticks {
 				foreach (var entity in dao.GetBy(Instrument, Granularity, t, End).ToList()) {
 					if(entity.DateTime != t) {
 						foreach (var oandaCandle in GetCandles(t, entity.DateTime.AddSeconds(-1))) {
+							while(t < oandaCandle.DateTime) {
+								SaveNullCandle(dao,t);
+								result.Add(new Candlestick() {Time =t, Open=0});
+								t = t.Add(granularitySpan);
+							}
 							SaveOandaCandle(dao, oandaCandle);
 							result.Add(oandaCandle.Candlestick);
+							t = t.Add(granularitySpan);
+						}
+						while (t < entity.DateTime) {
+							SaveNullCandle(dao, t);
+							result.Add(new Candlestick() { Time = t, Open = 0 });
+							t = t.Add(granularitySpan);
 						}
 						t = entity.DateTime;
 					}
@@ -81,8 +107,19 @@ namespace Candlesticks {
 				}
 				if (t < End) {
 					foreach (var oandaCandle in GetCandles(t, End)) {
+						while (t < oandaCandle.DateTime) {
+							SaveNullCandle(dao, t);
+							result.Add(new Candlestick() { Time = t, Open = 0 });
+							t = t.Add(granularitySpan);
+						}
 						SaveOandaCandle(dao, oandaCandle);
 						result.Add(oandaCandle.Candlestick);
+						t = t.Add(granularitySpan);
+					}
+					while (t < End) {
+						SaveNullCandle(dao, t);
+						result.Add(new Candlestick() { Time = t, Open = 0 });
+						t = t.Add(granularitySpan);
 					}
 				}
 				transaction.Commit();

@@ -29,8 +29,14 @@ namespace Candlesticks {
 		}
 
 		// http://www.oanda.com/lang/ja/forex-trading/analysis/currency-units-calculator
-		// JP225_USD  SPX500_USD BCO_USD SGD_HKD  NAS100_USD USB10Y_USD US30_USD
+		// JP225_USD  SPX500_USD BCO_USD SGD_HKD  NAS100_USD USB10Y_USD US30_USD WTICO_USD
 		public IEnumerable<OandaCandle> GetCandles(DateTime start, DateTime end, string instrument="USD_JPY", string granularity="M30") {
+			Console.WriteLine("start:"+start+" end:"+end);
+			if(start == end) {
+				Console.WriteLine("start == end");
+				return new List<OandaCandle>();
+			}
+
 			string startParam = WebUtility.UrlEncode(XmlConvert.ToString(start, XmlDateTimeSerializationMode.Utc));
 			string endParam = WebUtility.UrlEncode(XmlConvert.ToString(end, XmlDateTimeSerializationMode.Utc));
 			
@@ -44,6 +50,11 @@ namespace Candlesticks {
 
 			Task<String> readTask = webTask.Result.Content.ReadAsStringAsync();
 			readTask.Wait();
+
+			if(webTask.Result.StatusCode == HttpStatusCode.NoContent) {
+				Console.WriteLine("205 NoContent");
+				return new List<OandaCandle>();
+			}
 
 			if (webTask.Result.StatusCode != HttpStatusCode.OK) {
 				Console.WriteLine("HttpStatus:" + webTask.Result.StatusCode+" "+ readTask.Result);

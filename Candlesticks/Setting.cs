@@ -12,6 +12,7 @@ namespace Candlesticks {
 
 		private Setting() {
 			var registryKey = Registry.CurrentUser.CreateSubKey(@"Software\CandleSticks\Setting");
+			this.OandaAccountId = (string)registryKey.GetValue("oandaAccountId");
 			this.OandaBearerToken = (string)registryKey.GetValue("oandaBearerToken");
 			this.DataFilePath = (string)registryKey.GetValue("dataFilePath");
 			this.DBConnection = new DBConnectionSetting() {
@@ -24,12 +25,18 @@ namespace Candlesticks {
 
 		public void Save() {
 			var registryKey = Registry.CurrentUser.CreateSubKey(@"Software\CandleSticks\Setting");
+			registryKey.SetValue("oandaAccountId", this.OandaAccountId);
 			registryKey.SetValue("oandaBearerToken", this.OandaBearerToken);
 			registryKey.SetValue("dataFilePath", this.DataFilePath);
 			registryKey.SetValue("dbHost", this.DBConnection.Host);
 			registryKey.SetValue("dbPort", this.DBConnection.Port);
 			registryKey.SetValue("dbPassword", this.DBConnection.Password);
 			registryKey.Close();
+		}
+
+		public string OandaAccountId {
+			get;
+			set;
 		}
 
 		public string OandaBearerToken {

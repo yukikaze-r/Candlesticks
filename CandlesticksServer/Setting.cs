@@ -31,6 +31,9 @@ namespace Candlesticks {
 		public int ListenPort = -1;
 
 		[DataMember]
+		public string OandaAccountId = null;
+
+		[DataMember]
 		public string OandaBearerToken = null;
 
 		[DataMember]

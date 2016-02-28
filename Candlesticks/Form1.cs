@@ -644,9 +644,9 @@ namespace Candlesticks {
 				using(DBUtils.OpenThreadConnection()) {
 					foreach(var c in new CandlesticksGetter() {
 						Instrument = "USD_JPY",
-						Granularity = "M10",
-						Start = current.AddYears(-7),
-						End = current,
+						Granularity = "M5",
+						Start = new DateTime(2016,2,26, 0,00,0),
+						End = new DateTime(2016, 2, 26, 2, 00, 0),
 					}.Execute()) {
 //						report.WriteLine(c.Time, c.Open, c.High, c.Low, c.Close, c.Volume);
 					}
@@ -1101,6 +1101,10 @@ namespace Candlesticks {
 				}
 			});
 
+		}
+
+		private void ストリーミングテスト_Click(object sender, EventArgs e) {
+			new OandaAPI().GetPrices((bid,ask)=>{ Console.WriteLine("bid:"+bid+" ask:"+ask); }, "USD_JPY");
 		}
 	}
 }

@@ -54,6 +54,7 @@
 			this.くるくる = new System.Windows.Forms.Button();
 			this.区間の特徴 = new System.Windows.Forms.Button();
 			this.ベスト区間 = new System.Windows.Forms.Button();
+			this.ストリーミングテスト = new System.Windows.Forms.Button();
 			((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
 			this.menuStrip1.SuspendLayout();
 			this.SuspendLayout();
@@ -361,11 +362,22 @@
 			this.ベスト区間.UseVisualStyleBackColor = true;
 			this.ベスト区間.Click += new System.EventHandler(this.ベスト区間_Click);
 			// 
+			// ストリーミングテスト
+			// 
+			this.ストリーミングテスト.Location = new System.Drawing.Point(162, 158);
+			this.ストリーミングテスト.Name = "ストリーミングテスト";
+			this.ストリーミングテスト.Size = new System.Drawing.Size(147, 23);
+			this.ストリーミングテスト.TabIndex = 29;
+			this.ストリーミングテスト.Text = "ストリーミングテスト";
+			this.ストリーミングテスト.UseVisualStyleBackColor = true;
+			this.ストリーミングテスト.Click += new System.EventHandler(this.ストリーミングテスト_Click);
+			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(722, 597);
+			this.Controls.Add(this.ストリーミングテスト);
 			this.Controls.Add(this.ベスト区間);
 			this.Controls.Add(this.区間の特徴);
 			this.Controls.Add(this.くるくる);
@@ -437,6 +449,7 @@
 		private System.Windows.Forms.Button くるくる;
 		private System.Windows.Forms.Button 区間の特徴;
 		private System.Windows.Forms.Button ベスト区間;
+		private System.Windows.Forms.Button ストリーミングテスト;
 	}
 }
 

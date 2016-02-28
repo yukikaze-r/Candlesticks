@@ -10,12 +10,19 @@ using System.Runtime.Serialization.Json;
 using System.Xml;
 using System.Runtime.Serialization;
 using System.Net;
+using System.Threading;
+using System.Text.RegularExpressions;
 
 namespace Candlesticks {
 	class OandaAPI {
 		private static string BearerToken {
 			get {
 				return Setting.Instance.OandaBearerToken;
+			}
+		}
+		private static string AccountId {
+			get {
+				return Setting.Instance.OandaAccountId;
 			}
 		}
 
@@ -39,7 +46,8 @@ namespace Candlesticks {
 
 			string startParam = WebUtility.UrlEncode(XmlConvert.ToString(start, XmlDateTimeSerializationMode.Utc));
 			string endParam = WebUtility.UrlEncode(XmlConvert.ToString(end, XmlDateTimeSerializationMode.Utc));
-			
+
+//			HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "v1/candles?instrument=" + instrument + "&start=" + startParam + "&end=" + endParam + "&granularity=" + granularity + "&dailyAlignment=0&alignmentTimezone=Asia%2FTokyo");
 			HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "v1/candles?instrument="+ instrument + "&start="+ startParam+"&end="+endParam+"&candleFormat=midpoint&granularity="+ granularity+"&dailyAlignment=0&alignmentTimezone=Asia%2FTokyo");
 			request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", OandaAPI.BearerToken);
 
@@ -60,6 +68,7 @@ namespace Candlesticks {
 				Console.WriteLine("HttpStatus:" + webTask.Result.StatusCode+" "+ readTask.Result);
 				throw new Exception(readTask.Result);
 			}
+//			Console.WriteLine(readTask.Result);
 
 			var settings = new DataContractJsonSerializerSettings();
 			settings.UseSimpleDictionaryFormat = true;
@@ -93,6 +102,34 @@ namespace Candlesticks {
 				}
 				return result;
 			}
+		}
+
+		// 停止するにはHttpClientをDispose
+		public HttpClient GetPrices(Action<float,float> receiver, string instrument = "USD_JPY") {
+			HttpClient client = new HttpClient();
+			new Thread(new ThreadStart(async () => {
+				client.Timeout = TimeSpan.FromMilliseconds(Timeout.Infinite);
+				client.BaseAddress = new Uri("https://stream-fxpractice.oanda.com/");
+				HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "v1/prices?accountId=" + AccountId + "&instruments=" + instrument);
+				request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", OandaAPI.BearerToken);
+
+				HttpResponseMessage response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+				StreamReader reader = new StreamReader(await response.Content.ReadAsStreamAsync());
+				var regex = new Regex(@"""bid"":(\d+(\.\d+)?),""ask"":(\d+(\.\d+)?)");
+				try {
+					do {
+						string s = reader.ReadLine();
+						Console.WriteLine(">" + s);
+						var match = regex.Match(s);
+						if(match.Success) {
+							receiver(float.Parse(match.Groups[1].Value), float.Parse(match.Groups[3].Value));
+						}
+					} while (true);
+				} catch (IOException ex) {
+					Console.WriteLine(ex);
+				}
+			})).Start();
+			return client;
 		}
 
 	}

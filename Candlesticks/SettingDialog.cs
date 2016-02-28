@@ -17,6 +17,7 @@ namespace Candlesticks {
 
 		private void SettingDialog_Load(object sender, EventArgs e) {
 			var setting = Setting.Instance;
+			oandaAccountId.Text = setting.OandaAccountId;
 			oandaBearerToken.Text = setting.OandaBearerToken;
 			dataFilePath.Text = setting.DataFilePath;
 			dbHost.Text = setting.DBConnection.Host;
@@ -27,6 +28,7 @@ namespace Candlesticks {
 		private void button1_Click(object sender, EventArgs e) {
 			var setting = Setting.Instance;
 			setting.DataFilePath = dataFilePath.Text;
+			setting.OandaAccountId = oandaAccountId.Text;
 			setting.OandaBearerToken = oandaBearerToken.Text;
 			setting.DBConnection.Host = dbHost.Text;
 			setting.DBConnection.Port = int.Parse(dbPort.Text);

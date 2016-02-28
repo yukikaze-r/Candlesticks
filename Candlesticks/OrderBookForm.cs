@@ -6,6 +6,7 @@ using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Net.Sockets;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -20,13 +21,16 @@ namespace Candlesticks {
 		private NpgsqlConnection connection = null;
 		private TcpClient tcpClient = null;
 		private List<OrderBookDao.Entity> orderBooks;
+		private HttpClient priceStreamClient = null;
+		private Series streamPriceSeries = null;
 
 		public OrderBookForm() {
 			InitializeComponent();
 		}
 
-		private void chart1_Click(object sender, EventArgs e) {
-
+		
+		private void chart1_Click_1(object sender, EventArgs e) {
+			
 		}
 
 		private void OrderBookForm_Load(object sender, EventArgs ev) {
@@ -38,6 +42,18 @@ namespace Candlesticks {
 				= (splitContainer1.Panel1.HorizontalScroll.Maximum + splitContainer1.Panel1.HorizontalScroll.Minimum - splitContainer1.Panel1.ClientSize.Width) / 2;
 
 			new Thread(new ThreadStart(ReceiveEvent)).Start();
+
+			priceStreamClient = new OandaAPI().GetPrices(ReceivePrice);
+		}
+
+		private void ReceivePrice(float bid, float ask) {
+			Invoke(new Action(() => {
+				if (streamPriceSeries != null) {
+					float price = (bid + ask) / 2;
+					streamPriceSeries.Points[0].XValue = price;
+					streamPriceSeries.Points[1].XValue = price;
+				}
+			}));
 		}
 
 		private void ReceiveEvent() {
@@ -90,7 +106,7 @@ namespace Candlesticks {
 			}
 		}
 		
-		private void LoadChart(Chart chart, DateTime dateTime, PricePoints pricePoints) {
+		private void LoadChart(Chart chart, DateTime dateTime, PricePoints pricePoints, PricePoints previousPricePoints, bool hasStreamPriceSeries) {
 
 			chart.Series.Clear();
 			chart.ChartAreas.Clear();
@@ -111,33 +127,86 @@ namespace Candlesticks {
 			chartArea.AxisX.MinorGrid.LineColor = Color.LightGray;
 			chartArea.AxisX.MinorGrid.Interval = 0.05d;
 			chartArea.AxisY.Maximum = 5.0f;
-			chartArea.AxisY.Minimum = -1.0f;
+			chartArea.AxisY.Minimum = 0f;
 			chartArea.AxisY.Interval = 1.0f;
 			chartArea.AxisY.MajorGrid.LineColor = Color.LightGray;
 
+			chartArea.AxisY2.Enabled = AxisEnabled.True;
+			chartArea.AxisY2.Maximum = 2.5f;
+			chartArea.AxisY2.Minimum = -2.5f;
+			chartArea.AxisY2.Interval = 1.0f;
 
 			chart.ChartAreas.Add(chartArea);
 
 
-			Series seriesRate = new Series();
-			seriesRate.ChartType = SeriesChartType.Column;
-			var dataPoint = new DataPoint(pricePoints.rate, 5.0f);
-			seriesRate.SetCustomProperty("PointWidth", "0.01");
-			//			dataPoint["PointWidth"] = "1.0";
-			seriesRate.Points.Add(dataPoint);
-			seriesRate.Color = Color.Orange;
-			chart.Series.Add(seriesRate);
 
 			Series seriesDeltaPos = new Series();
-			seriesDeltaPos.ChartType = SeriesChartType.Column;
-			seriesDeltaPos.LegendText = "buy - sell position";
-			seriesDeltaPos.Color = Color.LightGreen;
-			foreach (var price in pricePoints.price_points.Keys.OrderBy(k => k)) {
-				var dprice = decimal.ToDouble((decimal)price);
-				var p = pricePoints.price_points[price];
-				seriesDeltaPos.Points.Add(new DataPoint(dprice, p.pl - p.ps));
-			}
 			chart.Series.Add(seriesDeltaPos);
+			seriesDeltaPos.YAxisType = AxisType.Secondary;
+			seriesDeltaPos.ChartType = SeriesChartType.StackedColumn;
+			seriesDeltaPos.LegendText = "buy - sell position";
+			seriesDeltaPos.Color = Color.FromArgb(100, 0, 255, 0);
+
+
+			Series seriesPreviousDeltaPos = new Series();
+			chart.Series.Add(seriesPreviousDeltaPos);
+			seriesPreviousDeltaPos.YAxisType = AxisType.Secondary;
+			seriesPreviousDeltaPos.ChartType = SeriesChartType.StackedColumn;
+			seriesPreviousDeltaPos.Color = Color.FromArgb(100, 0, 255, 0);
+
+			foreach (var price in pricePoints.price_points.Keys.OrderBy(k => k)) {
+				var dprice = (double)price;
+				var p = pricePoints.price_points[price];
+				var curD = p.pl - p.ps;
+				if(previousPricePoints != null) {
+					if(previousPricePoints.price_points.ContainsKey(price)) {
+						var pre = previousPricePoints.price_points[price];
+						var preD = pre.pl - pre.ps;
+
+						if(preD < 0 && curD > 0) {
+							seriesDeltaPos.Points.Add(new DataPoint(dprice, curD) { Color = Color.FromArgb(100, 255, 0, 0) } );
+							seriesPreviousDeltaPos.Points.Add(new DataPoint(dprice, preD) { Color = Color.FromArgb(100, 255, 0, 0) });
+						} else if(preD > 0 && curD < 0) {
+							seriesDeltaPos.Points.Add(new DataPoint(dprice, curD) { Color = Color.FromArgb(100, 0, 0, 255) });
+							seriesPreviousDeltaPos.Points.Add(new DataPoint(dprice, preD) { Color = Color.FromArgb(100, 0, 0, 255) });
+						} else if(preD > 0 && curD > 0) {
+							seriesDeltaPos.Points.Add(new DataPoint(dprice, Math.Min(curD, preD)) { Color = Color.FromArgb(100, 0, 255, 0) });
+							seriesPreviousDeltaPos.Points.Add(new DataPoint(dprice, Math.Abs(curD - preD)) { Color = curD > preD ? Color.FromArgb(100, 255, 0, 0) : Color.FromArgb(25,0,0,255) });
+						} else {
+							seriesDeltaPos.Points.Add(new DataPoint(dprice, Math.Max(curD, preD)) { Color = Color.FromArgb(100, 0, 255, 0) });
+							seriesPreviousDeltaPos.Points.Add(new DataPoint(dprice, -Math.Abs(curD - preD)) { Color = curD > preD ? Color.FromArgb(25, 255, 0, 0) : Color.FromArgb(100, 0, 0, 255) });
+						}
+					} else {
+						seriesDeltaPos.Points.Add(new DataPoint(dprice, curD));
+						seriesPreviousDeltaPos.Points.Add(new DataPoint(dprice,0));
+					}
+				} else {
+					seriesDeltaPos.Points.Add(new DataPoint(dprice, curD));
+				}
+			}
+/*
+			if(previousPricePoints != null) {
+				Series seriesPreviousUpDeltaPos = new Series();
+				chart.Series.Add(seriesPreviousUpDeltaPos);
+				seriesPreviousUpDeltaPos.ChartType = SeriesChartType.StackedColumn;
+				seriesPreviousUpDeltaPos.Color = Color.FromArgb(100,255,0,0);
+
+				foreach (var price in previousPricePoints.price_points.Keys.OrderBy(k => k)) {
+					var pre = previousPricePoints.price_points[price];
+					var dprice = decimal.ToDouble((decimal)price);
+					var cur = pricePoints.price_points[price];
+					DataPoint dataPoint = new DataPoint();
+					dataPoint.SetValueXY(dprice, 1);
+					dataPoint.Color = curD < preD ? Color.FromArgb(100, 0, 0, 255) : Color.FromArgb(100, 255, 0, 0);
+					seriesPreviousUpDeltaPos.Points.Add(dataPoint);
+					if (curD > preD) {
+//						seriesPreviousUpDeltaPos.Points.Add(new DataPoint(dprice,1));
+					} else {
+//						seriesPreviousDownDeltaPos.Points.Add(new DataPoint(dprice, 1));
+					}
+				}
+
+			}*/
 
 			Series[] lines = new Series[4];
 			string[] titles = new string[] { "order_long", "order_short", "pos_long", "pos_short" };
@@ -163,8 +232,24 @@ namespace Candlesticks {
 				lines[3].Points.Add(new DataPoint(dprice, p.ps));
 			}
 
+			Series seriesRate = new Series();
+			chart.Series.Add(seriesRate);
+			seriesRate.ChartType = SeriesChartType.Line;
+			//			seriesRate.SetCustomProperty("PointWidth", "0.01");
+			seriesRate.Points.Add(new DataPoint(pricePoints.rate, 5.0f));
+			seriesRate.Points.Add(new DataPoint(pricePoints.rate, -1.0f));
+			seriesRate.Color = Color.Orange;
 
-
+			if (hasStreamPriceSeries) {
+				streamPriceSeries = new Series();
+				chart.Series.Add(streamPriceSeries);
+				streamPriceSeries.ChartType = SeriesChartType.Line;
+				//				streamPriceSeries.SetCustomProperty("PointWidth", "0.01");
+				streamPriceSeries.Points.Add(new DataPoint(pricePoints.rate, 5.0f));
+				streamPriceSeries.Points.Add(new DataPoint(pricePoints.rate, -1.0f));
+				streamPriceSeries.Color = Color.Red;
+			}
+			
 		}
 
 		private void splitContainer1_Panel1_Scroll(object sender, ScrollEventArgs e) {
@@ -180,8 +265,14 @@ namespace Candlesticks {
 		{
 		    return splitContainer1.Panel1.AutoScrollPosition;
 		}
-		
-		private void LoadChart(Chart chart, OrderBookDao.Entity orderBook) {
+
+		private Dictionary<OrderBookDao.Entity, PricePoints> pricePointsCache = new Dictionary<OrderBookDao.Entity, PricePoints>();
+
+		private PricePoints GetPricePoints(OrderBookDao.Entity orderBook) {
+			if(pricePointsCache.ContainsKey(orderBook)) {
+				return pricePointsCache[orderBook];
+			}
+
 			PricePoints pricePoints = new PricePoints();
 			pricePoints.rate = orderBook.Rate;
 			pricePoints.price_points = new Dictionary<float, PricePoint>();
@@ -193,13 +284,20 @@ namespace Candlesticks {
 					pl = pp.Pl
 				};
 			}
-			LoadChart(chart, orderBook.DateTime, pricePoints);
+			pricePointsCache[orderBook] = pricePoints;
+			return pricePoints;
+		}
+
+		private void LoadChart(Chart chart, int index) {
+			OrderBookDao.Entity orderBook = orderBooks[index];
+			PricePoints previousPricePoints = (index + 1 < orderBooks.Count()) ? GetPricePoints(orderBooks[index + 1]) : null;
+			LoadChart(chart, orderBook.DateTime, GetPricePoints(orderBook), previousPricePoints, index == 0);
 		}
 
 		private void orderBookList_SelectedIndexChanged(object sender, EventArgs e) {
-			LoadChart(chart1,orderBooks[orderBookList.SelectedIndex]);
+			LoadChart(chart1,orderBookList.SelectedIndex);
 			if(orderBookList.SelectedIndex+1 < orderBooks.Count()) {
-				LoadChart(chart2, orderBooks[orderBookList.SelectedIndex + 1]);
+				LoadChart(chart2, orderBookList.SelectedIndex + 1);
 			}
 		}
 
@@ -212,6 +310,11 @@ namespace Candlesticks {
 				tcpClient.Close();
 				tcpClient = null;
 			}
+			if(priceStreamClient != null) {
+				priceStreamClient.Dispose();
+				priceStreamClient = null;
+			}
 		}
+
 	}
 }

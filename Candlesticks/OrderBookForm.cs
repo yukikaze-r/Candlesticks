@@ -114,7 +114,6 @@ namespace Candlesticks {
 
 			chart.Size = new Size(10000, 400);
 
-			chart.Titles.Add(new Title(dateTime.ToString()));
 
 			ChartArea chartArea = new ChartArea();
 			chartArea.AxisX.Interval = 0.05d;
@@ -154,16 +153,21 @@ namespace Candlesticks {
 			seriesPreviousDeltaPos.ChartType = SeriesChartType.StackedColumn;
 			seriesPreviousDeltaPos.Color = Color.FromArgb(100, 0, 255, 0);
 
+			float totalPl = 0;
+			float totalPs = 0;
+
 			foreach (var price in pricePoints.price_points.Keys.OrderBy(k => k)) {
 				var dprice = (double)price;
 				var p = pricePoints.price_points[price];
 				var curD = p.pl - p.ps;
+				totalPl += p.pl;
+				totalPs += p.ps;
 				if(previousPricePoints != null) {
 					if(previousPricePoints.price_points.ContainsKey(price)) {
 						var pre = previousPricePoints.price_points[price];
 						var preD = pre.pl - pre.ps;
 
-						if(preD < 0 && curD > 0) {
+						if (preD < 0 && curD > 0) {
 							seriesDeltaPos.Points.Add(new DataPoint(dprice, curD) { Color = Color.FromArgb(100, 255, 0, 0) } );
 							seriesPreviousDeltaPos.Points.Add(new DataPoint(dprice, preD) { Color = Color.FromArgb(100, 255, 0, 0) });
 						} else if(preD > 0 && curD < 0) {
@@ -184,29 +188,7 @@ namespace Candlesticks {
 					seriesDeltaPos.Points.Add(new DataPoint(dprice, curD));
 				}
 			}
-/*
-			if(previousPricePoints != null) {
-				Series seriesPreviousUpDeltaPos = new Series();
-				chart.Series.Add(seriesPreviousUpDeltaPos);
-				seriesPreviousUpDeltaPos.ChartType = SeriesChartType.StackedColumn;
-				seriesPreviousUpDeltaPos.Color = Color.FromArgb(100,255,0,0);
 
-				foreach (var price in previousPricePoints.price_points.Keys.OrderBy(k => k)) {
-					var pre = previousPricePoints.price_points[price];
-					var dprice = decimal.ToDouble((decimal)price);
-					var cur = pricePoints.price_points[price];
-					DataPoint dataPoint = new DataPoint();
-					dataPoint.SetValueXY(dprice, 1);
-					dataPoint.Color = curD < preD ? Color.FromArgb(100, 0, 0, 255) : Color.FromArgb(100, 255, 0, 0);
-					seriesPreviousUpDeltaPos.Points.Add(dataPoint);
-					if (curD > preD) {
-//						seriesPreviousUpDeltaPos.Points.Add(new DataPoint(dprice,1));
-					} else {
-//						seriesPreviousDownDeltaPos.Points.Add(new DataPoint(dprice, 1));
-					}
-				}
-
-			}*/
 
 			Series[] lines = new Series[4];
 			string[] titles = new string[] { "order_long", "order_short", "pos_long", "pos_short" };
@@ -249,7 +231,21 @@ namespace Candlesticks {
 				streamPriceSeries.Points.Add(new DataPoint(pricePoints.rate, -1.0f));
 				streamPriceSeries.Color = Color.Red;
 			}
-			
+			float pld = 0;
+			float psd = 0;
+			if (previousPricePoints != null) {
+				float prevTotalPl = 0;
+				float prevTotalPs = 0;
+				foreach (var pp in previousPricePoints.price_points) {
+					prevTotalPl += pp.Value.pl;
+					prevTotalPs += pp.Value.ps;
+				}
+				pld = totalPl - prevTotalPl;
+				psd = totalPs - prevTotalPs;
+			}
+			chart.Titles.Add(String.Format("{0} short position:{1:0.###}({2:+0.###;-0.###;0.###}) long position:{3:0.###}({4:+0.###;-0.###;0.###}) ", dateTime, totalPs, psd, totalPl, pld));
+
+
 		}
 
 		private void splitContainer1_Panel1_Scroll(object sender, ScrollEventArgs e) {

@@ -23,6 +23,7 @@ namespace Candlesticks {
 		private List<OrderBookDao.Entity> orderBooks;
 		private HttpClient priceStreamClient = null;
 		private Series streamPriceSeries = null;
+		private float latestPrice;
 
 		public OrderBookForm() {
 			InitializeComponent();
@@ -49,9 +50,9 @@ namespace Candlesticks {
 		private void ReceivePrice(float bid, float ask) {
 			Invoke(new Action(() => {
 				if (streamPriceSeries != null) {
-					float price = (bid + ask) / 2;
-					streamPriceSeries.Points[0].XValue = price;
-					streamPriceSeries.Points[1].XValue = price;
+					latestPrice = (bid + ask) / 2;
+					streamPriceSeries.Points[0].XValue = latestPrice;
+					streamPriceSeries.Points[1].XValue = latestPrice;
 				}
 			}));
 		}
@@ -220,15 +221,15 @@ namespace Candlesticks {
 			//			seriesRate.SetCustomProperty("PointWidth", "0.01");
 			seriesRate.Points.Add(new DataPoint(pricePoints.rate, 5.0f));
 			seriesRate.Points.Add(new DataPoint(pricePoints.rate, -1.0f));
-			seriesRate.Color = Color.Orange;
+			seriesRate.Color = Color.Blue;
 
 			if (hasStreamPriceSeries) {
 				streamPriceSeries = new Series();
 				chart.Series.Add(streamPriceSeries);
 				streamPriceSeries.ChartType = SeriesChartType.Line;
 				//				streamPriceSeries.SetCustomProperty("PointWidth", "0.01");
-				streamPriceSeries.Points.Add(new DataPoint(pricePoints.rate, 5.0f));
-				streamPriceSeries.Points.Add(new DataPoint(pricePoints.rate, -1.0f));
+				streamPriceSeries.Points.Add(new DataPoint(latestPrice, 5.0f));
+				streamPriceSeries.Points.Add(new DataPoint(latestPrice, -1.0f));
 				streamPriceSeries.Color = Color.Red;
 			}
 			float pld = 0;

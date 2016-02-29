@@ -5,6 +5,7 @@ using System.Data;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Timers;
 
 namespace Candlesticks {
@@ -34,7 +35,7 @@ namespace Candlesticks {
 			Trace.WriteLine("now:" + now);
 			Trace.WriteLine("remain:" + remainMillisecond);
 			Trace.Flush();
-			var timer = new Timer() {
+			var timer = new System.Timers.Timer() {
 				Interval = (double)remainMillisecond,
 				AutoReset = false,
 			};
@@ -46,13 +47,15 @@ namespace Candlesticks {
 		private void Timer_FirstElapsed(object sender, ElapsedEventArgs e) {
 			try {
 				Trace.WriteLine("Timer_FirstElapsed");
-				var timer = new Timer() {
+				var timer = new System.Timers.Timer() {
 					Interval = (double)INTERVAL_MINUTE * 60 * 1000,
 					AutoReset = true,
 				};
 				timer.Elapsed += Timer_Elapsed;
 				timer.Start();
-				SaveOrderbook(oandaApi.GetOrderbookData(3600));
+				for (int i = 0; SaveOrderbook(oandaApi.GetOrderbookData(3600)) == false && i < 3; i++) {
+					Thread.Sleep(1000);
+				}
 				Trace.WriteLine("Timer_FirstElapsed end");
 			} catch(Exception ex) {
 				Trace.WriteLine(ex);
@@ -62,14 +65,16 @@ namespace Candlesticks {
 		private void Timer_Elapsed(object sender, ElapsedEventArgs e) {
 			try {
 				Trace.WriteLine("Timer_Elapsed");
-				SaveOrderbook(oandaApi.GetOrderbookData(3600));
+				for(int i=0; SaveOrderbook(oandaApi.GetOrderbookData(3600)) == false && i<3; i++) {
+					Thread.Sleep(1000);
+				}
 				Trace.WriteLine("Timer_Elapsed end");
 			} catch (Exception ex) {
 				Trace.WriteLine(ex);
 			}
 		}
 
-		private void SaveOrderbook(Dictionary<DateTime,PricePoints> orderbook) {
+		private bool SaveOrderbook(Dictionary<DateTime,PricePoints> orderbook) {
 			DateTime? lastUpdated = null;
 			Trace.WriteLine("order book count:"+orderbook.Keys.Count());
 			foreach (var time in orderbook.Keys.OrderBy(k => k)) {
@@ -85,6 +90,9 @@ namespace Candlesticks {
 
 			if (lastUpdated != null) {
 				eventServer.Send(new OrderBookUpdated() { DateTime = lastUpdated.Value });
+				return true;
+			} else {
+				return false;
 			}
 		}
 

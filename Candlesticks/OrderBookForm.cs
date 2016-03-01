@@ -230,8 +230,8 @@ namespace Candlesticks {
 				volumeSeries = new Series();
 				chart.Series.Add(volumeSeries);
 				volumeSeries.ChartType = SeriesChartType.Column;
-				volumeSeries.Color = Color.FromArgb(100, 0, 0, 0);
-				volumeSeries.SetCustomProperty("PointWidth", "0.3");
+				volumeSeries.Color = Color.LightGray;
+				volumeSeries.SetCustomProperty("PointWidth", "0.5");
 				LoadVolumeSeries();
 			}
 
@@ -316,7 +316,7 @@ namespace Candlesticks {
 			//			seriesRate.SetCustomProperty("PointWidth", "0.01");
 			seriesRate.Points.Add(new DataPoint(pricePoints.rate, 5.0f));
 			seriesRate.Points.Add(new DataPoint(pricePoints.rate, -1.0f));
-			seriesRate.Color = Color.Blue;
+			seriesRate.Color = Color.Pink;
 
 			if (isLatestChart) {
 				streamPriceSeries = new Series();

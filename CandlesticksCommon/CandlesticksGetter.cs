@@ -40,6 +40,18 @@ namespace Candlesticks {
 		public DateTime Start;
 		public DateTime End;
 		public int Count = -1;
+		private OandaAPI oandaAPI = null;
+		public OandaAPI OandaAPI {
+			get {
+				if(oandaAPI == null) {
+					oandaAPI = new OandaAPI();
+				}
+				return oandaAPI;
+			}
+			set {
+				oandaAPI = value;
+			}
+		}
 
 
 		private void SaveOandaCandle(CandlestickDao dao, OandaCandle oandaCandle) {
@@ -86,20 +98,9 @@ namespace Candlesticks {
 				foreach (var entity in dao.GetBy(Instrument, Granularity, t, End).ToList()) {
 					if(entity.DateTime != t) {
 						foreach (var oandaCandle in GetCandles(t, entity.DateTime.AddSeconds(-1))) {
-							while(t < oandaCandle.DateTime) {
-								SaveNullCandle(dao,t);
-								result.Add(new Candlestick() {Time =t, Open=0});
-								t = t.Add(granularitySpan);
-							}
-							SaveOandaCandle(dao, oandaCandle);
-							result.Add(oandaCandle.Candlestick);
-							t = t.Add(granularitySpan);
+							t = SaveAndAdd(result, granularitySpan, dao, t, oandaCandle);
 						}
-						while (t < entity.DateTime) {
-							SaveNullCandle(dao, t);
-							result.Add(new Candlestick() { Time = t, Open = 0 });
-							t = t.Add(granularitySpan);
-						}
+						FillNullCandles(result, granularitySpan, dao, t, entity.DateTime);
 						t = entity.DateTime;
 					}
 					result.Add(entity.Candlestick);
@@ -107,24 +108,33 @@ namespace Candlesticks {
 				}
 				if (t < End) {
 					foreach (var oandaCandle in GetCandles(t, End)) {
-						while (t < oandaCandle.DateTime) {
-							SaveNullCandle(dao, t);
-							result.Add(new Candlestick() { Time = t, Open = 0 });
-							t = t.Add(granularitySpan);
-						}
-						SaveOandaCandle(dao, oandaCandle);
-						result.Add(oandaCandle.Candlestick);
-						t = t.Add(granularitySpan);
+						t = SaveAndAdd(result, granularitySpan, dao, t, oandaCandle);
 					}
-					while (t < End) {
-						SaveNullCandle(dao, t);
-						result.Add(new Candlestick() { Time = t, Open = 0 });
-						t = t.Add(granularitySpan);
-					}
+					FillNullCandles(result, granularitySpan, dao, t, End);
 				}
 				transaction.Commit();
 			}
 			return result;
+		}
+
+		private void FillNullCandles(List<Candlestick> result, TimeSpan granularitySpan, CandlestickDao dao, DateTime t, DateTime endTime) {
+			while (t < endTime) {
+				SaveNullCandle(dao, t);
+				result.Add(new Candlestick() { Time = t, Open = 0 });
+				t = t.Add(granularitySpan);
+			}
+		}
+
+		private DateTime SaveAndAdd(List<Candlestick> result, TimeSpan granularitySpan, CandlestickDao dao, DateTime t, OandaCandle oandaCandle) {
+			while (t < oandaCandle.DateTime) {
+				SaveNullCandle(dao, t);
+				result.Add(new Candlestick() { Time = t, Open = 0 });
+				t = t.Add(granularitySpan);
+			}
+			SaveOandaCandle(dao, oandaCandle);
+			result.Add(oandaCandle.Candlestick);
+			t = t.Add(granularitySpan);
+			return t;
 		}
 
 		private IEnumerable<OandaCandle> GetCandles(DateTime start, DateTime end) {
@@ -133,7 +143,7 @@ namespace Candlesticks {
 			do {
 				count = (end - start).Ticks / granularitySpan.Ticks;
 				DateTime e = start.AddTicks(granularitySpan.Ticks * Math.Min(count, 5000));
-				foreach (var c in new OandaAPI().GetCandles(start, e, Instrument, Granularity)) {
+				foreach (var c in this.OandaAPI.GetCandles(start, e, Instrument, Granularity)) {
 					yield return c;
 				}
 				start = e;

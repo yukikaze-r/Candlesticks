@@ -14,7 +14,7 @@ using System.Threading;
 using System.Text.RegularExpressions;
 
 namespace Candlesticks {
-	class OandaAPI {
+	class OandaAPI : IDisposable{
 		private static string BearerToken {
 			get {
 				return Setting.Instance.OandaBearerToken;
@@ -37,21 +37,26 @@ namespace Candlesticks {
 
 		// http://www.oanda.com/lang/ja/forex-trading/analysis/currency-units-calculator
 		// JP225_USD  SPX500_USD BCO_USD SGD_HKD  NAS100_USD USB10Y_USD US30_USD WTICO_USD
-		public IEnumerable<OandaCandle> GetCandles(DateTime start, DateTime end, string instrument="USD_JPY", string granularity="M30") {
-			Console.WriteLine("start:"+start+" end:"+end);
-			if(start == end) {
+		public IEnumerable<OandaCandle> GetCandles(DateTime start, DateTime end, string instrument = "USD_JPY", string granularity = "M30") {
+			if (start == end) {
 				Console.WriteLine("start == end");
 				return new List<OandaCandle>();
 			}
-
 			string startParam = WebUtility.UrlEncode(XmlConvert.ToString(start, XmlDateTimeSerializationMode.Utc));
 			string endParam = WebUtility.UrlEncode(XmlConvert.ToString(end, XmlDateTimeSerializationMode.Utc));
+			return GetCandles("v1/candles?instrument=" + instrument + "&start=" + startParam + "&end=" + endParam + "&candleFormat=midpoint&granularity=" + granularity + "&dailyAlignment=0&alignmentTimezone=Asia%2FTokyo");
+		}
 
-//			HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "v1/candles?instrument=" + instrument + "&start=" + startParam + "&end=" + endParam + "&granularity=" + granularity + "&dailyAlignment=0&alignmentTimezone=Asia%2FTokyo");
-			HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "v1/candles?instrument="+ instrument + "&start="+ startParam+"&end="+endParam+"&candleFormat=midpoint&granularity="+ granularity+"&dailyAlignment=0&alignmentTimezone=Asia%2FTokyo");
+		public IEnumerable<OandaCandle> GetCandles(int count, string instrument = "USD_JPY", string granularity = "M30") {
+			return GetCandles("v1/candles?instrument=" + instrument + "&count=" + count + "&candleFormat=midpoint&granularity=" + granularity + "&dailyAlignment=0&alignmentTimezone=Asia%2FTokyo");
+		}
+
+
+		public IEnumerable<OandaCandle> GetCandles(string requestUri) {
+			HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
 			request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", OandaAPI.BearerToken);
 
-			Console.WriteLine(request.ToString());
+//			Console.WriteLine(request.ToString());
 
 			Task<HttpResponseMessage> webTask = client.SendAsync(request);
 			webTask.Wait();
@@ -119,10 +124,10 @@ namespace Candlesticks {
 				try {
 					do {
 						string s = reader.ReadLine();
-						Console.WriteLine(">" + s);
 						var match = regex.Match(s);
 						if(match.Success) {
 							receiver(float.Parse(match.Groups[1].Value), float.Parse(match.Groups[3].Value));
+							Console.WriteLine(">" + s);
 						}
 					} while (true);
 				} catch (IOException ex) {
@@ -131,6 +136,24 @@ namespace Candlesticks {
 			})).Start();
 			return client;
 		}
+
+		#region IDisposable Support
+		private bool disposedValue = false; // 重複する呼び出しを検出するには
+
+		protected virtual void Dispose(bool disposing) {
+			if (!disposedValue) {
+				if (disposing) {
+					client.Dispose();
+				}
+
+				disposedValue = true;
+			}
+		}
+
+		public void Dispose() {
+			Dispose(true);
+		}
+		#endregion
 
 	}
 

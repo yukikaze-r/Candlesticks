@@ -24,6 +24,10 @@ namespace Candlesticks {
 		private HttpClient priceStreamClient = null;
 		private Series streamPriceSeries = null;
 		private float latestPrice;
+		private OandaAPI oandaApi;
+		private Series volumeSeries = null;
+		private List<OandaCandle> latestS5Candles;
+		private object volumeCandlesLock = new object();
 
 		public OrderBookForm() {
 			InitializeComponent();
@@ -35,6 +39,8 @@ namespace Candlesticks {
 		}
 
 		private void OrderBookForm_Load(object sender, EventArgs ev) {
+			oandaApi = new OandaAPI();
+
 			LoadOrderBookList();
 
 			orderBookList.SelectedIndex = 0;
@@ -43,8 +49,87 @@ namespace Candlesticks {
 				= (splitContainer1.Panel1.HorizontalScroll.Maximum + splitContainer1.Panel1.HorizontalScroll.Minimum - splitContainer1.Panel1.ClientSize.Width) / 2;
 
 			new Thread(new ThreadStart(ReceiveEvent)).Start();
+			new Thread(new ThreadStart(RetriveVolumes)).Start();
 
 			priceStreamClient = new OandaAPI().GetPrices(ReceivePrice);
+		}
+
+		private void RetriveVolumes() {
+			while (volumeCandlesLock != null) {
+				Action invokeTarget = null;
+				lock (volumeCandlesLock) {
+					if (latestS5Candles == null) {
+						DateTime firstDateTime = orderBooks[0].DateTime;
+						latestS5Candles = oandaApi.GetCandles(new DateTime(firstDateTime.Year, firstDateTime.Month, firstDateTime.Day, firstDateTime.Hour, firstDateTime.Minute, 0, DateTimeKind.Local),
+							DateTime.Now, "USD_JPY", "S5").ToList();
+						invokeTarget = new Action(() => {
+							if (orderBookList.SelectedIndex == 0) {
+								LoadVolumeSeries();
+							}
+						});
+					} else {
+						invokeTarget = RetriveVolumeLatest();
+					}
+				}
+				if(invokeTarget != null) {
+					Invoke(invokeTarget);
+				}
+				Thread.Sleep(5000);
+			}
+		}
+
+		private void LoadVolumeSeries() {
+			lock(volumeCandlesLock) {
+				if (latestS5Candles != null) {
+					Dictionary<float, float> PriceVolumes = new Dictionary<float, float>();
+					foreach (var candle in latestS5Candles) {
+						float min = GetRoundPrice(candle.lowMid);
+						float max = GetRoundPrice(candle.highMid);
+						float average = candle.volume / ((max - min) / 0.05f + 1);
+						for (float i = min; i <= max; i += 0.05f) {
+							if (PriceVolumes.ContainsKey(i)) {
+								PriceVolumes[i] += average;
+							} else {
+								PriceVolumes[i] = average;
+							}
+						}
+					}
+					volumeSeries.Points.Clear();
+					foreach (var price in GetPricePoints(orderBooks[0]).price_points.Keys.OrderBy(k => k)) {
+						if (PriceVolumes.ContainsKey(price)) {
+							Console.WriteLine("price:" + price + " volume:" + PriceVolumes[price]);
+							volumeSeries.Points.Add(new DataPoint(price, PriceVolumes[price] / 100));
+						} else {
+							volumeSeries.Points.Add(new DataPoint(price, 0));
+						}
+					}
+				}
+			}
+		}
+
+		private Action RetriveVolumeLatest() {
+			var candle = oandaApi.GetCandles(1,"USD_JPY", "S5").First();
+			if(latestS5Candles.Where(c=>c.DateTime==candle.DateTime).Count()==0) {
+				latestS5Candles.Add(candle);
+
+				return new Action(() => {
+					if (orderBookList.SelectedIndex == 0) {
+						float min = GetRoundPrice(candle.lowMid);
+						float max = GetRoundPrice(candle.highMid);
+						float average = candle.volume / (int)((max - min) / 0.05f + 1);
+						Console.WriteLine("candle lowMid:" + min + "(" + candle.lowMid+") highMid:" +max + "(" + candle.highMid+") volume:"+candle.volume);
+						foreach (var dataPoint in volumeSeries.Points.Where(p => min <= p.XValue && p.XValue <= max)) {
+							dataPoint.YValues[0] += average / 100;
+						}
+					}
+				});
+			}
+			return null;
+		}
+
+		private float GetRoundPrice(float price) {
+			int n = (int)((price + 0.025f) / 0.05f);
+			return n * 0.05f;
 		}
 
 		private void ReceivePrice(float bid, float ask) {
@@ -79,6 +164,9 @@ namespace Candlesticks {
 									orderBookList.SelectedIndex = 0;
 								}
 							}));
+							lock (volumeCandlesLock) {
+								latestS5Candles = null;
+							}
 						}
 					}
 
@@ -107,7 +195,7 @@ namespace Candlesticks {
 			}
 		}
 		
-		private void LoadChart(Chart chart, DateTime dateTime, PricePoints pricePoints, PricePoints previousPricePoints, bool hasStreamPriceSeries) {
+		private void LoadChart(Chart chart, DateTime dateTime, PricePoints pricePoints, PricePoints previousPricePoints, bool isLatestChart) {
 
 			chart.Series.Clear();
 			chart.ChartAreas.Clear();
@@ -138,7 +226,14 @@ namespace Candlesticks {
 
 			chart.ChartAreas.Add(chartArea);
 
-
+			if(isLatestChart) {
+				volumeSeries = new Series();
+				chart.Series.Add(volumeSeries);
+				volumeSeries.ChartType = SeriesChartType.Column;
+				volumeSeries.Color = Color.FromArgb(100, 0, 0, 0);
+				volumeSeries.SetCustomProperty("PointWidth", "0.3");
+				LoadVolumeSeries();
+			}
 
 			Series seriesDeltaPos = new Series();
 			chart.Series.Add(seriesDeltaPos);
@@ -223,7 +318,7 @@ namespace Candlesticks {
 			seriesRate.Points.Add(new DataPoint(pricePoints.rate, -1.0f));
 			seriesRate.Color = Color.Blue;
 
-			if (hasStreamPriceSeries) {
+			if (isLatestChart) {
 				streamPriceSeries = new Series();
 				chart.Series.Add(streamPriceSeries);
 				streamPriceSeries.ChartType = SeriesChartType.Line;
@@ -310,6 +405,13 @@ namespace Candlesticks {
 			if(priceStreamClient != null) {
 				priceStreamClient.Dispose();
 				priceStreamClient = null;
+			}
+			if(oandaApi != null) {
+				oandaApi.Dispose();
+				oandaApi = null;
+			}
+			if(volumeCandlesLock != null) {
+				volumeCandlesLock = null;
 			}
 		}
 

@@ -55,6 +55,7 @@
 			this.区間の特徴 = new System.Windows.Forms.Button();
 			this.ベスト区間 = new System.Windows.Forms.Button();
 			this.ストリーミングテスト = new System.Windows.Forms.Button();
+			this.チャートToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
 			this.menuStrip1.SuspendLayout();
 			this.SuspendLayout();
@@ -288,14 +289,14 @@
             this.ウィンドウToolStripMenuItem});
 			this.menuStrip1.Location = new System.Drawing.Point(0, 0);
 			this.menuStrip1.Name = "menuStrip1";
-			this.menuStrip1.Size = new System.Drawing.Size(722, 24);
+			this.menuStrip1.Size = new System.Drawing.Size(722, 26);
 			this.menuStrip1.TabIndex = 24;
 			this.menuStrip1.Text = "menuStrip1";
 			// 
 			// 設定ToolStripMenuItem
 			// 
 			this.設定ToolStripMenuItem.Name = "設定ToolStripMenuItem";
-			this.設定ToolStripMenuItem.Size = new System.Drawing.Size(43, 20);
+			this.設定ToolStripMenuItem.Size = new System.Drawing.Size(44, 22);
 			this.設定ToolStripMenuItem.Text = "設定";
 			this.設定ToolStripMenuItem.Click += new System.EventHandler(this.設定ToolStripMenuItem_Click);
 			// 
@@ -303,22 +304,23 @@
 			// 
 			this.ウィンドウToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.オーダーブックToolStripMenuItem,
-            this.シグナルToolStripMenuItem});
+            this.シグナルToolStripMenuItem,
+            this.チャートToolStripMenuItem});
 			this.ウィンドウToolStripMenuItem.Name = "ウィンドウToolStripMenuItem";
-			this.ウィンドウToolStripMenuItem.Size = new System.Drawing.Size(60, 20);
+			this.ウィンドウToolStripMenuItem.Size = new System.Drawing.Size(80, 22);
 			this.ウィンドウToolStripMenuItem.Text = "ウィンドウ";
 			// 
 			// オーダーブックToolStripMenuItem
 			// 
 			this.オーダーブックToolStripMenuItem.Name = "オーダーブックToolStripMenuItem";
-			this.オーダーブックToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
+			this.オーダーブックToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
 			this.オーダーブックToolStripMenuItem.Text = "オーダーブック";
 			this.オーダーブックToolStripMenuItem.Click += new System.EventHandler(this.オーダーブックToolStripMenuItem_Click);
 			// 
 			// シグナルToolStripMenuItem
 			// 
 			this.シグナルToolStripMenuItem.Name = "シグナルToolStripMenuItem";
-			this.シグナルToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
+			this.シグナルToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
 			this.シグナルToolStripMenuItem.Text = "シグナル";
 			this.シグナルToolStripMenuItem.Click += new System.EventHandler(this.シグナルToolStripMenuItem_Click);
 			// 
@@ -371,6 +373,13 @@
 			this.ストリーミングテスト.Text = "ストリーミングテスト";
 			this.ストリーミングテスト.UseVisualStyleBackColor = true;
 			this.ストリーミングテスト.Click += new System.EventHandler(this.ストリーミングテスト_Click);
+			// 
+			// チャートToolStripMenuItem
+			// 
+			this.チャートToolStripMenuItem.Name = "チャートToolStripMenuItem";
+			this.チャートToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+			this.チャートToolStripMenuItem.Text = "チャート";
+			this.チャートToolStripMenuItem.Click += new System.EventHandler(this.チャートToolStripMenuItem_Click);
 			// 
 			// Form1
 			// 
@@ -450,6 +459,7 @@
 		private System.Windows.Forms.Button 区間の特徴;
 		private System.Windows.Forms.Button ベスト区間;
 		private System.Windows.Forms.Button ストリーミングテスト;
+		private System.Windows.Forms.ToolStripMenuItem チャートToolStripMenuItem;
 	}
 }
 

@@ -1,0 +1,61 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Text;
+
+namespace Candlesticks
+{
+	delegate void PriceListener(float bid, float ask);
+
+	class PriceObserver
+    {
+		private static Dictionary<string, PriceObserver> instances = new Dictionary<string, PriceObserver>();
+
+		public static PriceObserver Get(string instrument) {
+			lock(typeof(PriceObserver)) {
+				if(!instances.ContainsKey(instrument)) {
+					instances[instrument] = new PriceObserver(instrument);
+				}
+				return instances[instrument];
+			}
+		}
+
+		private PriceListener listeners = null;
+		private OandaAPI oandaApi;
+		private HttpClient client;
+		private string instrument;
+
+		public PriceObserver(string instrument) {
+			this.instrument = instrument;
+		}
+
+		public void Observe(PriceListener listener) {
+			lock(this) {
+				if (listeners == null) {
+					oandaApi = new OandaAPI();
+					listeners = new PriceListener(listener);
+					client = oandaApi.GetPrices(ReceivePrice, instrument);
+				} else {
+					listeners += listener;
+				}
+			}
+		}
+
+		private void ReceivePrice(float bid, float ask) {
+			lock(this) {
+				listeners.Invoke(bid, ask);
+			}
+		}
+
+		public void UnOnserve(PriceListener listener) {
+			lock (this) {
+				listeners -= listener;
+				if (listeners.GetInvocationList().Length == 0) {
+					client.Dispose();
+					oandaApi.Dispose();
+					listeners = null;
+				}
+			}
+		}
+    }
+}

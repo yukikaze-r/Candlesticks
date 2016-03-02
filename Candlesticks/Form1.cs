@@ -645,10 +645,10 @@ namespace Candlesticks {
 					foreach(var c in new CandlesticksGetter() {
 						Instrument = "USD_JPY",
 						Granularity = "M5",
-						Start = new DateTime(2016,2,26, 0,00,0),
-						End = new DateTime(2016, 2, 26, 2, 00, 0),
+						Start = new DateTime(2016,3,2, 16,00,0,DateTimeKind.Local),
+						End = new DateTime(2016, 3, 2, 16, 30, 0, DateTimeKind.Local),
 					}.Execute()) {
-//						report.WriteLine(c.Time, c.Open, c.High, c.Low, c.Close, c.Volume);
+						report.WriteLine(c.Time, c.Open, c.High, c.Low, c.Close, c.Volume);
 					}
 				}
 				/*
@@ -826,13 +826,6 @@ namespace Candlesticks {
 			dialog.ShowDialog(this);
 		}
 
-		private void オーダーブックToolStripMenuItem_Click(object sender, EventArgs e) {
-			new OrderBookForm().Show(this);
-		}
-
-		private void シグナルToolStripMenuItem_Click(object sender, EventArgs e) {
-			new SignalForm().Show(this);
-		}
 
 		private void 原油因果_Click(object sender, EventArgs ev) {
 
@@ -1105,6 +1098,19 @@ namespace Candlesticks {
 
 		private void ストリーミングテスト_Click(object sender, EventArgs e) {
 			new OandaAPI().GetPrices((bid,ask)=>{ Console.WriteLine("bid:"+bid+" ask:"+ask); }, "USD_JPY");
+		}
+
+		private void オーダーブックToolStripMenuItem_Click(object sender, EventArgs e) {
+			new OrderBookForm().Show();
+		}
+
+		private void シグナルToolStripMenuItem_Click(object sender, EventArgs e) {
+			new SignalForm().Show();
+		}
+
+		private void チャートToolStripMenuItem_Click(object sender, EventArgs e) {
+			new ChartForm().Show();
+
 		}
 	}
 }

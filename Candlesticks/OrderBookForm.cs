@@ -21,7 +21,6 @@ namespace Candlesticks {
 		private NpgsqlConnection connection = null;
 		private TcpClient tcpClient = null;
 		private List<OrderBookDao.Entity> orderBooks;
-		private HttpClient priceStreamClient = null;
 		private Series streamPriceSeries = null;
 		private float latestPrice;
 		private OandaAPI oandaApi;
@@ -51,7 +50,7 @@ namespace Candlesticks {
 			new Thread(new ThreadStart(ReceiveEvent)).Start();
 			new Thread(new ThreadStart(RetriveVolumes)).Start();
 
-			priceStreamClient = new OandaAPI().GetPrices(ReceivePrice);
+			PriceObserver.Get("USD_JPY").Observe(ReceivePrice);
 		}
 
 		private void RetriveVolumes() {
@@ -394,17 +393,14 @@ namespace Candlesticks {
 		}
 
 		private void OrderBookForm_FormClosing(object sender, FormClosingEventArgs e) {
-			if(connection != null) {
+			PriceObserver.Get("USD_JPY").UnOnserve(ReceivePrice);
+			if (connection != null) {
 				connection.Close();
 				connection = null;
 			}
 			if(tcpClient != null) {
 				tcpClient.Close();
 				tcpClient = null;
-			}
-			if(priceStreamClient != null) {
-				priceStreamClient.Dispose();
-				priceStreamClient = null;
 			}
 			if(oandaApi != null) {
 				oandaApi.Dispose();

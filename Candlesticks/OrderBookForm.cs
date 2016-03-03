@@ -88,8 +88,8 @@ namespace Candlesticks {
 					firstDateTime.Year, firstDateTime.Month, firstDateTime.Day, firstDateTime.Hour, firstDateTime.Minute, 0, DateTimeKind.Local);
 				return new CandlesticksGetter() {
 					Start = startDateTime,
-					End = startDateTime.AddMinutes(20)
-
+					End = startDateTime.AddMinutes(20),
+					Granularity = "S5"
 				}.Execute().ToList();
 			}
 		}
@@ -101,7 +101,7 @@ namespace Candlesticks {
 			foreach (var candle in s5candles) {
 				float min = GetRoundPrice(candle.Low);
 				float max = GetRoundPrice(candle.High);
-				float average = candle.Volume / ((max - min) / VOLUME_PRICE_GRANURALITY + 1);
+				float average = (float)candle.Volume / (int)((max - min + 1) / VOLUME_PRICE_GRANURALITY);
 				for (float i = min; i <= max; i += VOLUME_PRICE_GRANURALITY) {
 					if (priceVolumes.ContainsKey(i)) {
 						priceVolumes[i] += average;
@@ -112,7 +112,7 @@ namespace Candlesticks {
 			}
 			series.Points.Clear();
 			foreach (var price in priceVolumes.Keys.OrderBy(k => k)) {
-				series.Points.Add(new DataPoint(price, priceVolumes[price] / (2000 * VOLUME_PRICE_GRANURALITY)));
+				series.Points.Add(new DataPoint(price, priceVolumes[price] / (100 * VOLUME_PRICE_GRANURALITY)));
 			}
 		}
 
@@ -127,10 +127,20 @@ namespace Candlesticks {
 						volumeLabel.ForeColor = candle.volume >= 10 ? Color.Red : (candle.volume >= 5 ? Color.Orange : (candle.volume >= 2 ? Color.Blue : Color.Gray));
 						float min = GetRoundPrice(candle.lowMid);
 						float max = GetRoundPrice(candle.highMid);
-						float average = candle.volume / (int)((max - min) / VOLUME_PRICE_GRANURALITY + 1);
-						Console.WriteLine("candle lowMid:" + min + "(" + candle.lowMid+") highMid:" +max + "(" + candle.highMid+") volume:"+candle.volume);
+						float average = (float)candle.volume / (int)((max - min + 1) / VOLUME_PRICE_GRANURALITY);
+						Console.WriteLine("candle lowMid:" + min + "(" + candle.lowMid+") highMid:" +max + "(" + candle.highMid+") volume:"+candle.volume+" avg:"+ average);
+						for (float i = min; i <= max; i += VOLUME_PRICE_GRANURALITY) {
+							DataPoint dp = latestVolumeSeries.Points.Where(p => p.XValue == i).FirstOrDefault();
+							if(dp == null) {
+								dp = new DataPoint(i, 0);
+								latestVolumeSeries.Points.Add(dp);
+							}
+							dp.YValues[0] += average / (100 * VOLUME_PRICE_GRANURALITY);
+						}
+
+
 						foreach (var dataPoint in latestVolumeSeries.Points.Where(p => min <= p.XValue && p.XValue <= max)) {
-							dataPoint.YValues[0] += average / (2000 * VOLUME_PRICE_GRANURALITY);
+//							dataPoint.YValues[0] += average / (100 * VOLUME_PRICE_GRANURALITY);
 						}
 					}
 				});

@@ -57,6 +57,7 @@
 			this.ベスト区間 = new System.Windows.Forms.Button();
 			this.ストリーミングテスト = new System.Windows.Forms.Button();
 			this.価格急変 = new System.Windows.Forms.Button();
+			this.ポジション傾向ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
 			this.menuStrip1.SuspendLayout();
 			this.SuspendLayout();
@@ -306,7 +307,8 @@
 			this.ウィンドウToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.オーダーブックToolStripMenuItem,
             this.シグナルToolStripMenuItem,
-            this.チャートToolStripMenuItem});
+            this.チャートToolStripMenuItem,
+            this.ポジション傾向ToolStripMenuItem});
 			this.ウィンドウToolStripMenuItem.Name = "ウィンドウToolStripMenuItem";
 			this.ウィンドウToolStripMenuItem.Size = new System.Drawing.Size(60, 20);
 			this.ウィンドウToolStripMenuItem.Text = "ウィンドウ";
@@ -314,21 +316,21 @@
 			// オーダーブックToolStripMenuItem
 			// 
 			this.オーダーブックToolStripMenuItem.Name = "オーダーブックToolStripMenuItem";
-			this.オーダーブックToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
+			this.オーダーブックToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
 			this.オーダーブックToolStripMenuItem.Text = "オーダーブック";
 			this.オーダーブックToolStripMenuItem.Click += new System.EventHandler(this.オーダーブックToolStripMenuItem_Click);
 			// 
 			// シグナルToolStripMenuItem
 			// 
 			this.シグナルToolStripMenuItem.Name = "シグナルToolStripMenuItem";
-			this.シグナルToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
+			this.シグナルToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
 			this.シグナルToolStripMenuItem.Text = "シグナル";
 			this.シグナルToolStripMenuItem.Click += new System.EventHandler(this.シグナルToolStripMenuItem_Click);
 			// 
 			// チャートToolStripMenuItem
 			// 
 			this.チャートToolStripMenuItem.Name = "チャートToolStripMenuItem";
-			this.チャートToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
+			this.チャートToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
 			this.チャートToolStripMenuItem.Text = "チャート";
 			this.チャートToolStripMenuItem.Click += new System.EventHandler(this.チャートToolStripMenuItem_Click);
 			// 
@@ -391,6 +393,13 @@
 			this.価格急変.Text = "価格急変";
 			this.価格急変.UseVisualStyleBackColor = true;
 			this.価格急変.Click += new System.EventHandler(this.価格急変_Click);
+			// 
+			// ポジション傾向ToolStripMenuItem
+			// 
+			this.ポジション傾向ToolStripMenuItem.Name = "ポジション傾向ToolStripMenuItem";
+			this.ポジション傾向ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.ポジション傾向ToolStripMenuItem.Text = "ポジション傾向";
+			this.ポジション傾向ToolStripMenuItem.Click += new System.EventHandler(this.ポジション傾向ToolStripMenuItem_Click);
 			// 
 			// Form1
 			// 
@@ -473,6 +482,7 @@
 		private System.Windows.Forms.Button ストリーミングテスト;
 		private System.Windows.Forms.ToolStripMenuItem チャートToolStripMenuItem;
 		private System.Windows.Forms.Button 価格急変;
+		private System.Windows.Forms.ToolStripMenuItem ポジション傾向ToolStripMenuItem;
 	}
 }
 

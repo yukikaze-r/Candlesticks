@@ -14,6 +14,22 @@ namespace Candlesticks
 			this.connection = connection;
 		}
 
+		public IEnumerable<Tuple<DateTime, float, float>> GetPositionSummaryGroupByOrderBookDateTime(DateTime start, DateTime end) {
+			using (var cmd = new NpgsqlCommand()) {
+				cmd.Connection = connection;
+				cmd.CommandText = "select ob.date_time, sum(pp.ps), sum(pp.pl) from order_book_price_point as pp, order_book as ob where pp.order_book_id = ob.id and :start <= ob.date_time and ob.date_time < :end group by ob.date_time order by ob.date_time";
+				cmd.Parameters.Add(new NpgsqlParameter("start", DbType.DateTime));
+				cmd.Parameters.Add(new NpgsqlParameter("end", DbType.DateTime));
+				cmd.Parameters["start"].Value = start;
+				cmd.Parameters["end"].Value = end;
+				using (var dr = cmd.ExecuteReader()) {
+					while (dr.Read()) {
+						yield return new Tuple<DateTime, float, float>((DateTime)dr[0], (float)((decimal)dr[1]), (float)((decimal)dr[2]));
+					}
+				}
+			}
+		}
+
 		public IEnumerable<Entity> GetByOrderBookOrderByPrice(Int64 orderBookId) {
 
 			using (var cmd = new NpgsqlCommand()) {

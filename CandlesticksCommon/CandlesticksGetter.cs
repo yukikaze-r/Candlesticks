@@ -38,7 +38,18 @@ namespace Candlesticks {
 		*/
 		public string Granularity = "M10";
 		public DateTime Start;
-		public DateTime End;
+		public DateTime End {
+			set {
+				end = value;
+				if(end > DateTime.Now) {
+					end = DateTime.Now;
+				}
+			}
+			get {
+				return end;
+			}
+		}
+		private DateTime end;
 		public int Count = -1;
 		private OandaAPI oandaAPI = null;
 		public OandaAPI OandaAPI {

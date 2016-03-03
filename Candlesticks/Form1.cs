@@ -1113,6 +1113,10 @@ namespace Candlesticks {
 
 		}
 
+		private void ポジション傾向ToolStripMenuItem_Click(object sender, EventArgs e) {
+			new PositionsForm().Show();
+		}
+
 		private void 価格急変_Click(object sender, EventArgs e) {
 
 			RunTask(sender, (Report report) => {
@@ -1233,7 +1237,6 @@ namespace Candlesticks {
 				}
 			});
 		}
-
 
 	}
 }

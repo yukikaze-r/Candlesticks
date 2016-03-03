@@ -50,12 +50,13 @@
 			this.ウィンドウToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.オーダーブックToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.シグナルToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.チャートToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.原油因果 = new System.Windows.Forms.Button();
 			this.くるくる = new System.Windows.Forms.Button();
 			this.区間の特徴 = new System.Windows.Forms.Button();
 			this.ベスト区間 = new System.Windows.Forms.Button();
 			this.ストリーミングテスト = new System.Windows.Forms.Button();
-			this.チャートToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.価格急変 = new System.Windows.Forms.Button();
 			((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
 			this.menuStrip1.SuspendLayout();
 			this.SuspendLayout();
@@ -234,7 +235,7 @@
 			// 
 			// button9
 			// 
-			this.button9.Location = new System.Drawing.Point(177, 205);
+			this.button9.Location = new System.Drawing.Point(259, 196);
 			this.button9.Name = "button9";
 			this.button9.Size = new System.Drawing.Size(75, 23);
 			this.button9.TabIndex = 18;
@@ -274,7 +275,7 @@
 			// 
 			// button19
 			// 
-			this.button19.Location = new System.Drawing.Point(177, 235);
+			this.button19.Location = new System.Drawing.Point(226, 234);
 			this.button19.Name = "button19";
 			this.button19.Size = new System.Drawing.Size(108, 23);
 			this.button19.TabIndex = 22;
@@ -289,14 +290,14 @@
             this.ウィンドウToolStripMenuItem});
 			this.menuStrip1.Location = new System.Drawing.Point(0, 0);
 			this.menuStrip1.Name = "menuStrip1";
-			this.menuStrip1.Size = new System.Drawing.Size(722, 26);
+			this.menuStrip1.Size = new System.Drawing.Size(722, 24);
 			this.menuStrip1.TabIndex = 24;
 			this.menuStrip1.Text = "menuStrip1";
 			// 
 			// 設定ToolStripMenuItem
 			// 
 			this.設定ToolStripMenuItem.Name = "設定ToolStripMenuItem";
-			this.設定ToolStripMenuItem.Size = new System.Drawing.Size(44, 22);
+			this.設定ToolStripMenuItem.Size = new System.Drawing.Size(43, 20);
 			this.設定ToolStripMenuItem.Text = "設定";
 			this.設定ToolStripMenuItem.Click += new System.EventHandler(this.設定ToolStripMenuItem_Click);
 			// 
@@ -307,26 +308,33 @@
             this.シグナルToolStripMenuItem,
             this.チャートToolStripMenuItem});
 			this.ウィンドウToolStripMenuItem.Name = "ウィンドウToolStripMenuItem";
-			this.ウィンドウToolStripMenuItem.Size = new System.Drawing.Size(80, 22);
+			this.ウィンドウToolStripMenuItem.Size = new System.Drawing.Size(60, 20);
 			this.ウィンドウToolStripMenuItem.Text = "ウィンドウ";
 			// 
 			// オーダーブックToolStripMenuItem
 			// 
 			this.オーダーブックToolStripMenuItem.Name = "オーダーブックToolStripMenuItem";
-			this.オーダーブックToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+			this.オーダーブックToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
 			this.オーダーブックToolStripMenuItem.Text = "オーダーブック";
 			this.オーダーブックToolStripMenuItem.Click += new System.EventHandler(this.オーダーブックToolStripMenuItem_Click);
 			// 
 			// シグナルToolStripMenuItem
 			// 
 			this.シグナルToolStripMenuItem.Name = "シグナルToolStripMenuItem";
-			this.シグナルToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+			this.シグナルToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
 			this.シグナルToolStripMenuItem.Text = "シグナル";
 			this.シグナルToolStripMenuItem.Click += new System.EventHandler(this.シグナルToolStripMenuItem_Click);
 			// 
+			// チャートToolStripMenuItem
+			// 
+			this.チャートToolStripMenuItem.Name = "チャートToolStripMenuItem";
+			this.チャートToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
+			this.チャートToolStripMenuItem.Text = "チャート";
+			this.チャートToolStripMenuItem.Click += new System.EventHandler(this.チャートToolStripMenuItem_Click);
+			// 
 			// 原油因果
 			// 
-			this.原油因果.Location = new System.Drawing.Point(30, 225);
+			this.原油因果.Location = new System.Drawing.Point(30, 205);
 			this.原油因果.Name = "原油因果";
 			this.原油因果.Size = new System.Drawing.Size(75, 23);
 			this.原油因果.TabIndex = 25;
@@ -336,7 +344,7 @@
 			// 
 			// くるくる
 			// 
-			this.くるくる.Location = new System.Drawing.Point(30, 257);
+			this.くるくる.Location = new System.Drawing.Point(30, 234);
 			this.くるくる.Name = "くるくる";
 			this.くるくる.Size = new System.Drawing.Size(75, 23);
 			this.くるくる.TabIndex = 26;
@@ -366,7 +374,7 @@
 			// 
 			// ストリーミングテスト
 			// 
-			this.ストリーミングテスト.Location = new System.Drawing.Point(162, 158);
+			this.ストリーミングテスト.Location = new System.Drawing.Point(226, 156);
 			this.ストリーミングテスト.Name = "ストリーミングテスト";
 			this.ストリーミングテスト.Size = new System.Drawing.Size(147, 23);
 			this.ストリーミングテスト.TabIndex = 29;
@@ -374,18 +382,22 @@
 			this.ストリーミングテスト.UseVisualStyleBackColor = true;
 			this.ストリーミングテスト.Click += new System.EventHandler(this.ストリーミングテスト_Click);
 			// 
-			// チャートToolStripMenuItem
+			// 価格急変
 			// 
-			this.チャートToolStripMenuItem.Name = "チャートToolStripMenuItem";
-			this.チャートToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
-			this.チャートToolStripMenuItem.Text = "チャート";
-			this.チャートToolStripMenuItem.Click += new System.EventHandler(this.チャートToolStripMenuItem_Click);
+			this.価格急変.Location = new System.Drawing.Point(111, 175);
+			this.価格急変.Name = "価格急変";
+			this.価格急変.Size = new System.Drawing.Size(75, 23);
+			this.価格急変.TabIndex = 30;
+			this.価格急変.Text = "価格急変";
+			this.価格急変.UseVisualStyleBackColor = true;
+			this.価格急変.Click += new System.EventHandler(this.価格急変_Click);
 			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(722, 597);
+			this.Controls.Add(this.価格急変);
 			this.Controls.Add(this.ストリーミングテスト);
 			this.Controls.Add(this.ベスト区間);
 			this.Controls.Add(this.区間の特徴);
@@ -460,6 +472,7 @@
 		private System.Windows.Forms.Button ベスト区間;
 		private System.Windows.Forms.Button ストリーミングテスト;
 		private System.Windows.Forms.ToolStripMenuItem チャートToolStripMenuItem;
+		private System.Windows.Forms.Button 価格急変;
 	}
 }
 

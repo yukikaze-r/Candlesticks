@@ -1112,5 +1112,128 @@ namespace Candlesticks {
 			new ChartForm().Show();
 
 		}
+
+		private void 価格急変_Click(object sender, EventArgs e) {
+
+			RunTask(sender, (Report report) => {
+				/*
+				report.Version = 1;
+				report.IsForceOverride = true;
+				report.SetHeader("pips","count");
+
+				using (DBUtils.OpenThreadConnection()) {
+					DateTime start = DateTime.Now.AddYears(-5);
+					DateTime end = DateTime.Now.AddHours(-1);
+					
+					var usdjpy = new CandlesticksGetter() {
+						Instrument = "USD_JPY",
+						Granularity = "M10",
+						Start = start,
+						End = end
+					}.Execute().ToList();
+
+					Dictionary<int, int> sum = new Dictionary<int,int>();
+					foreach(var c in usdjpy) {
+						var d = Math.Abs(c.Close - c.Open);
+						var key = (int)Math.Round(d*10);
+						if(sum.ContainsKey(key) == false) {
+							sum[key] = 1;
+						} else {
+							sum[key]++;
+						}
+					}
+					foreach (var key in sum.Keys.OrderBy(k=>k)) {
+						report.WriteLine(key, sum[key]);
+					}
+
+
+				}*/
+				/*
+				report.Version = 2;
+				report.IsForceOverride = true;
+				report.Comment = "次足の振幅";
+				report.SetHeader("振幅");
+
+				using (DBUtils.OpenThreadConnection()) {
+					DateTime start = DateTime.Now.AddYears(-5);
+					DateTime end = DateTime.Now.AddHours(-1);
+					
+					var usdjpy = new CandlesticksGetter() {
+						Instrument = "USD_JPY",
+						Granularity = "M10",
+						Start = start,
+						End = end
+					}.Execute().ToList();
+
+					Dictionary<int, int> sum = new Dictionary<int,int>();
+					for(int t=0; t<usdjpy.Count(); t++) {
+						var c = usdjpy[t];
+						var d = Math.Max(c.Open - c.Low, c.High - c.Open);
+						if ( d >= 0.2) {
+							var c1 = usdjpy[t + 1];
+							var d1 = Math.Max(c1.Open - c1.Low,c1.High - c1.Open);
+							report.WriteLine(d1);
+						}
+					}
+				}*/
+
+				/*
+				report.Version = 3;
+				report.IsForceOverride = true;
+				report.Comment = "平均振幅";
+				report.SetHeader("平均振幅");
+
+				using (DBUtils.OpenThreadConnection()) {
+					DateTime start = DateTime.Now.AddYears(-5);
+					DateTime end = DateTime.Now.AddHours(-1);
+
+					var usdjpy = new CandlesticksGetter() {
+						Instrument = "USD_JPY",
+						Granularity = "M10",
+						Start = start,
+						End = end
+					}.Execute().ToList();
+
+					float sum = 0;
+					for (int t = 0; t < usdjpy.Count(); t++) {
+						var c = usdjpy[t];
+						var d = Math.Max(c.Open - c.Low, c.High - c.Open);
+						sum += d;
+					}
+					report.WriteLine(sum / usdjpy.Count());
+				}*/
+
+
+				report.Version = 6;
+				report.IsForceOverride = true;
+				report.Comment = "逆方向振幅";
+				report.SetHeader("逆方向最大振幅","逆方向振幅","正方向最大振幅");
+
+
+				using (DBUtils.OpenThreadConnection()) {
+					DateTime start = DateTime.Now.AddYears(-5);
+					DateTime end = DateTime.Now.AddHours(-1);
+
+					var usdjpy = new CandlesticksGetter() {
+						Instrument = "USD_JPY",
+						Granularity = "M10",
+						Start = start,
+						End = end
+					}.Execute().ToList();
+
+					Dictionary<int, int> sum = new Dictionary<int, int>();
+					for (int t = 0; t < usdjpy.Count(); t++) {
+						var c = usdjpy[t];
+						var d = Math.Abs(c.Close-c.Open);
+						if (d >= 0.2) {
+							var c1 = usdjpy[t + 1];
+							report.WriteLine(c.IsUp() ? c1.Open - c1.Low : c1.High - c1.Open, (c.IsUp()==c1.IsUp() ? -1 : 1) * Math.Abs(c1.Open-c1.Close),c.IsUp() ? c1.High - c1.Open :c1.Open - c1.Low);
+						}
+					}
+				}
+			});
+		}
+
+
 	}
 }

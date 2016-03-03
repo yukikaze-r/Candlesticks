@@ -24,8 +24,8 @@ namespace Candlesticks {
 		private Series streamPriceSeries = null;
 		private float latestPrice;
 		private OandaAPI oandaApi;
-		private Series volumeSeries = null;
-		private List<OandaCandle> latestS5Candles;
+		private Series latestVolumeSeries = null;
+		private List<Candlestick> latestS5Candles;
 		private object volumeCandlesLock = new object();
 
 		public OrderBookForm() {
@@ -58,12 +58,16 @@ namespace Candlesticks {
 				Action invokeTarget = null;
 				lock (volumeCandlesLock) {
 					if (latestS5Candles == null) {
-						DateTime firstDateTime = orderBooks[0].DateTime;
-						latestS5Candles = oandaApi.GetCandles(new DateTime(firstDateTime.Year, firstDateTime.Month, firstDateTime.Day, firstDateTime.Hour, firstDateTime.Minute, 0, DateTimeKind.Local),
-							DateTime.Now, "USD_JPY", "S5").ToList();
+						latestS5Candles = RetrieveS5Candles(orderBooks[0]);
+						/*						latestS5Candles = oandaApi.GetCandles(new DateTime(firstDateTime.Year, firstDateTime.Month, firstDateTime.Day, firstDateTime.Hour, firstDateTime.Minute, 0, DateTimeKind.Local),
+													DateTime.Now, "USD_JPY", "S5").ToList();*/
 						invokeTarget = new Action(() => {
 							if (orderBookList.SelectedIndex == 0) {
-								LoadVolumeSeries();
+								lock (volumeCandlesLock) {
+									if (latestS5Candles != null) {
+										LoadVolumeSeries(latestVolumeSeries, latestS5Candles);
+									}
+								}
 							}
 						});
 					} else {
@@ -77,48 +81,56 @@ namespace Candlesticks {
 			}
 		}
 
-		private void LoadVolumeSeries() {
-			lock(volumeCandlesLock) {
-				if (latestS5Candles != null) {
-					Dictionary<float, float> PriceVolumes = new Dictionary<float, float>();
-					foreach (var candle in latestS5Candles) {
-						float min = GetRoundPrice(candle.lowMid);
-						float max = GetRoundPrice(candle.highMid);
-						float average = candle.volume / ((max - min) / 0.05f + 1);
-						for (float i = min; i <= max; i += 0.05f) {
-							if (PriceVolumes.ContainsKey(i)) {
-								PriceVolumes[i] += average;
-							} else {
-								PriceVolumes[i] = average;
-							}
-						}
-					}
-					volumeSeries.Points.Clear();
-					foreach (var price in GetPricePoints(orderBooks[0]).price_points.Keys.OrderBy(k => k)) {
-						if (PriceVolumes.ContainsKey(price)) {
-							Console.WriteLine("price:" + price + " volume:" + PriceVolumes[price]);
-							volumeSeries.Points.Add(new DataPoint(price, PriceVolumes[price] / 100));
-						} else {
-							volumeSeries.Points.Add(new DataPoint(price, 0));
-						}
+		private List<Candlestick> RetrieveS5Candles(OrderBookDao.Entity orderBook) {
+			using(DBUtils.OpenThreadConnection()) {
+				DateTime firstDateTime = orderBook.DateTime;
+				DateTime startDateTime = new DateTime(
+					firstDateTime.Year, firstDateTime.Month, firstDateTime.Day, firstDateTime.Hour, firstDateTime.Minute, 0, DateTimeKind.Local);
+				return new CandlesticksGetter() {
+					Start = startDateTime,
+					End = startDateTime.AddMinutes(20)
+
+				}.Execute().ToList();
+			}
+		}
+
+		private readonly float VOLUME_PRICE_GRANURALITY = 0.01f;
+
+		private void LoadVolumeSeries(Series series, List<Candlestick> s5candles) {
+			Dictionary<float, float> priceVolumes = new Dictionary<float, float>();
+			foreach (var candle in s5candles) {
+				float min = GetRoundPrice(candle.Low);
+				float max = GetRoundPrice(candle.High);
+				float average = candle.Volume / ((max - min) / VOLUME_PRICE_GRANURALITY + 1);
+				for (float i = min; i <= max; i += VOLUME_PRICE_GRANURALITY) {
+					if (priceVolumes.ContainsKey(i)) {
+						priceVolumes[i] += average;
+					} else {
+						priceVolumes[i] = average;
 					}
 				}
+			}
+			series.Points.Clear();
+			foreach (var price in priceVolumes.Keys.OrderBy(k => k)) {
+				series.Points.Add(new DataPoint(price, priceVolumes[price] / (2000 * VOLUME_PRICE_GRANURALITY)));
 			}
 		}
 
 		private Action RetriveVolumeLatest() {
 			var candle = oandaApi.GetCandles(1,"USD_JPY", "S5").First();
-			if(latestS5Candles.Where(c=>c.DateTime==candle.DateTime).Count()==0) {
-				latestS5Candles.Add(candle);
+			if(latestS5Candles.Where(c=>c.Time.Equals(candle.DateTime)).Count()==0) {
+				latestS5Candles.Add(candle.Candlestick);
 
 				return new Action(() => {
 					if (orderBookList.SelectedIndex == 0) {
+						volumeLabel.Text = candle.volume.ToString();
+						volumeLabel.ForeColor = candle.volume >= 10 ? Color.Red : (candle.volume >= 5 ? Color.Orange : (candle.volume >= 2 ? Color.Blue : Color.Gray));
 						float min = GetRoundPrice(candle.lowMid);
 						float max = GetRoundPrice(candle.highMid);
-						float average = candle.volume / (int)((max - min) / 0.05f + 1);
+						float average = candle.volume / (int)((max - min) / VOLUME_PRICE_GRANURALITY + 1);
 						Console.WriteLine("candle lowMid:" + min + "(" + candle.lowMid+") highMid:" +max + "(" + candle.highMid+") volume:"+candle.volume);
-						foreach (var dataPoint in volumeSeries.Points.Where(p => min <= p.XValue && p.XValue <= max)) {
-							dataPoint.YValues[0] += average / 100;
+						foreach (var dataPoint in latestVolumeSeries.Points.Where(p => min <= p.XValue && p.XValue <= max)) {
+							dataPoint.YValues[0] += average / (2000 * VOLUME_PRICE_GRANURALITY);
 						}
 					}
 				});
@@ -127,12 +139,15 @@ namespace Candlesticks {
 		}
 
 		private float GetRoundPrice(float price) {
-			int n = (int)((price + 0.025f) / 0.05f);
-			return n * 0.05f;
+			int n = (int)((price + VOLUME_PRICE_GRANURALITY/2) / VOLUME_PRICE_GRANURALITY);
+			return n * VOLUME_PRICE_GRANURALITY;
 		}
 
-		private void ReceivePrice(float bid, float ask) {
+		private void ReceivePrice(DateTime dateTime,float bid, float ask) {
 			Invoke(new Action(() => {
+				timeLabel.Text = dateTime.ToString("M/d HH:mm:ss");
+				bidLabel.Text = bid.ToString("f3");
+				askLabel.Text = ask.ToString("f3");
 				if (streamPriceSeries != null) {
 					latestPrice = (bid + ask) / 2;
 					streamPriceSeries.Points[0].XValue = latestPrice;
@@ -194,14 +209,16 @@ namespace Candlesticks {
 			}
 		}
 		
-		private void LoadChart(Chart chart, DateTime dateTime, PricePoints pricePoints, PricePoints previousPricePoints, bool isLatestChart) {
+		private void LoadChart(Chart chart, DateTime dateTime, OrderBookDao.Entity orderBook, OrderBookDao.Entity previousOrderBook, bool isLatestChart) {
+
+			PricePoints pricePoints = GetPricePoints(orderBook);
+			PricePoints previousPricePoints = GetPricePoints(previousOrderBook);
 
 			chart.Series.Clear();
 			chart.ChartAreas.Clear();
 			chart.Titles.Clear();
 
 			chart.Size = new Size(10000, 400);
-
 
 			ChartArea chartArea = new ChartArea();
 			chartArea.AxisX.Interval = 0.05d;
@@ -213,6 +230,13 @@ namespace Candlesticks {
 			chartArea.AxisX.MinorGrid.Enabled = true;
 			chartArea.AxisX.MinorGrid.LineColor = Color.LightGray;
 			chartArea.AxisX.MinorGrid.Interval = 0.05d;
+
+/*			chartArea.AxisX2.Enabled = AxisEnabled.True;
+			chartArea.AxisX2.Minimum = chartArea.AxisX.Minimum;
+			chartArea.AxisX2.Maximum = chartArea.AxisX.Maximum;*/
+//			chartArea.AxisX2.Interval = VOLUME_PRICE_GRANURALITY;
+
+
 			chartArea.AxisY.Maximum = 5.0f;
 			chartArea.AxisY.Minimum = 0f;
 			chartArea.AxisY.Interval = 1.0f;
@@ -225,13 +249,23 @@ namespace Candlesticks {
 
 			chart.ChartAreas.Add(chartArea);
 
-			if(isLatestChart) {
-				volumeSeries = new Series();
-				chart.Series.Add(volumeSeries);
-				volumeSeries.ChartType = SeriesChartType.Column;
-				volumeSeries.Color = Color.LightGray;
-				volumeSeries.SetCustomProperty("PointWidth", "0.5");
-				LoadVolumeSeries();
+			Series volumeSeries = new Series();
+			volumeSeries.ChartType = SeriesChartType.Column;
+			//				volumeSeries.XAxisType = AxisType.Secondary;
+			volumeSeries.Color = Color.LightGray;
+			volumeSeries.SetCustomProperty("PixelPointWidth", "2");
+			//				volumeSeries.SetCustomProperty("PointWidth", "0.5");
+			chart.Series.Add(volumeSeries);
+
+			if (isLatestChart) {
+				latestVolumeSeries = volumeSeries;
+				lock (volumeCandlesLock) {
+					if (latestS5Candles != null) {
+						LoadVolumeSeries(latestVolumeSeries,latestS5Candles);
+					}
+				}
+			} else {
+				LoadVolumeSeries(volumeSeries, RetrieveS5Candles(orderBook));
 			}
 
 			Series seriesDeltaPos = new Series();
@@ -239,6 +273,7 @@ namespace Candlesticks {
 			seriesDeltaPos.YAxisType = AxisType.Secondary;
 			seriesDeltaPos.ChartType = SeriesChartType.StackedColumn;
 			seriesDeltaPos.LegendText = "buy - sell position";
+			seriesDeltaPos.SetCustomProperty("PixelPointWidth", "14");
 			seriesDeltaPos.Color = Color.FromArgb(100, 0, 255, 0);
 
 
@@ -246,6 +281,7 @@ namespace Candlesticks {
 			chart.Series.Add(seriesPreviousDeltaPos);
 			seriesPreviousDeltaPos.YAxisType = AxisType.Secondary;
 			seriesPreviousDeltaPos.ChartType = SeriesChartType.StackedColumn;
+			seriesPreviousDeltaPos.SetCustomProperty("PixelPointWidth", "14");
 			seriesPreviousDeltaPos.Color = Color.FromArgb(100, 0, 255, 0);
 
 			float totalPl = 0;
@@ -381,8 +417,8 @@ namespace Candlesticks {
 
 		private void LoadChart(Chart chart, int index) {
 			OrderBookDao.Entity orderBook = orderBooks[index];
-			PricePoints previousPricePoints = (index + 1 < orderBooks.Count()) ? GetPricePoints(orderBooks[index + 1]) : null;
-			LoadChart(chart, orderBook.DateTime, GetPricePoints(orderBook), previousPricePoints, index == 0);
+			OrderBookDao.Entity previousOrderBook = (index + 1 < orderBooks.Count()) ? orderBooks[index + 1] : null;
+			LoadChart(chart, orderBook.DateTime, orderBook, previousOrderBook, index == 0);
 		}
 
 		private void orderBookList_SelectedIndexChanged(object sender, EventArgs e) {
@@ -411,5 +447,8 @@ namespace Candlesticks {
 			}
 		}
 
+		private void volumeLabel_Click(object sender, EventArgs e) {
+
+		}
 	}
 }

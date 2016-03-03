@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Candlesticks
 {
-	delegate void PriceListener(float bid, float ask);
+	delegate void PriceListener(DateTime dateTime, float bid, float ask);
 
 	class PriceObserver
     {
@@ -41,9 +41,9 @@ namespace Candlesticks
 			}
 		}
 
-		private void ReceivePrice(float bid, float ask) {
+		private void ReceivePrice(DateTime dateTime, float bid, float ask) {
 			lock(this) {
-				listeners.Invoke(bid, ask);
+				listeners.Invoke(dateTime, bid, ask);
 			}
 		}
 

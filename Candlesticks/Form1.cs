@@ -644,11 +644,11 @@ namespace Candlesticks {
 				using(DBUtils.OpenThreadConnection()) {
 					foreach(var c in new CandlesticksGetter() {
 						Instrument = "USD_JPY",
-						Granularity = "M5",
-						Start = new DateTime(2016,3,2, 16,00,0,DateTimeKind.Local),
+						Granularity = "M1",
+						Start = new DateTime(2011, 4,1, 0,00,0,DateTimeKind.Local),
 						End = new DateTime(2016, 3, 2, 16, 30, 0, DateTimeKind.Local),
 					}.Execute()) {
-						report.WriteLine(c.Time, c.Open, c.High, c.Low, c.Close, c.Volume);
+//						report.WriteLine(c.Time, c.Open, c.High, c.Low, c.Close, c.Volume);
 					}
 				}
 				/*
@@ -1097,7 +1097,7 @@ namespace Candlesticks {
 		}
 
 		private void ストリーミングテスト_Click(object sender, EventArgs e) {
-			new OandaAPI().GetPrices((bid,ask)=>{ Console.WriteLine("bid:"+bid+" ask:"+ask); }, "USD_JPY");
+//			new OandaAPI().GetPrices((bid,ask)=>{ Console.WriteLine("bid:"+bid+" ask:"+ask); }, "USD_JPY");
 		}
 
 		private void オーダーブックToolStripMenuItem_Click(object sender, EventArgs e) {

@@ -58,7 +58,7 @@ namespace Candlesticks {
 			}
 		}
 
-		private void ReceivePrice(float bid, float ask) {
+		private void ReceivePrice(DateTime dateTime,float bid, float ask) {
 			
 		}
 

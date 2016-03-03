@@ -23,20 +23,26 @@
 		/// the contents of this method with the code editor.
 		/// </summary>
 		private void InitializeComponent() {
-			System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-			System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-			System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
-			System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-			System.Windows.Forms.DataVisualization.Charting.Legend legend2 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-			System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
+			System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea5 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+			System.Windows.Forms.DataVisualization.Charting.Legend legend5 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+			System.Windows.Forms.DataVisualization.Charting.Series series5 = new System.Windows.Forms.DataVisualization.Charting.Series();
+			System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea6 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+			System.Windows.Forms.DataVisualization.Charting.Legend legend6 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+			System.Windows.Forms.DataVisualization.Charting.Series series6 = new System.Windows.Forms.DataVisualization.Charting.Series();
 			this.splitContainer1 = new System.Windows.Forms.SplitContainer();
 			this.chart1 = new System.Windows.Forms.DataVisualization.Charting.Chart();
 			this.splitter1 = new System.Windows.Forms.Splitter();
 			this.chart2 = new System.Windows.Forms.DataVisualization.Charting.Chart();
 			this.orderBookList = new System.Windows.Forms.ListBox();
-			this.checkBox1 = new System.Windows.Forms.CheckBox();
 			this.splitter2 = new System.Windows.Forms.Splitter();
 			this.panel1 = new System.Windows.Forms.Panel();
+			this.label1 = new System.Windows.Forms.Label();
+			this.label2 = new System.Windows.Forms.Label();
+			this.label3 = new System.Windows.Forms.Label();
+			this.timeLabel = new System.Windows.Forms.Label();
+			this.bidLabel = new System.Windows.Forms.Label();
+			this.askLabel = new System.Windows.Forms.Label();
+			this.volumeLabel = new System.Windows.Forms.Label();
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
 			this.splitContainer1.Panel1.SuspendLayout();
 			this.splitContainer1.Panel2.SuspendLayout();
@@ -71,16 +77,16 @@
 			// 
 			// chart1
 			// 
-			chartArea1.Name = "ChartArea1";
-			this.chart1.ChartAreas.Add(chartArea1);
-			legend1.Name = "Legend1";
-			this.chart1.Legends.Add(legend1);
+			chartArea5.Name = "ChartArea1";
+			this.chart1.ChartAreas.Add(chartArea5);
+			legend5.Name = "Legend1";
+			this.chart1.Legends.Add(legend5);
 			this.chart1.Location = new System.Drawing.Point(3, 3);
 			this.chart1.Name = "chart1";
-			series1.ChartArea = "ChartArea1";
-			series1.Legend = "Legend1";
-			series1.Name = "Series1";
-			this.chart1.Series.Add(series1);
+			series5.ChartArea = "ChartArea1";
+			series5.Legend = "Legend1";
+			series5.Name = "Series1";
+			this.chart1.Series.Add(series5);
 			this.chart1.Size = new System.Drawing.Size(797, 234);
 			this.chart1.TabIndex = 0;
 			this.chart1.TabStop = false;
@@ -97,16 +103,16 @@
 			// 
 			// chart2
 			// 
-			chartArea2.Name = "ChartArea1";
-			this.chart2.ChartAreas.Add(chartArea2);
-			legend2.Name = "Legend1";
-			this.chart2.Legends.Add(legend2);
+			chartArea6.Name = "ChartArea1";
+			this.chart2.ChartAreas.Add(chartArea6);
+			legend6.Name = "Legend1";
+			this.chart2.Legends.Add(legend6);
 			this.chart2.Location = new System.Drawing.Point(0, 3);
 			this.chart2.Name = "chart2";
-			series2.ChartArea = "ChartArea1";
-			series2.Legend = "Legend1";
-			series2.Name = "Series1";
-			this.chart2.Series.Add(series2);
+			series6.ChartArea = "ChartArea1";
+			series6.Legend = "Legend1";
+			series6.Name = "Series1";
+			this.chart2.Series.Add(series6);
 			this.chart2.Size = new System.Drawing.Size(842, 225);
 			this.chart2.TabIndex = 0;
 			this.chart2.TabStop = false;
@@ -123,16 +129,6 @@
 			this.orderBookList.TabIndex = 4;
 			this.orderBookList.SelectedIndexChanged += new System.EventHandler(this.orderBookList_SelectedIndexChanged);
 			// 
-			// checkBox1
-			// 
-			this.checkBox1.AutoSize = true;
-			this.checkBox1.Location = new System.Drawing.Point(12, 12);
-			this.checkBox1.Name = "checkBox1";
-			this.checkBox1.Size = new System.Drawing.Size(72, 16);
-			this.checkBox1.TabIndex = 5;
-			this.checkBox1.Text = "自動更新";
-			this.checkBox1.UseVisualStyleBackColor = true;
-			// 
 			// splitter2
 			// 
 			this.splitter2.Location = new System.Drawing.Point(118, 34);
@@ -143,12 +139,86 @@
 			// 
 			// panel1
 			// 
-			this.panel1.Controls.Add(this.checkBox1);
+			this.panel1.Controls.Add(this.volumeLabel);
+			this.panel1.Controls.Add(this.askLabel);
+			this.panel1.Controls.Add(this.bidLabel);
+			this.panel1.Controls.Add(this.timeLabel);
+			this.panel1.Controls.Add(this.label3);
+			this.panel1.Controls.Add(this.label2);
+			this.panel1.Controls.Add(this.label1);
 			this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
 			this.panel1.Location = new System.Drawing.Point(0, 0);
 			this.panel1.Name = "panel1";
 			this.panel1.Size = new System.Drawing.Size(1274, 34);
 			this.panel1.TabIndex = 9;
+			// 
+			// label1
+			// 
+			this.label1.AutoSize = true;
+			this.label1.Location = new System.Drawing.Point(145, 13);
+			this.label1.Name = "label1";
+			this.label1.Size = new System.Drawing.Size(22, 12);
+			this.label1.TabIndex = 0;
+			this.label1.Text = "Bid";
+			// 
+			// label2
+			// 
+			this.label2.AutoSize = true;
+			this.label2.Location = new System.Drawing.Point(260, 13);
+			this.label2.Name = "label2";
+			this.label2.Size = new System.Drawing.Size(25, 12);
+			this.label2.TabIndex = 1;
+			this.label2.Text = "Ask";
+			// 
+			// label3
+			// 
+			this.label3.AutoSize = true;
+			this.label3.Location = new System.Drawing.Point(372, 12);
+			this.label3.Name = "label3";
+			this.label3.Size = new System.Drawing.Size(43, 12);
+			this.label3.TabIndex = 2;
+			this.label3.Text = "Volume";
+			// 
+			// timeLabel
+			// 
+			this.timeLabel.AutoSize = true;
+			this.timeLabel.Font = new System.Drawing.Font("MS UI Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+			this.timeLabel.Location = new System.Drawing.Point(14, 9);
+			this.timeLabel.Name = "timeLabel";
+			this.timeLabel.Size = new System.Drawing.Size(127, 16);
+			this.timeLabel.TabIndex = 3;
+			this.timeLabel.Text = "XX/XX XX:XX:XX";
+			// 
+			// bidLabel
+			// 
+			this.bidLabel.AutoSize = true;
+			this.bidLabel.Font = new System.Drawing.Font("MS UI Gothic", 14F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+			this.bidLabel.Location = new System.Drawing.Point(168, 9);
+			this.bidLabel.Name = "bidLabel";
+			this.bidLabel.Size = new System.Drawing.Size(86, 19);
+			this.bidLabel.TabIndex = 4;
+			this.bidLabel.Text = "XXX.XXX";
+			// 
+			// askLabel
+			// 
+			this.askLabel.AutoSize = true;
+			this.askLabel.Font = new System.Drawing.Font("MS UI Gothic", 14F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+			this.askLabel.Location = new System.Drawing.Point(284, 9);
+			this.askLabel.Name = "askLabel";
+			this.askLabel.Size = new System.Drawing.Size(86, 19);
+			this.askLabel.TabIndex = 5;
+			this.askLabel.Text = "XXX.XXX";
+			// 
+			// volumeLabel
+			// 
+			this.volumeLabel.AutoSize = true;
+			this.volumeLabel.Font = new System.Drawing.Font("MS UI Gothic", 14F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+			this.volumeLabel.Location = new System.Drawing.Point(412, 8);
+			this.volumeLabel.Name = "volumeLabel";
+			this.volumeLabel.Size = new System.Drawing.Size(45, 19);
+			this.volumeLabel.TabIndex = 6;
+			this.volumeLabel.Text = "XXX";
+			this.volumeLabel.Click += new System.EventHandler(this.volumeLabel_Click);
 			// 
 			// OrderBookForm
 			// 
@@ -181,8 +251,14 @@
 		private System.Windows.Forms.DataVisualization.Charting.Chart chart2;
 		private System.Windows.Forms.Splitter splitter1;
 		private System.Windows.Forms.ListBox orderBookList;
-		private System.Windows.Forms.CheckBox checkBox1;
 		private System.Windows.Forms.Splitter splitter2;
 		private System.Windows.Forms.Panel panel1;
+		private System.Windows.Forms.Label volumeLabel;
+		private System.Windows.Forms.Label askLabel;
+		private System.Windows.Forms.Label bidLabel;
+		private System.Windows.Forms.Label timeLabel;
+		private System.Windows.Forms.Label label3;
+		private System.Windows.Forms.Label label2;
+		private System.Windows.Forms.Label label1;
 	}
 }

@@ -27,7 +27,7 @@ namespace Candlesticks
 
 		public static ThreadConnection OpenThreadConnection() {
 			if(threadConnection.Value != null) {
-				throw new Exception("Already exists thread connection");
+				throw new Exception("Already exists thread connection (TODO nested support)");
 			}
 			threadConnection.Value = OpenConnection();
 			return new ThreadConnection();

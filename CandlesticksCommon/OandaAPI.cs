@@ -56,7 +56,7 @@ namespace Candlesticks {
 			HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
 			request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", OandaAPI.BearerToken);
 
-//			Console.WriteLine(request.ToString());
+			Console.WriteLine(requestUri);
 
 			Task<HttpResponseMessage> webTask = client.SendAsync(request);
 			webTask.Wait();
@@ -110,7 +110,7 @@ namespace Candlesticks {
 		}
 
 		// 停止するにはHttpClientをDispose
-		public HttpClient GetPrices(Action<float,float> receiver, string instrument = "USD_JPY") {
+		public HttpClient GetPrices(Action<DateTime,float,float> receiver, string instrument = "USD_JPY") {
 			HttpClient client = new HttpClient();
 			new Thread(new ThreadStart(async () => {
 				client.Timeout = TimeSpan.FromMilliseconds(Timeout.Infinite);
@@ -120,13 +120,15 @@ namespace Candlesticks {
 
 				HttpResponseMessage response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
 				StreamReader reader = new StreamReader(await response.Content.ReadAsStreamAsync());
-				var regex = new Regex(@"""bid"":(\d+(\.\d+)?),""ask"":(\d+(\.\d+)?)");
+				//{"tick":{"instrument":"USD_JPY","time":"2016-03-03T11:44:15.633667Z","bid":113.93,"ask":113.934}}
+				var regex = new Regex(@"""time"":""(.+)"",""bid"":(\d+(\.\d+)?),""ask"":(\d+(\.\d+)?)");
+//				var regex = new Regex(@"""bid"":(\d+(\.\d+)?),""ask"":(\d+(\.\d+)?)");
 				try {
 					do {
 						string s = reader.ReadLine();
 						var match = regex.Match(s);
 						if(match.Success) {
-							receiver(float.Parse(match.Groups[1].Value), float.Parse(match.Groups[3].Value));
+							receiver(XmlConvert.ToDateTime(match.Groups[1].Value, XmlDateTimeSerializationMode.Local), float.Parse(match.Groups[2].Value), float.Parse(match.Groups[4].Value));
 							Console.WriteLine(">" + s);
 						}
 					} while (true);

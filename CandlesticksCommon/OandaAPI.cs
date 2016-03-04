@@ -52,6 +52,7 @@ namespace Candlesticks {
 		}
 
 
+
 		public IEnumerable<OandaCandle> GetCandles(string requestUri) {
 			HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
 			request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", OandaAPI.BearerToken);

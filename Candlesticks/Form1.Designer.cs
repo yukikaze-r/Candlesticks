@@ -51,13 +51,13 @@
 			this.オーダーブックToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.シグナルToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.チャートToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.ポジション傾向ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.原油因果 = new System.Windows.Forms.Button();
 			this.くるくる = new System.Windows.Forms.Button();
 			this.区間の特徴 = new System.Windows.Forms.Button();
 			this.ベスト区間 = new System.Windows.Forms.Button();
 			this.ストリーミングテスト = new System.Windows.Forms.Button();
 			this.価格急変 = new System.Windows.Forms.Button();
-			this.ポジション傾向ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
 			this.menuStrip1.SuspendLayout();
 			this.SuspendLayout();
@@ -316,23 +316,30 @@
 			// オーダーブックToolStripMenuItem
 			// 
 			this.オーダーブックToolStripMenuItem.Name = "オーダーブックToolStripMenuItem";
-			this.オーダーブックToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.オーダーブックToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
 			this.オーダーブックToolStripMenuItem.Text = "オーダーブック";
 			this.オーダーブックToolStripMenuItem.Click += new System.EventHandler(this.オーダーブックToolStripMenuItem_Click);
 			// 
 			// シグナルToolStripMenuItem
 			// 
 			this.シグナルToolStripMenuItem.Name = "シグナルToolStripMenuItem";
-			this.シグナルToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.シグナルToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
 			this.シグナルToolStripMenuItem.Text = "シグナル";
 			this.シグナルToolStripMenuItem.Click += new System.EventHandler(this.シグナルToolStripMenuItem_Click);
 			// 
 			// チャートToolStripMenuItem
 			// 
 			this.チャートToolStripMenuItem.Name = "チャートToolStripMenuItem";
-			this.チャートToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.チャートToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
 			this.チャートToolStripMenuItem.Text = "チャート";
 			this.チャートToolStripMenuItem.Click += new System.EventHandler(this.チャートToolStripMenuItem_Click);
+			// 
+			// ポジション傾向ToolStripMenuItem
+			// 
+			this.ポジション傾向ToolStripMenuItem.Name = "ポジション傾向ToolStripMenuItem";
+			this.ポジション傾向ToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
+			this.ポジション傾向ToolStripMenuItem.Text = "ポジション傾向";
+			this.ポジション傾向ToolStripMenuItem.Click += new System.EventHandler(this.ポジション傾向ToolStripMenuItem_Click);
 			// 
 			// 原油因果
 			// 
@@ -394,13 +401,6 @@
 			this.価格急変.UseVisualStyleBackColor = true;
 			this.価格急変.Click += new System.EventHandler(this.価格急変_Click);
 			// 
-			// ポジション傾向ToolStripMenuItem
-			// 
-			this.ポジション傾向ToolStripMenuItem.Name = "ポジション傾向ToolStripMenuItem";
-			this.ポジション傾向ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-			this.ポジション傾向ToolStripMenuItem.Text = "ポジション傾向";
-			this.ポジション傾向ToolStripMenuItem.Click += new System.EventHandler(this.ポジション傾向ToolStripMenuItem_Click);
-			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -438,6 +438,8 @@
 			this.MainMenuStrip = this.menuStrip1;
 			this.Name = "Form1";
 			this.Text = "Form1";
+			this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_FormClosed);
+			this.Load += new System.EventHandler(this.Form1_Load);
 			((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
 			this.menuStrip1.ResumeLayout(false);
 			this.menuStrip1.PerformLayout();

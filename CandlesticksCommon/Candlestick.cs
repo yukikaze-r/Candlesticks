@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Candlesticks {
 	struct Candlestick {
-		public DateTime Time;
+		public DateTime DateTime;
 		public float Open;
 		public float Close;
 		public float High;
@@ -46,25 +46,38 @@ namespace Candlesticks {
 			}
 		}
 
-		static public Candlestick Create(IEnumerable<Candlestick> l) {
+		static public Candlestick Aggregate(IEnumerable<Candlestick> l) {
 			Candlestick result = new Candlestick();
 			result.High = float.MinValue;
 			result.Low = float.MaxValue;
 			bool isOpen = true;
 			foreach(var c in l) {
 				if(isOpen) {
+					result.DateTime = c.DateTime;
 					result.Open = c.Open;
 					isOpen = false;
+				}
+				if (c.IsNull) {
+					continue;
 				}
 				result.Close = c.Close;
 				result.High = Math.Max(result.High, c.High);
 				result.Low = Math.Min(result.Low, c.Low);
 			}
+			if(isOpen) {
+				throw new Exception();
+			}
 			return result;
 		}
 
+		static public IEnumerable<Candlestick> Aggregate(IEnumerable<Candlestick> l, int n) {
+			for (int s = 0; s < l.Count(); s += n) {
+				yield return Aggregate(l.Skip(s).Take(n));
+			}
+		}
+
 		public Candlestick Add(Candlestick candle) {
-			return Candlestick.Create(new Candlestick[] { this, candle });
+			return Candlestick.Aggregate(new Candlestick[] { this, candle });
 		}
 	}
 }

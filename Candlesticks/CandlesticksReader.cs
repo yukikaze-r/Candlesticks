@@ -17,7 +17,7 @@ namespace Candlesticks {
 				}
 				var e = line.Split(',');
 				Candlestick c = new Candlestick();
-				c.Time = DateTime.Parse(e[0]+" "+e[1]);
+				c.DateTime = DateTime.Parse(e[0]+" "+e[1]);
 				c.Open = float.Parse(e[2]);
 				c.High = float.Parse(e[3]);
 				c.Low = float.Parse(e[4]);

@@ -88,7 +88,7 @@ namespace Candlesticks
 			public Candlestick Candlestick {
 				get {
 					Candlestick result = new Candlestick();
-					result.Time = this.DateTime;
+					result.DateTime = this.DateTime;
 					result.Open = this.Open;
 					result.High = this.High;
 					result.Low = this.Low;

@@ -39,13 +39,13 @@ namespace Candlesticks {
 
 			foreach (var c in candlesticksM30) {
 
-				if (IsSummerTime!=null && IsSummerTime.Value ==false && est.IsDaylightSavingTime(c.Time)) {
+				if (IsSummerTime!=null && IsSummerTime.Value ==false && est.IsDaylightSavingTime(c.DateTime)) {
 					continue;
 				}
 
 
 
-				DateTime shiftedTime = c.Time.AddHours(this.ShiftHour);
+				DateTime shiftedTime = c.DateTime.AddHours(this.ShiftHour);
 
 				if (!oldDate.Equals(shiftedTime.Date)) {
 					hmList = new Candlestick[48];

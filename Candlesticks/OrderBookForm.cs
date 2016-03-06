@@ -47,7 +47,8 @@ namespace Candlesticks {
 			splitContainer1.Panel2.HorizontalScroll.Value = splitContainer1.Panel1.HorizontalScroll.Value
 				= (splitContainer1.Panel1.HorizontalScroll.Maximum + splitContainer1.Panel1.HorizontalScroll.Minimum - splitContainer1.Panel1.ClientSize.Width) / 2;
 
-			new Thread(new ThreadStart(ReceiveEvent)).Start();
+			EventReceiver.Instance.OrderBookUpdatedEvent += OnOrderBookUpdated;
+
 			new Thread(new ThreadStart(RetriveVolumes)).Start();
 
 			PriceObserver.Get("USD_JPY").Observe(ReceivePrice);
@@ -118,7 +119,7 @@ namespace Candlesticks {
 
 		private Action RetriveVolumeLatest() {
 			var candle = oandaApi.GetCandles(1,"USD_JPY", "S5").First();
-			if(latestS5Candles.Where(c=>c.Time.Equals(candle.DateTime)).Count()==0) {
+			if(latestS5Candles.Where(c=>c.DateTime.Equals(candle.DateTime)).Count()==0) {
 				latestS5Candles.Add(candle.Candlestick);
 
 				return new Action(() => {
@@ -166,40 +167,20 @@ namespace Candlesticks {
 			}));
 		}
 
-		private void ReceiveEvent() {
-			Console.WriteLine("receive start");
-			tcpClient = new TcpClient("localhost", 4444);
-			var reader = new BinaryReader(tcpClient.GetStream());
-
-			try {
-				while (true) {
-					int length = reader.ReadInt32();
-					byte[] body = reader.ReadBytes(length);
-					using(var memStream = new MemoryStream(body)) {
-						DataContractSerializer ser = new DataContractSerializer(typeof(ServerEvent), new Type[] { typeof(OrderBookUpdated) });
-						var receivedObject = ((ServerEvent) ser.ReadObject(memStream)).Body;
-						Console.WriteLine("received: " + receivedObject);
-						if (receivedObject is OrderBookUpdated) {
-							var orderBookUpdated = (OrderBookUpdated)receivedObject;
-							Invoke(new Action(() => {
-								int selectedIndex = orderBookList.SelectedIndex;
-								LoadOrderBookList(orderBookUpdated.DateTime);
-								if (selectedIndex == 0) {
-									orderBookList.SelectedIndex = 0;
-								}
-							}));
-							lock (volumeCandlesLock) {
-								latestS5Candles = null;
-							}
-						}
-					}
-
+		private void OnOrderBookUpdated(OrderBookUpdated orderBookUpdated) {
+			Invoke(new Action(() => {
+				int selectedIndex = orderBookList.SelectedIndex;
+				LoadOrderBookList(orderBookUpdated.DateTime);
+				if (selectedIndex == 0) {
+					orderBookList.SelectedIndex = 0;
 				}
-
-			} catch(Exception e) {
-				Console.WriteLine(e);
+			}));
+			lock (volumeCandlesLock) {
+				latestS5Candles = null;
 			}
+
 		}
+		
 
 		private void LoadOrderBookList() {
 			connection = DBUtils.OpenConnection();
@@ -440,6 +421,8 @@ namespace Candlesticks {
 
 		private void OrderBookForm_FormClosing(object sender, FormClosingEventArgs e) {
 			PriceObserver.Get("USD_JPY").UnOnserve(ReceivePrice);
+			EventReceiver.Instance.OrderBookUpdatedEvent -= OnOrderBookUpdated;
+
 			if (connection != null) {
 				connection.Close();
 				connection = null;

@@ -13,6 +13,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)CandlestickDao.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CandlesticksGetter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DBUtils.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EventReceiver.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)OandaAPI.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)OrderBookDao.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)OrderBookPricePointDao.cs" />

@@ -33,11 +33,10 @@ namespace Candlesticks
 			lock(this) {
 				if (listeners == null) {
 					oandaApi = new OandaAPI();
-					listeners = new PriceListener(listener);
+					listeners = delegate { };
 					client = oandaApi.GetPrices(ReceivePrice, instrument);
-				} else {
-					listeners += listener;
 				}
+				listeners += listener;
 			}
 		}
 

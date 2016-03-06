@@ -6,6 +6,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -31,6 +32,15 @@ namespace Candlesticks {
 		}
 
 		private List<TradePosition> positions = new List<TradePosition>();
+
+		private void Form1_Load(object sender, EventArgs e) {
+			new Thread(new ThreadStart(() => { EventReceiver.Instance.Execute(); })).Start();
+		}
+
+
+		private void Form1_FormClosed(object sender, FormClosedEventArgs e) {
+			EventReceiver.Instance.Dispose();
+		}
 
 		private void button1_Click(object sender, EventArgs e) {
 			int range = 8;
@@ -140,7 +150,7 @@ namespace Candlesticks {
 			List<Candlestick> list = new List<Candlestick>(new CandlesticksReader().Read(DATA_PATH + @"\h1.csv"));
 			Dictionary<string, List<Candlestick>> dayOftheWeekTimeDict = new Dictionary<string, List<Candlestick>>();
 			foreach(var stick in list) {
-				string key = stick.Time.DayOfWeek + " " + stick.Time.Hour;
+				string key = stick.DateTime.DayOfWeek + " " + stick.DateTime.Hour;
 				if(dayOftheWeekTimeDict.ContainsKey(key) == false) {
 					dayOftheWeekTimeDict[key] = new List<Candlestick>();
 				}
@@ -163,13 +173,13 @@ namespace Candlesticks {
 			Dictionary<string, Candlestick> dict = new Dictionary<string, Candlestick>();
 			DayOfWeek oldDayOfWeek = DayOfWeek.Friday;
 			foreach (var stick in list) {
-				if(stick.Time.DayOfWeek < oldDayOfWeek) {
+				if(stick.DateTime.DayOfWeek < oldDayOfWeek) {
 					dict = new Dictionary<string, Candlestick>();
 					dayOfWeekTable.Add(dict);
 				}
-				string key = stick.Time.DayOfWeek + " " + stick.Time.Hour;
+				string key = stick.DateTime.DayOfWeek + " " + stick.DateTime.Hour;
 				dict.Add(key, stick);
-				oldDayOfWeek = stick.Time.DayOfWeek;
+				oldDayOfWeek = stick.DateTime.DayOfWeek;
 			}
 
 			foreach(var d in dayOfWeekTable) {
@@ -267,7 +277,7 @@ namespace Candlesticks {
 		private IEnumerable<Candlestick> GetByDateRangeM30(DateTime start, DateTime end) {
 			List<Candlestick> list = new List<Candlestick>(new CandlesticksReader().Read(DATA_PATH + @"\m30-5y.csv"));
 			foreach(var c in list) {
-				if(start <= c.Time && c.Time < end) {
+				if(start <= c.DateTime && c.DateTime < end) {
 					yield return c;
 				}
 			}
@@ -283,12 +293,12 @@ namespace Candlesticks {
 			List<Candlestick[]> dateList = new List<Candlestick[]>();
 			foreach (var c in list) {
 
-				if (hmList==null || oldDayOfWeek > c.Time.DayOfWeek) {
+				if (hmList==null || oldDayOfWeek > c.DateTime.DayOfWeek) {
 					hmList = new Candlestick[48*7];
 					dateList.Add(hmList);
 				}
-				oldDayOfWeek = c.Time.DayOfWeek;
-				hmList[(int)c.Time.DayOfWeek * 48 + c.Time.Hour * 2 + (c.Time.Minute == 30 ? 1 : 0)] = c;
+				oldDayOfWeek = c.DateTime.DayOfWeek;
+				hmList[(int)c.DateTime.DayOfWeek * 48 + c.DateTime.Hour * 2 + (c.DateTime.Minute == 30 ? 1 : 0)] = c;
 			}
 
 			List<Tuple<int[], int[]>> summary = new List<Tuple<int[], int[]>>();
@@ -333,12 +343,12 @@ namespace Candlesticks {
 			Candlestick[] hmList = null;
 			List<Candlestick[]> dateList = new List<Candlestick[]>();
 			foreach (var c in list) {
-				if (!oldDate.Equals(c.Time.Date)) {
+				if (!oldDate.Equals(c.DateTime.Date)) {
 					hmList = new Candlestick[48];
 					dateList.Add(hmList);
-					oldDate = c.Time.Date;
+					oldDate = c.DateTime.Date;
 				}
-				hmList[c.Time.Hour * 2 + (c.Time.Minute == 30 ? 1 : 0)] = c;
+				hmList[c.DateTime.Hour * 2 + (c.DateTime.Minute == 30 ? 1 : 0)] = c;
 			}
 
 			foreach (var hml in dateList) {
@@ -349,9 +359,9 @@ namespace Candlesticks {
 				float sd = hml[tradeTimes[1]].Close - hml[tradeTimes[0]].Open;
 				float ed = hml[tradeTimes[3]].Close - hml[tradeTimes[2]].Open;
 				if (sd > 0) {
-					yield return new Tuple<DateTime, float,bool>(hml[tradeTimes[0]].Time, -ed,false);
+					yield return new Tuple<DateTime, float,bool>(hml[tradeTimes[0]].DateTime, -ed,false);
 				} else if (sd < 0) {
-					yield return new Tuple<DateTime, float,bool>(hml[tradeTimes[0]].Time, ed,true);
+					yield return new Tuple<DateTime, float,bool>(hml[tradeTimes[0]].DateTime, ed,true);
 				}
 			}
 		}
@@ -361,12 +371,12 @@ namespace Candlesticks {
 			Candlestick[] hmList = null;
 			List<Candlestick[]> dateList = new List<Candlestick[]>();
 			foreach (var c in list) {
-				if (hmList == null || oldDayOfWeek > c.Time.DayOfWeek) {
+				if (hmList == null || oldDayOfWeek > c.DateTime.DayOfWeek) {
 					hmList = new Candlestick[48 * 7];
 					dateList.Add(hmList);
 				}
-				oldDayOfWeek = c.Time.DayOfWeek;
-				hmList[(int)c.Time.DayOfWeek * 48 + c.Time.Hour * 2 + (c.Time.Minute == 30 ? 1 : 0)] = c;
+				oldDayOfWeek = c.DateTime.DayOfWeek;
+				hmList[(int)c.DateTime.DayOfWeek * 48 + c.DateTime.Hour * 2 + (c.DateTime.Minute == 30 ? 1 : 0)] = c;
 			}
 
 			foreach (var hml in dateList) {
@@ -377,9 +387,9 @@ namespace Candlesticks {
 				float sd = hml[tradeTimes[1]].Close - hml[tradeTimes[0]].Open;
 				float ed = hml[tradeTimes[3]].Close - hml[tradeTimes[2]].Open;
 				if (sd > 0) {
-					yield return new Tuple<DateTime, float>(hml[tradeTimes[0]].Time, -ed);
+					yield return new Tuple<DateTime, float>(hml[tradeTimes[0]].DateTime, -ed);
 				} else if (sd < 0) {
-					yield return new Tuple<DateTime, float>(hml[tradeTimes[0]].Time, ed);
+					yield return new Tuple<DateTime, float>(hml[tradeTimes[0]].DateTime, ed);
 				}
 			}
 		}
@@ -438,12 +448,12 @@ namespace Candlesticks {
 				Candlestick[] hmList = null;
 				List<Candlestick[]> dateList = new List<Candlestick[]>();
 				foreach (var c in list) {
-					if (!oldDate.Equals(c.Time.Date)) {
+					if (!oldDate.Equals(c.DateTime.Date)) {
 						hmList = new Candlestick[48];
 						dateList.Add(hmList);
-						oldDate = c.Time.Date;
+						oldDate = c.DateTime.Date;
 					}
-					hmList[c.Time.Hour * 2 + (c.Time.Minute == 30 ? 1 : 0)] = c;
+					hmList[c.DateTime.Hour * 2 + (c.DateTime.Minute == 30 ? 1 : 0)] = c;
 				}
 
 				foreach (var t in CheckTrade(new CandlesticksReader().Read(DATA_PATH + @"\m30-5y.csv"), new int[] { 0, 9, 10, 14 })) {
@@ -462,15 +472,15 @@ namespace Candlesticks {
 				report.SetHeader("limit","usable","total","ratio","avg");
 				List<Candlestick> list = new List<Candlestick>(new CandlesticksReader().Read(DATA_PATH + @"\m30-5y.csv"));
 				for (int limit = 1; limit <= 40; limit += 2) {
-					DateTime startTime = list[0].Time;
+					DateTime startTime = list[0].DateTime;
 					int total = 0;
 					int usable = 0;
 					float summ = 0;
 					while (true) {
 						DateTime endTime = startTime.AddMonths(24);
 						DateTime checkEndTime = endTime.AddMonths(1);
-						List<Candlestick> targetList = new List<Candlestick>(list.Where(c => startTime <= c.Time && c.Time < endTime));
-						List<Candlestick> checkList = new List<Candlestick>(list.Where(c => endTime <= c.Time && c.Time < checkEndTime));
+						List<Candlestick> targetList = new List<Candlestick>(list.Where(c => startTime <= c.DateTime && c.DateTime < endTime));
+						List<Candlestick> checkList = new List<Candlestick>(list.Where(c => endTime <= c.DateTime && c.DateTime < checkEndTime));
 						if (checkList.Count == 0) {
 							break;
 						}
@@ -496,7 +506,7 @@ namespace Candlesticks {
 				report.SetHeader("month", "usable", "total", "ratio", "avg", "max", "min");
 				List<Candlestick> list = new List<Candlestick>(new CandlesticksReader().Read(DATA_PATH + @"\m30-5y.csv"));
 				for (int month = 1; month <= 48; month++) {
-					DateTime startTime = list[0].Time;
+					DateTime startTime = list[0].DateTime;
 					int total = 0;
 					int usable = 0;
 					float summ = 0;
@@ -505,8 +515,8 @@ namespace Candlesticks {
 					while (true) {
 						DateTime endTime = startTime.AddMonths(month);
 						DateTime checkEndTime = endTime.AddMonths(1);
-						List<Candlestick> targetList = new List<Candlestick>(list.Where(c => startTime <= c.Time && c.Time < endTime));
-						List<Candlestick> checkList = new List<Candlestick>(list.Where(c => endTime <= c.Time && c.Time < checkEndTime));
+						List<Candlestick> targetList = new List<Candlestick>(list.Where(c => startTime <= c.DateTime && c.DateTime < endTime));
+						List<Candlestick> checkList = new List<Candlestick>(list.Where(c => endTime <= c.DateTime && c.DateTime < checkEndTime));
 						if (checkList.Count == 0) {
 							break;
 						}
@@ -535,7 +545,7 @@ namespace Candlesticks {
 				report.Comment = "";
 				report.SetHeader("date", "balance");
 				List<Candlestick> list = new List<Candlestick>(new CandlesticksReader().Read(DATA_PATH + @"\m30-5y.csv"));
-				DateTime startTime = list[0].Time;
+				DateTime startTime = list[0].DateTime;
 				int total = 0;
 				int usable = 0;
 				float summ = 0;
@@ -544,8 +554,8 @@ namespace Candlesticks {
 				while (true) {
 					DateTime endTime = startTime.AddMonths(30);
 					DateTime checkEndTime = endTime.AddMonths(1);
-					List<Candlestick> targetList = new List<Candlestick>(list.Where(c => startTime <= c.Time && c.Time < endTime));
-					List<Candlestick> checkList = new List<Candlestick>(list.Where(c => endTime <= c.Time && c.Time < checkEndTime));
+					List<Candlestick> targetList = new List<Candlestick>(list.Where(c => startTime <= c.DateTime && c.DateTime < endTime));
+					List<Candlestick> checkList = new List<Candlestick>(list.Where(c => endTime <= c.DateTime && c.DateTime < checkEndTime));
 					if (checkList.Count == 0) {
 						break;
 					}
@@ -592,7 +602,7 @@ namespace Candlesticks {
 				report.SetHeader("month", "usable", "total", "ratio", "avg", "max", "min");
 
 				List<Candlestick> list = new List<Candlestick>(new CandlesticksReader().Read(DATA_PATH + @"\m30-5y.csv"));
-				DateTime startTime = list[0].Time;
+				DateTime startTime = list[0].DateTime;
 				int total = 0;
 				int usable = 0;
 				float summ = 0;
@@ -601,8 +611,8 @@ namespace Candlesticks {
 				while (true) {
 					DateTime endTime = startTime.AddMonths(32);
 					DateTime checkEndTime = endTime.AddMonths(1);
-					List<Candlestick> targetList = new List<Candlestick>(list.Where(c => startTime <= c.Time && c.Time < endTime));
-					List<Candlestick> checkList = new List<Candlestick>(list.Where(c => endTime <= c.Time && c.Time < checkEndTime));
+					List<Candlestick> targetList = new List<Candlestick>(list.Where(c => startTime <= c.DateTime && c.DateTime < endTime));
+					List<Candlestick> checkList = new List<Candlestick>(list.Where(c => endTime <= c.DateTime && c.DateTime < checkEndTime));
 					if (checkList.Count == 0) {
 						break;
 					}
@@ -698,12 +708,12 @@ namespace Candlesticks {
 			Candlestick[] hmList = null;
 			List<Candlestick[]> dateList = new List<Candlestick[]>();
 			foreach (var c in list) {
-				if (!oldDate.Equals(c.Time.Date)) {
+				if (!oldDate.Equals(c.DateTime.Date)) {
 					hmList = new Candlestick[48];
 					dateList.Add(hmList);
-					oldDate = c.Time.Date;
+					oldDate = c.DateTime.Date;
 				}
-				hmList[c.Time.Hour * 2 + (c.Time.Minute == 30 ? 1 : 0)] = c;
+				hmList[c.DateTime.Hour * 2 + (c.DateTime.Minute == 30 ? 1 : 0)] = c;
 			}
 
 			List<Tuple<int[], int[]>> summary = new List<Tuple<int[], int[]>>();
@@ -722,7 +732,7 @@ namespace Candlesticks {
 									float d1 = hml[e1].Close - hml[s1].Open;
 									float d2 = hml[e2].Close - hml[s2].Open;
 
-									var c1 = Candlestick.Create(hml.Skip(s1).Take(e1 - s1 + 1));
+									var c1 = Candlestick.Aggregate(hml.Skip(s1).Take(e1 - s1 + 1));
 									int barType;
 									if(c1.IsPinbar(true, 0.3f, 0.1f)) {
 										barType = 1;
@@ -876,10 +886,10 @@ namespace Candlesticks {
 			int downup = 0;
 			int downdown = 0;
 			for (int i = 0; i < wtico.Count() - (n + m); i++) {
-				if (wtico[i].Time != usdjpy[i].Time) {
+				if (wtico[i].DateTime != usdjpy[i].DateTime) {
 					Console.WriteLine("different time");
 				}
-				TimeSpan t = wtico[i].Time.TimeOfDay;
+				TimeSpan t = wtico[i].DateTime.TimeOfDay;
 				if(!(start <= t && t < end)) {
 					continue;
 				}
@@ -888,12 +898,12 @@ namespace Candlesticks {
 				if (w.Count(c => c.IsNull) >= 1) {
 					continue;
 				}
-				if (Candlestick.Create(w).IsUp(thrashold)) {
+				if (Candlestick.Aggregate(w).IsUp(thrashold)) {
 					var u = TakeRange(usdjpy, i + n, i + n + m);
 					if (u.Count(c => c.IsNull) >= 1) {
 						continue;
 					}
-					if (Candlestick.Create(u).IsUp()) {
+					if (Candlestick.Aggregate(u).IsUp()) {
 						upup++;
 					} else {
 						updown++;
@@ -903,7 +913,7 @@ namespace Candlesticks {
 					if (u.Count(c => c.IsNull) >= 1) {
 						continue;
 					}
-					if (Candlestick.Create(u).IsUp()) {
+					if (Candlestick.Aggregate(u).IsUp()) {
 						downup++;
 					} else {
 						downdown++;
@@ -951,13 +961,13 @@ namespace Candlesticks {
 			public float totalInDown;
 
 			public void Check(Candlestick candle) {
-				if (candle.Time.TimeOfDay == start && candle.IsNull == false) {
+				if (candle.DateTime.TimeOfDay == start && candle.IsNull == false) {
 					isInRange = true;
 					sum = candle;
 				} else if (isInRange) {
 					if (candle.IsNull) {
 						isInRange = false;
-					} else if (candle.Time.TimeOfDay == end) {
+					} else if (candle.DateTime.TimeOfDay == end) {
 						isInRange = false;
 						endTimeFunc(this);
 					} else {
@@ -1023,7 +1033,7 @@ namespace Candlesticks {
 						Start = start,
 						End = end
 					}.Execute()) {
-						if(est.IsDaylightSavingTime(candle.Time)==false) {
+						if(est.IsDaylightSavingTime(candle.DateTime)==false) {
 							continue;
 						}
 //						signal.Check(candle);
@@ -1080,7 +1090,7 @@ namespace Candlesticks {
 							Start = start,
 							End = end
 						}.Execute()) {
-							if (est.IsDaylightSavingTime(candle.Time) != isSummerTime) {
+							if (est.IsDaylightSavingTime(candle.DateTime) != isSummerTime) {
 								continue;
 							}
 							foreach (var s in ranges) {

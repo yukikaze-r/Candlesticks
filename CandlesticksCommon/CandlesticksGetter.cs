@@ -131,7 +131,7 @@ namespace Candlesticks {
 		private void FillNullCandles(List<Candlestick> result, TimeSpan granularitySpan, CandlestickDao dao, DateTime t, DateTime endTime) {
 			while (t < endTime) {
 				SaveNullCandle(dao, t);
-				result.Add(new Candlestick() { Time = t, Open = 0 });
+				result.Add(new Candlestick() { DateTime = t, Open = 0 });
 				t = t.Add(granularitySpan);
 			}
 		}
@@ -139,7 +139,7 @@ namespace Candlesticks {
 		private DateTime SaveAndAdd(List<Candlestick> result, TimeSpan granularitySpan, CandlestickDao dao, DateTime t, OandaCandle oandaCandle) {
 			while (t < oandaCandle.DateTime) {
 				SaveNullCandle(dao, t);
-				result.Add(new Candlestick() { Time = t, Open = 0 });
+				result.Add(new Candlestick() { DateTime = t, Open = 0 });
 				t = t.Add(granularitySpan);
 			}
 			SaveOandaCandle(dao, oandaCandle);

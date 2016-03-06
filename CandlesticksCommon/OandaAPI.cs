@@ -232,7 +232,7 @@ namespace Candlesticks {
 		public Candlestick Candlestick {
 			get {
 				Candlestick s = new Candlestick();
-				s.Time = this.DateTime;
+				s.DateTime = this.DateTime;
 				s.Open = this.openMid;
 				s.Close = this.closeMid;
 				s.High = this.highMid;

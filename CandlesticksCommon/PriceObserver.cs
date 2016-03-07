@@ -49,7 +49,7 @@ namespace Candlesticks
 		public void UnOnserve(PriceListener listener) {
 			lock (this) {
 				listeners -= listener;
-				if (listeners.GetInvocationList().Length == 0) {
+				if (listeners.GetInvocationList().Length == 1) {
 					client.Dispose();
 					oandaApi.Dispose();
 					listeners = null;

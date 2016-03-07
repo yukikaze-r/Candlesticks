@@ -39,7 +39,9 @@ namespace Candlesticks {
 
 
 		private void Form1_FormClosed(object sender, FormClosedEventArgs e) {
+			Console.WriteLine("Form1_FormClosed");
 			EventReceiver.Instance.Dispose();
+			Application.Exit();
 		}
 
 		private void button1_Click(object sender, EventArgs e) {

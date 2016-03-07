@@ -38,8 +38,6 @@ namespace Candlesticks {
 
 			using (DBUtils.OpenThreadConnection()) {
 				DateTime start = NormalizeDateTime(dateTime.AddDays(-1));
-				DateTime end = dateTime;
-
 
 				chart1.Series.Clear();
 				chart1.ChartAreas.Clear();
@@ -48,11 +46,11 @@ namespace Candlesticks {
 				var candles = Candlestick.Aggregate(new CandlesticksGetter() {
 					Granularity = "M10",
 					Start = start,
-					End = end
+					End = start.AddDays(1)
 				}.Execute().ToList(), 2).ToList();
 
 				var positions = new OrderBookPricePointDao(
-						DBUtils.GetConnection()).GetPositionSummaryGroupByOrderBookDateTime(start, end)
+						DBUtils.GetConnection()).GetPositionSummaryGroupByOrderBookDateTime(start, dateTime)
 						.Select(p => new Tuple<DateTime,float,float>(NormalizeDateTime(p.Item1),p.Item2,p.Item3)).ToList();
 
 				DateTime startChart = candles[0].DateTime;
@@ -140,7 +138,7 @@ namespace Candlesticks {
 				DateTime t = candle.DateTime.AddMinutes(10);
 //				Console.WriteLine(String.Format("{0} {1} {2} {3} {4}",t, candle.High, candle.Low, candle.Open, candle.Close));
 				candleSeries.Points.Add(new DataPoint(t.ToOADate(), new double[] {
-					candle.High, candle.Low, candle.Open, candle.Close }));
+					candle.High, candle.Low, candle.Open, candle.Close }) { Color = candle.IsUp() ? Color.Red : Color.Blue });
 			}
 
 			chartArea.AlignWithChartArea = "position_summary";

@@ -27,6 +27,7 @@ namespace Candlesticks {
 		private Series latestVolumeSeries = null;
 		private List<Candlestick> latestS5Candles;
 		private object volumeCandlesLock = new object();
+		private Thread retriveVolumesThread = null;
 
 		public OrderBookForm() {
 			InitializeComponent();
@@ -49,7 +50,8 @@ namespace Candlesticks {
 
 			EventReceiver.Instance.OrderBookUpdatedEvent += OnOrderBookUpdated;
 
-			new Thread(new ThreadStart(RetriveVolumes)).Start();
+			retriveVolumesThread = new Thread(new ThreadStart(RetriveVolumes));
+			retriveVolumesThread.Start();
 
 			PriceObserver.Get("USD_JPY").Observe(ReceivePrice);
 		}
@@ -78,7 +80,12 @@ namespace Candlesticks {
 				if(invokeTarget != null) {
 					Invoke(invokeTarget);
 				}
-				Thread.Sleep(5000);
+
+				try {
+					Thread.Sleep(5000);
+				} catch(ThreadInterruptedException) {
+					return;
+				}
 			}
 		}
 
@@ -420,6 +427,7 @@ namespace Candlesticks {
 		}
 
 		private void OrderBookForm_FormClosing(object sender, FormClosingEventArgs e) {
+			Console.WriteLine("OrderBookForm_FormClosing");
 			PriceObserver.Get("USD_JPY").UnOnserve(ReceivePrice);
 			EventReceiver.Instance.OrderBookUpdatedEvent -= OnOrderBookUpdated;
 
@@ -435,8 +443,9 @@ namespace Candlesticks {
 				oandaApi.Dispose();
 				oandaApi = null;
 			}
-			if(volumeCandlesLock != null) {
-				volumeCandlesLock = null;
+			if(retriveVolumesThread != null) {
+				retriveVolumesThread.Interrupt();
+				retriveVolumesThread = null;
 			}
 		}
 

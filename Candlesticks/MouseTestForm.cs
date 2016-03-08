@@ -22,8 +22,26 @@ namespace Candlesticks {
 			InitializeComponent();
 		}
 
+		private bool task1 = false;
+		private bool task2 = false;
+
 		private void timer1_Tick(object sender, EventArgs e) {
 			label1.Text = Cursor.Position.X +"," + Cursor.Position.Y;
+
+			DateTime now = DateTime.Now;
+			if(now.Hour == 6 && now.Minute == 0 && task1 == false) {
+				Cursor.Position = Setting.Instance.MouseClickPosition.Ask;
+				mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
+				mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
+				task1 = true;
+			}
+
+			if (now.Hour == 7 && now.Minute == 10 && task2 == false) {
+				Cursor.Position = Setting.Instance.MouseClickPosition.Settle;
+				mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
+				mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
+				task2 = true;
+			}
 		}
 
 		private void button1_Click(object sender, EventArgs e) {
@@ -45,6 +63,7 @@ namespace Candlesticks {
 				Setting.Instance.MouseClickPosition.Settle = Cursor.Position;
 				settleCursorPosLabel.Text = Cursor.Position.ToString();
 			}
+			Setting.Instance.Save();
 		}
 
 		private void button6_Click(object sender, EventArgs e) {

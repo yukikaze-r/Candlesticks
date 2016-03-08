@@ -5,13 +5,21 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Candlesticks {
+
 	public partial class Form1 : Form {
+		
+		[DllImport("USER32.dll", CallingConvention = CallingConvention.StdCall)]
+		static extern void mouse_event(int dwFlags, int dx, int dy, int cButtons, int dwExtraInfo);
+
+		private const int MOUSEEVENTF_LEFTDOWN = 0x2;
+		private const int MOUSEEVENTF_LEFTUP = 0x4;
 
 		public string REPORT_PATH {
 			get {
@@ -1250,5 +1258,8 @@ namespace Candlesticks {
 			});
 		}
 
+		private void マウステスト_Click(object sender, EventArgs e) {
+			new MouseTestForm().Show();
+		}
 	}
 }

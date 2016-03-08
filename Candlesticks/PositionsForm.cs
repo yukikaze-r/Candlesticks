@@ -161,8 +161,8 @@ namespace Candlesticks {
 			chartArea.AxisX.Minimum = start.ToOADate();
 			chartArea.AxisX.Maximum = end.ToOADate();
 
-			chartArea.AxisY.Maximum = 42;
-			chartArea.AxisY.Minimum = 32;
+			chartArea.AxisY.Maximum = 44;
+			chartArea.AxisY.Minimum = 30;
 			chartArea.AxisY.MajorGrid.Enabled = true;
 			chartArea.AxisY.MajorGrid.Interval = 5;
 			chartArea.AxisY.MinorGrid.Enabled = true;
@@ -171,8 +171,8 @@ namespace Candlesticks {
 			//				chartArea.AxisY.Su
 
 			chartArea.AxisY2.Enabled = AxisEnabled.True;
-			chartArea.AxisY2.Maximum = 68;
-			chartArea.AxisY2.Minimum = 58;
+			chartArea.AxisY2.Maximum = 70;
+			chartArea.AxisY2.Minimum = 56;
 			chartArea.AxisY2.MajorGrid.Enabled = false;
 			chartArea.AxisY2.MinorGrid.Enabled = false;
 			chartArea.AxisY2.IsReversed = true;

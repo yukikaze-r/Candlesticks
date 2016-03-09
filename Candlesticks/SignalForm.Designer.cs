@@ -38,10 +38,10 @@
 			this.signalDataGrid.Location = new System.Drawing.Point(0, 0);
 			this.signalDataGrid.MultiSelect = false;
 			this.signalDataGrid.Name = "signalDataGrid";
-			this.signalDataGrid.ReadOnly = true;
 			this.signalDataGrid.RowTemplate.Height = 21;
+			this.signalDataGrid.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
 			this.signalDataGrid.ShowEditingIcon = false;
-			this.signalDataGrid.Size = new System.Drawing.Size(644, 375);
+			this.signalDataGrid.Size = new System.Drawing.Size(742, 377);
 			this.signalDataGrid.TabIndex = 0;
 			this.signalDataGrid.TabStop = false;
 			// 
@@ -55,7 +55,7 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(644, 375);
+			this.ClientSize = new System.Drawing.Size(742, 377);
 			this.Controls.Add(this.signalDataGrid);
 			this.Name = "SignalForm";
 			this.Text = "SignalForm";

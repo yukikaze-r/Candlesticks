@@ -51,6 +51,32 @@ namespace Candlesticks
 				"の間に価格が" + (IsCheckUp ? "上がっていたら" : "下がっていたら");
 		}
 
+		public string GetTradeDescription() {
+			DateTime priceGettableTime = DateTime.Now.AddSeconds(-5);
+
+			var builder = new StringBuilder();
+			builder.Append(this.TradeType);
+			builder.Append("-");
+			DateTime tradeStartDateTime = DateTime.Today.AddTicks(this.TradeStartTime.Ticks);
+			if (tradeStartDateTime < priceGettableTime) {
+				builder.Append(TimeOfDayPattern.GetPrice(tradeStartDateTime).ToString("F3"));
+			} else {
+				builder.Append("???");
+			}
+			builder.Append("[" + this.TradeStartTime + "]");
+			builder.Append("→");
+
+			DateTime tradeEndDateTime = DateTime.Today.AddTicks(this.TradeEndTime.Ticks);
+			if (tradeEndDateTime < priceGettableTime) {
+				builder.Append(TimeOfDayPattern.GetPrice(tradeEndDateTime).ToString("F3"));
+			} else {
+				builder.Append("???");
+			}
+			builder.Append("[" + this.TradeEndTime + "]");
+
+			return builder.ToString();
+		}
+
 		public class Signal {
 			public TimeOfDayPattern Pattern;
 			public float CheckStartPrice = float.NaN;
@@ -69,31 +95,6 @@ namespace Candlesticks
 				}
 			}
 
-			public string GetTradeDescription() {
-				DateTime priceGettableTime = DateTime.Now.AddSeconds(-5);
-
-				var builder = new StringBuilder();
-				builder.Append(Pattern.TradeType);
-				builder.Append("-");
-				DateTime tradeStartDateTime = DateTime.Today.AddTicks(Pattern.TradeStartTime.Ticks);
-				if(tradeStartDateTime < priceGettableTime) {
-					builder.Append(TimeOfDayPattern.GetPrice(tradeStartDateTime).ToString("F3"));
-				} else {
-					builder.Append("???");
-				}
-				builder.Append("[" + Pattern.TradeStartTime + "]");
-				builder.Append("→");
-
-				DateTime tradeEndDateTime = DateTime.Today.AddTicks(Pattern.TradeEndTime.Ticks);
-				if (tradeEndDateTime < priceGettableTime) {
-					builder.Append(TimeOfDayPattern.GetPrice(tradeEndDateTime).ToString("F3"));
-				} else {
-					builder.Append("???");
-				}
-				builder.Append("[" + Pattern.TradeEndTime + "]");
-
-				return builder.ToString();
-			}
 		}
 
 		private static float GetPrice(DateTime dateTime) {

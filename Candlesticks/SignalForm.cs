@@ -4,13 +4,26 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Candlesticks {
 	public partial class SignalForm : Form {
+		private static int randomSecond = new Random().Next() % 10;
+
+		[DllImport("USER32.dll", CallingConvention = CallingConvention.StdCall)]
+		static extern void mouse_event(int dwFlags, int dx, int dy, int cButtons, int dwExtraInfo);
+
+		private const int MOUSEEVENTF_LEFTDOWN = 0x2;
+		private const int MOUSEEVENTF_LEFTUP = 0x4;
+
+
+
 		private List<TimeOfDayPattern> patterns = new List<TimeOfDayPattern>();
+		private HashSet<TimeOfDayPattern> havePositionSet = new HashSet<TimeOfDayPattern>();
+		private HashSet<TimeOfDayPattern> haveSettleSet = new HashSet<TimeOfDayPattern>();
 
 		public SignalForm() {
 			InitializeComponent();
@@ -53,10 +66,25 @@ namespace Candlesticks {
 					TradeEndTime = new TimeOfDayPattern.Time(6, 10),
 					TradeType = TradeType.Ask
 				});
-				this.signalDataGrid.ReadOnly = true;
+
+				/*
+				patterns.Add(new TimeOfDayPattern() {
+					CheckStartTime = new TimeOfDayPattern.Time(1, 50),
+					CheckEndTime = new TimeOfDayPattern.Time(3, 20),
+					IsCheckUp = true,
+					TradeStartTime = new TimeOfDayPattern.Time(3, 20),
+					TradeEndTime = new TimeOfDayPattern.Time(3, 22),
+					TradeType = TradeType.Ask
+				});*/
+
 				this.signalDataGrid.Columns.Add("pattern", "パターン");
 				this.signalDataGrid.Columns.Add("match", "マッチ状況");
-				this.signalDataGrid.Columns.Add("trade", "トレードシグナル");
+				this.signalDataGrid.Columns.Add("trade", "トレード");
+
+				this.signalDataGrid.Columns.Add(new DataGridViewCheckBoxColumn() {
+					Name = "autoTrade",
+					HeaderText = "自動取引"
+				});
 
 				foreach (var pattern in patterns) {
 					this.signalDataGrid.Rows.Add();
@@ -69,34 +97,60 @@ namespace Candlesticks {
 		}
 
 		private void timer1_Tick(object sender, EventArgs e) {
-			this.signalDataGrid.CurrentCell = null;
+//			this.signalDataGrid.CurrentCell = null;
 			using (DBUtils.OpenThreadConnection()) {
 				int index = 0;
+				this.signalDataGrid.CommitEdit(DataGridViewDataErrorContexts.Commit);
 				foreach (var pattern in patterns) {
-					this.signalDataGrid.Rows[index].Cells[0].Value = pattern.GetCheckDescription();
+					var cells = this.signalDataGrid.Rows[index].Cells;
+					cells["pattern"].Value = pattern.GetCheckDescription();
 
 					TimeOfDayPattern.Signal signal;
 					bool isMatch = false;
 					if (pattern.IsMatch(out signal)) {
-						this.signalDataGrid.Rows[index].Cells[2].Value = signal.GetTradeDescription();
-						this.signalDataGrid.Rows[index].Cells[2].Style.BackColor = signal.IsInTradeTime ? Color.Red : Color.Yellow;
+						cells["trade"].Style.BackColor = signal.IsInTradeTime ? Color.Red : Color.Yellow;
 						isMatch = true;
 					} else {
-						this.signalDataGrid.Rows[index].Cells[2].Value = "";
-						this.signalDataGrid.Rows[index].Cells[2].Style.BackColor = Color.White;
+						cells["trade"].Style.BackColor = Color.White;
 						isMatch = false;
 					}
+					cells["trade"].Value = pattern.GetTradeDescription();
 					if (signal != null) {
-						this.signalDataGrid.Rows[index].Cells[1].Value = signal.GetCheckResultDescription();
 						if(isMatch) {
-							this.signalDataGrid.Rows[index].Cells[1].Style.BackColor = isMatch ? Color.Yellow : Color.White;
+							cells["match"].Value = "Matched!" + signal.GetCheckResultDescription();
+							cells["match"].Style.BackColor = Color.Yellow;
+							var isAutoTrade = cells["autoTrade"].Value;
+							if (isAutoTrade!=null && (bool)isAutoTrade) {
+								DoTrade(pattern);
+							}
+						} else {
+							cells[1].Value = "Not Match " + signal.GetCheckResultDescription();
 						}
+					} else {
+						cells[1].Value = "Not Match";
 					}
 					index++;
 				}
 				this.signalDataGrid.AutoResizeColumn(0);
 				this.signalDataGrid.AutoResizeColumn(1);
 				this.signalDataGrid.AutoResizeColumn(2);
+			}
+		}
+
+		private void DoTrade(TimeOfDayPattern pattern) {
+			DateTime now = DateTime.Now;
+			DateTime nowMinutes = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, 0, now.Kind);
+			var mouseClickPosition = Setting.Instance.MouseClickPosition;
+			if(pattern.TradeStartTime.Todays == nowMinutes && !havePositionSet.Contains(pattern)) {
+				Cursor.Position = pattern.TradeType == TradeType.Ask ? mouseClickPosition.Ask : mouseClickPosition.Bid;
+				mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
+				mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
+				havePositionSet.Add(pattern);
+			}
+			if(pattern.TradeEndTime.Todays == nowMinutes && now.Second % 10 == randomSecond) {
+				Cursor.Position = mouseClickPosition.Settle;
+				mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
+				mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
 			}
 		}
 	}

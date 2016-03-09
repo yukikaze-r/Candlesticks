@@ -70,11 +70,13 @@ namespace Candlesticks
 			}
 
 			public string GetTradeDescription() {
+				DateTime priceGettableTime = DateTime.Now.AddSeconds(-5);
+
 				var builder = new StringBuilder();
 				builder.Append(Pattern.TradeType);
 				builder.Append("-");
 				DateTime tradeStartDateTime = DateTime.Today.AddTicks(Pattern.TradeStartTime.Ticks);
-				if(tradeStartDateTime > DateTime.Now) {
+				if(tradeStartDateTime < priceGettableTime) {
 					builder.Append(TimeOfDayPattern.GetPrice(tradeStartDateTime).ToString("F3"));
 				} else {
 					builder.Append("???");
@@ -83,7 +85,7 @@ namespace Candlesticks
 				builder.Append("→");
 
 				DateTime tradeEndDateTime = DateTime.Today.AddTicks(Pattern.TradeEndTime.Ticks);
-				if (tradeEndDateTime > DateTime.Now) {
+				if (tradeEndDateTime < priceGettableTime) {
 					builder.Append(TimeOfDayPattern.GetPrice(tradeEndDateTime).ToString("F3"));
 				} else {
 					builder.Append("???");

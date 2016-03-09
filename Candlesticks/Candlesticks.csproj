@@ -59,6 +59,12 @@
     <Compile Include="ChartForm.Designer.cs">
       <DependentUpon>ChartForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="DateTimeBestForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DateTimeBestForm.Designer.cs">
+      <DependentUpon>DateTimeBestForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -101,6 +107,9 @@
     </Compile>
     <EmbeddedResource Include="ChartForm.resx">
       <DependentUpon>ChartForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DateTimeBestForm.resx">
+      <DependentUpon>DateTimeBestForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>

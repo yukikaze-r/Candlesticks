@@ -15,12 +15,6 @@ namespace Candlesticks {
 
 	public partial class Form1 : Form {
 		
-		[DllImport("USER32.dll", CallingConvention = CallingConvention.StdCall)]
-		static extern void mouse_event(int dwFlags, int dx, int dy, int cButtons, int dwExtraInfo);
-
-		private const int MOUSEEVENTF_LEFTDOWN = 0x2;
-		private const int MOUSEEVENTF_LEFTUP = 0x4;
-
 		public string REPORT_PATH {
 			get {
 				return Setting.Instance.DataFilePath;
@@ -431,6 +425,8 @@ namespace Candlesticks {
 
 
 		private void 日時ベスト(object sender, EventArgs ev) {
+			new DateTimeBestForm().Show();
+/*
 			RunTask(sender, (Report report) => {
 				report.Version = 6;
 //				report.IsForceOverride = false;
@@ -445,7 +441,7 @@ namespace Candlesticks {
 					}
 					report.WriteLine();
 				}
-			});
+			});*/
 		}
 		
 		private void 日時ベスト特定日時検証(object sender, EventArgs e) {

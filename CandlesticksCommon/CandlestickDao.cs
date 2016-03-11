@@ -12,7 +12,6 @@ namespace Candlesticks
 		}
 
 		public IEnumerable<Entity> GetBy(string instrument, string granularity, DateTime start, DateTime end) {
-
 			using (var cmd = new NpgsqlCommand()) {
 				cmd.Connection = DBUtils.GetConnection();
 				cmd.CommandText = "select id,date_time,open,high,low,close,volume from candlestick where instrument = :instrument and granularity = :granularity and :start <= date_time and date_time < :end order by date_time";

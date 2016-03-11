@@ -75,10 +75,16 @@ namespace Candlesticks {
 			entity.Low = oandaCandle.lowMid;
 			entity.Close = oandaCandle.closeMid;
 			entity.Volume = oandaCandle.volume;
-			
-			entity.Save();
+			try {
+				entity.Save();
+			} catch(NpgsqlException e) {
+				if(e.Code == "23505") {
+					Console.WriteLine(e.Message);
+				} else {
+					throw e;
+				}
+			}
 		}
-
 
 		private void SaveNullCandle(CandlestickDao dao, DateTime t) {
 			var entity = dao.CreateNewEntity();
@@ -91,7 +97,15 @@ namespace Candlesticks {
 			entity.Close = 0;
 			entity.Volume = 0;
 
-			entity.Save();
+			try {
+				entity.Save();
+			} catch (NpgsqlException e) {
+				if (e.Code == "23505") {
+					Console.WriteLine(e.Message);
+				} else {
+					throw e;
+				}
+			}
 		}
 
 		public IEnumerable<Candlestick> Execute() {

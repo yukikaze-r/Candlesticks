@@ -30,6 +30,7 @@
 			this.日時ベスト冬時間３ヶ月 = new System.Windows.Forms.Button();
 			this.日時ベスト夏時間5年 = new System.Windows.Forms.Button();
 			this.日時ベスト通年５年１０分足 = new System.Windows.Forms.Button();
+			this.日時ベスト通年5年10分足12時 = new System.Windows.Forms.Button();
 			((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
 			this.SuspendLayout();
 			// 
@@ -106,11 +107,22 @@
 			this.日時ベスト通年５年１０分足.UseVisualStyleBackColor = true;
 			this.日時ベスト通年５年１０分足.Click += new System.EventHandler(this.日時ベスト通年５年１０分足_Click);
 			// 
+			// 日時ベスト通年5年10分足12時
+			// 
+			this.日時ベスト通年5年10分足12時.Location = new System.Drawing.Point(33, 144);
+			this.日時ベスト通年5年10分足12時.Name = "日時ベスト通年5年10分足12時";
+			this.日時ベスト通年5年10分足12時.Size = new System.Drawing.Size(266, 23);
+			this.日時ベスト通年5年10分足12時.TabIndex = 7;
+			this.日時ベスト通年5年10分足12時.Text = "日時ベスト - 通年 - 5年 - 10分足 - 12時";
+			this.日時ベスト通年5年10分足12時.UseVisualStyleBackColor = true;
+			this.日時ベスト通年5年10分足12時.Click += new System.EventHandler(this.日時ベスト通年5年10分足12時_Click);
+			// 
 			// DateTimeBestForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(834, 684);
+			this.Controls.Add(this.日時ベスト通年5年10分足12時);
 			this.Controls.Add(this.日時ベスト通年５年１０分足);
 			this.Controls.Add(this.日時ベスト夏時間5年);
 			this.Controls.Add(this.日時ベスト冬時間３ヶ月);
@@ -135,5 +147,6 @@
 		private System.Windows.Forms.Button 日時ベスト冬時間３ヶ月;
 		private System.Windows.Forms.Button 日時ベスト夏時間5年;
 		private System.Windows.Forms.Button 日時ベスト通年５年１０分足;
+		private System.Windows.Forms.Button 日時ベスト通年5年10分足12時;
 	}
 }

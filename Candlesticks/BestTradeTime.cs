@@ -12,7 +12,7 @@ namespace Candlesticks {
 		public BestTradeTime(IEnumerable<Candlestick> candlesticks) {
 			this.candlesticks = candlesticks;
 			this.ShiftHour = 0;
-			this.Comparator = f => f[1] - f[0] + f[2] - f[3];
+			this.Comparator = f => (int)(Math.Max((double)f[1]/(f[0] + f[1]), (double)f[2]/(f[2]  + f[3]))*10000);
 			this.IsSummerTime = null;
 			this.Granularity = new TimeSpan(0, 30, 0);
 		}
@@ -90,43 +90,38 @@ namespace Candlesticks {
 			return (t / 2 < 10 ? "0" : "") + t / 2 + ":" + (t % 2 == 0 ? "00" : "30");
 		}*/
 
-		public IEnumerable<Tuple<int[], int[]>> Calculate( int limit) {
+		public IEnumerable<Tuple<int[], int[]>> Calculate( int limit = 0) {
 
 			List<Candlestick[]> candlesticksEachDate = GetCandlesticksEachDate();
 			List<Tuple<int[], int[]>> summary = new List<Tuple<int[], int[]>>();
 			int dayLength = GetArrayIndex(new TimeSpan(1, 0, 0, 0));
 			int searchLength = GetArrayIndex(new TimeSpan(0, 6, 0, 0));
 
-			for (int s1 = 0; s1 < dayLength - searchLength; s1++) {
-				for (int e1 = s1 + 1; e1 < s1 + searchLength; e1++) {
-					for (int s2 = e1; s2 < dayLength - searchLength; s2++) {
-						for (int e2 = s2 + 1; e2 < s2 + searchLength; e2++) {
+			for (int s1 = 0; s1 < dayLength; s1++) {
+				int e1Max = Math.Min(s1 + searchLength, dayLength);
+				for (int e1 = s1 + 1; e1 < e1Max; e1++) {
+					for (int s2 = e1; s2 < dayLength; s2++) {
+						int e2Max = Math.Min(s2 + searchLength, dayLength);
+						for (int e2 = s2 + 1; e2 < e2Max ; e2++) {
 							int[] dayResult = new int[4];
 							summary.Add(new Tuple<int[], int[]>(new int[] { s1, e1, s2, e2 }, dayResult));
 							foreach (var hml in candlesticksEachDate) {
-								try {
-									float d1 = hml[e1].Open - hml[s1].Open;
-									float d2 = hml[e2].Open - hml[s2].Open;
-
-									if (hml[e1].IsNull || hml[s1].IsNull || hml[s2].IsNull || hml[e2].IsNull) {
-										continue;
-									}
-									dayResult[(d1 >= 0 ? 0 : 2) + (d2 >= 0 ? 0 : 1)]++;
-								} catch (Exception) {
+								if (hml[e1].IsNull || hml[s1].IsNull || hml[s2].IsNull || hml[e2].IsNull) {
+									continue;
 								}
+								float d1 = hml[e1].Open - hml[s1].Open;
+								float d2 = hml[e2].Open - hml[s2].Open;
+
+								dayResult[(d1 >= 0 ? 0 : 2) + (d2 >= 0 ? 0 : 1)]++;
 							}
 						}
 					}
 				}
 			}
-
-			int i = 0;
-			foreach (var t in summary.OrderByDescending(t => this.Comparator(t.Item2)) /*Math.Abs(t.Item2[0] - t.Item2[1]) + Math.Abs(t.Item2[2] - t.Item2[3]))*/) {
-				if (i >= limit) {
-					break;
-				}
-				yield return t;
-				i++;
+			if(limit == 0) {
+				return summary;
+			} else {
+				return summary.OrderByDescending(t => this.Comparator(t.Item2)).Take(limit);
 			}
 
 		}

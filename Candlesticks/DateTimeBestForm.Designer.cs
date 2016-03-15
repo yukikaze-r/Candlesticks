@@ -31,6 +31,7 @@
 			this.日時ベスト夏時間5年 = new System.Windows.Forms.Button();
 			this.日時ベスト通年５年１０分足 = new System.Windows.Forms.Button();
 			this.日時ベスト通年5年10分足12時 = new System.Windows.Forms.Button();
+			this.日時ベスト通年5年10分足12時EUR_USD = new System.Windows.Forms.Button();
 			((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
 			this.SuspendLayout();
 			// 
@@ -61,17 +62,17 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-			this.dataGridView1.Location = new System.Drawing.Point(0, 217);
+			this.dataGridView1.Location = new System.Drawing.Point(0, 282);
 			this.dataGridView1.Name = "dataGridView1";
 			this.dataGridView1.ReadOnly = true;
 			this.dataGridView1.RowTemplate.Height = 21;
-			this.dataGridView1.Size = new System.Drawing.Size(836, 469);
+			this.dataGridView1.Size = new System.Drawing.Size(836, 404);
 			this.dataGridView1.TabIndex = 2;
 			// 
 			// taskStatus
 			// 
 			this.taskStatus.AutoSize = true;
-			this.taskStatus.Location = new System.Drawing.Point(-2, 202);
+			this.taskStatus.Location = new System.Drawing.Point(-2, 267);
 			this.taskStatus.Name = "taskStatus";
 			this.taskStatus.Size = new System.Drawing.Size(35, 12);
 			this.taskStatus.TabIndex = 3;
@@ -117,11 +118,22 @@
 			this.日時ベスト通年5年10分足12時.UseVisualStyleBackColor = true;
 			this.日時ベスト通年5年10分足12時.Click += new System.EventHandler(this.日時ベスト通年5年10分足12時_Click);
 			// 
+			// 日時ベスト通年5年10分足12時EUR_USD
+			// 
+			this.日時ベスト通年5年10分足12時EUR_USD.Location = new System.Drawing.Point(33, 173);
+			this.日時ベスト通年5年10分足12時EUR_USD.Name = "日時ベスト通年5年10分足12時EUR_USD";
+			this.日時ベスト通年5年10分足12時EUR_USD.Size = new System.Drawing.Size(300, 23);
+			this.日時ベスト通年5年10分足12時EUR_USD.TabIndex = 8;
+			this.日時ベスト通年5年10分足12時EUR_USD.Text = "日時ベスト - 通年 - 5年 - 10分足 - 12時 - EUR_USD";
+			this.日時ベスト通年5年10分足12時EUR_USD.UseVisualStyleBackColor = true;
+			this.日時ベスト通年5年10分足12時EUR_USD.Click += new System.EventHandler(this.日時ベスト通年5年10分足12時EUR_USD_Click);
+			// 
 			// DateTimeBestForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(834, 684);
+			this.Controls.Add(this.日時ベスト通年5年10分足12時EUR_USD);
 			this.Controls.Add(this.日時ベスト通年5年10分足12時);
 			this.Controls.Add(this.日時ベスト通年５年１０分足);
 			this.Controls.Add(this.日時ベスト夏時間5年);
@@ -148,5 +160,6 @@
 		private System.Windows.Forms.Button 日時ベスト夏時間5年;
 		private System.Windows.Forms.Button 日時ベスト通年５年１０分足;
 		private System.Windows.Forms.Button 日時ベスト通年5年10分足12時;
+		private System.Windows.Forms.Button 日時ベスト通年5年10分足12時EUR_USD;
 	}
 }

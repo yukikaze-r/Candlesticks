@@ -21,12 +21,20 @@ namespace Candlesticks {
 				Port = (int)registryKey.GetValue("dbUserName",5432),
 				Password = (string)registryKey.GetValue("dbPassword"),
 			};
-			this.MouseClickPosition = new MouseClikPositoin() {
+			registryKey.Close();
+			this.MouseClickPositionUSD_JPY = LoadMouseClickPos("MousePosUsdJpy");
+			this.MouseClickPositionEUR_USD = LoadMouseClickPos("MousePosEurUsd");
+		}
+
+		private MouseClikPositoin LoadMouseClickPos(string subKeyName) {
+			var registryKey = Registry.CurrentUser.CreateSubKey(@"Software\CandleSticks\Setting\"+ subKeyName);
+			var result = new MouseClikPositoin() {
 				Bid = new Point((int)registryKey.GetValue("bidPosX", 0), (int)registryKey.GetValue("bidPosY", 0)),
 				Ask = new Point((int)registryKey.GetValue("askPosX", 0), (int)registryKey.GetValue("askPosY", 0)),
 				Settle = new Point((int)registryKey.GetValue("settlePosX", 0), (int)registryKey.GetValue("settlePosY", 0)),
 			};
 			registryKey.Close();
+			return result;
 		}
 
 		public void Save() {
@@ -37,13 +45,22 @@ namespace Candlesticks {
 			registryKey.SetValue("dbHost", this.DBConnection.Host);
 			registryKey.SetValue("dbPort", this.DBConnection.Port);
 			registryKey.SetValue("dbPassword", this.DBConnection.Password);
-			registryKey.SetValue("bidPosX", this.MouseClickPosition.Bid.X);
-			registryKey.SetValue("bidPosY", this.MouseClickPosition.Bid.Y);
-			registryKey.SetValue("askPosX", this.MouseClickPosition.Ask.X);
-			registryKey.SetValue("askPosY", this.MouseClickPosition.Ask.Y);
-			registryKey.SetValue("settlePosX", this.MouseClickPosition.Settle.X);
-			registryKey.SetValue("settlePosY", this.MouseClickPosition.Settle.Y);
 			registryKey.Close();
+
+			SaveMouseClickPos(this.MouseClickPositionUSD_JPY, "MousePosUsdJpy");
+			SaveMouseClickPos(this.MouseClickPositionEUR_USD, "MousePosEurUsd");
+		}
+
+		private void SaveMouseClickPos(MouseClikPositoin mouseClickPos, string subKeyName) {
+
+			var registryKeyMousePos = Registry.CurrentUser.CreateSubKey(@"Software\CandleSticks\Setting\"+subKeyName);
+			registryKeyMousePos.SetValue("bidPosX", mouseClickPos.Bid.X);
+			registryKeyMousePos.SetValue("bidPosY", mouseClickPos.Bid.Y);
+			registryKeyMousePos.SetValue("askPosX", mouseClickPos.Ask.X);
+			registryKeyMousePos.SetValue("askPosY", mouseClickPos.Ask.Y);
+			registryKeyMousePos.SetValue("settlePosX", mouseClickPos.Settle.X);
+			registryKeyMousePos.SetValue("settlePosY", mouseClickPos.Settle.Y);
+			registryKeyMousePos.Close();
 		}
 
 		public string OandaAccountId {
@@ -74,7 +91,12 @@ namespace Candlesticks {
 			public string Database = "candlesticks";
 		}
 
-		public MouseClikPositoin MouseClickPosition {
+		public MouseClikPositoin MouseClickPositionUSD_JPY {
+			get;
+			set;
+		}
+
+		public MouseClikPositoin MouseClickPositionEUR_USD {
 			get;
 			set;
 		}

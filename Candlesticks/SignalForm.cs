@@ -32,6 +32,7 @@ namespace Candlesticks {
 		private void SignalForm_Load(object sender, EventArgs e) {
 			using (DBUtils.OpenThreadConnection()) {
 				patterns.Add(new TimeOfDayPattern() {
+					Instrument = "USD_JPY",
 					CheckStartTime = new TimeOfDayPattern.Time(7, 50),
 					CheckEndTime = new TimeOfDayPattern.Time(8, 40),
 					IsCheckUp = true,
@@ -41,6 +42,7 @@ namespace Candlesticks {
 				});
 
 				patterns.Add(new TimeOfDayPattern() {
+					Instrument = "USD_JPY",
 					CheckStartTime = new TimeOfDayPattern.Time(0, 10),
 					CheckEndTime = new TimeOfDayPattern.Time(4, 30),
 					IsCheckUp = false,
@@ -50,6 +52,7 @@ namespace Candlesticks {
 				});
 
 				patterns.Add(new TimeOfDayPattern() {
+					Instrument = "USD_JPY",
 					CheckStartTime = new TimeOfDayPattern.Time(0, 20),
 					CheckEndTime = new TimeOfDayPattern.Time(5, 40),
 					IsCheckUp = false,
@@ -57,16 +60,37 @@ namespace Candlesticks {
 					TradeEndTime = new TimeOfDayPattern.Time(7, 10),
 					TradeType = TradeType.Ask
 				});
-
+				/*
 				patterns.Add(new TimeOfDayPattern() {
+					Instrument = "USD_JPY",
 					CheckStartTime = new TimeOfDayPattern.Time(5, 50),
 					CheckEndTime = new TimeOfDayPattern.Time(6, 00),
 					IsCheckUp = false,
 					TradeStartTime = new TimeOfDayPattern.Time(6, 00),
 					TradeEndTime = new TimeOfDayPattern.Time(6, 10),
 					TradeType = TradeType.Ask
+				});*/
+
+
+				patterns.Add(new TimeOfDayPattern() {
+					Instrument = "EUR_USD",
+					CheckStartTime = new TimeOfDayPattern.Time(8, 50),
+					CheckEndTime = new TimeOfDayPattern.Time(11, 00),
+					IsCheckUp = false,
+					TradeStartTime = new TimeOfDayPattern.Time(11, 00),
+					TradeEndTime = new TimeOfDayPattern.Time(11, 40),
+					TradeType = TradeType.Ask
 				});
 
+				patterns.Add(new TimeOfDayPattern() {
+					Instrument = "EUR_USD",
+					CheckStartTime = new TimeOfDayPattern.Time(0, 50),
+					CheckEndTime = new TimeOfDayPattern.Time(4, 00),
+					IsCheckUp = true,
+					TradeStartTime = new TimeOfDayPattern.Time(6, 20),
+					TradeEndTime = new TimeOfDayPattern.Time(7, 40),
+					TradeType = TradeType.Bid
+				});
 				/*
 				patterns.Add(new TimeOfDayPattern() {
 					CheckStartTime = new TimeOfDayPattern.Time(1, 50),
@@ -124,10 +148,13 @@ namespace Candlesticks {
 								DoTrade(pattern);
 							}
 						} else {
-							cells[1].Value = "Not Match " + signal.GetCheckResultDescription();
+							if(signal.IsCheckFinished) {
+								cells["match"].Style.BackColor = Color.LightGray;
+							}
+							cells["match"].Value = "Not Match " + signal.GetCheckResultDescription();
 						}
 					} else {
-						cells[1].Value = "Not Match";
+						cells["match"].Value = "Not Match";
 					}
 					index++;
 				}
@@ -140,8 +167,8 @@ namespace Candlesticks {
 		private void DoTrade(TimeOfDayPattern pattern) {
 			DateTime now = DateTime.Now;
 			DateTime nowMinutes = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, 0, now.Kind);
-			var mouseClickPosition = Setting.Instance.MouseClickPosition;
-			if(pattern.TradeStartTime.Todays == nowMinutes && !havePositionSet.Contains(pattern)) {
+			var mouseClickPosition = GetMouseClickPosition(pattern.Instrument);
+			if (pattern.TradeStartTime.Todays == nowMinutes && !havePositionSet.Contains(pattern)) {
 				Cursor.Position = pattern.TradeType == TradeType.Ask ? mouseClickPosition.Ask : mouseClickPosition.Bid;
 				mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
 				mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
@@ -151,6 +178,17 @@ namespace Candlesticks {
 				Cursor.Position = mouseClickPosition.Settle;
 				mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
 				mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
+			}
+		}
+
+		private Setting.MouseClikPositoin GetMouseClickPosition(string instrument) {
+			switch(instrument) {
+				case "USD_JPY":
+					return Setting.Instance.MouseClickPositionUSD_JPY;
+				case "EUR_USD":
+					return Setting.Instance.MouseClickPositionEUR_USD;
+				default:
+					throw new Exception("Unknown Instrument:"+instrument);
 			}
 		}
 	}

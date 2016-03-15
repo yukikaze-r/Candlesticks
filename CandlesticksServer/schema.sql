@@ -23,15 +23,18 @@ create table candlestick (
 	instrument text,
 	granularity text,
 	date_time timestamp with time zone,
-	open numeric(10,3),
-	high numeric(10,3),
-	low numeric(10,3),
-	close numeric(10,3),
+	open numeric(12,5),
+	high numeric(12,5),
+	low numeric(12,5),
+	close numeric(12,5),
 	volume integer,
 	unique(instrument,granularity,date_time)
 );
 
---- alter table candlestick alter column close type numeric(10,3)
+alter table candlestick alter column open type numeric(12,5);
+alter table candlestick alter column high type numeric(12,5);
+alter table candlestick alter column low type numeric(12,5);
+alter table candlestick alter column close type numeric(12,5);
 
 create table time_of_day_pattern (
 	id bigserial primary key,

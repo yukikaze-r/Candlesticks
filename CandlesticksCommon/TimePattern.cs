@@ -18,6 +18,8 @@ namespace Candlesticks
 		public int TotalVerification;
 		public int MatchVerification;
 
+		public string Instrument;
+
 		public bool IsMatch(out Signal signal) {
 			signal = null;
 
@@ -47,7 +49,7 @@ namespace Candlesticks
 		}
 
 		public string GetCheckDescription() {
-			return CheckStartTime + "～" + CheckEndTime + 
+			return "["+this.Instrument + "] " + CheckStartTime + "～" + CheckEndTime + 
 				"の間に価格が" + (IsCheckUp ? "上がっていたら" : "下がっていたら");
 		}
 
@@ -59,7 +61,7 @@ namespace Candlesticks
 			builder.Append("-");
 			DateTime tradeStartDateTime = DateTime.Today.AddTicks(this.TradeStartTime.Ticks);
 			if (tradeStartDateTime < priceGettableTime) {
-				builder.Append(TimeOfDayPattern.GetPrice(tradeStartDateTime).ToString("F3"));
+				builder.Append(GetPrice(tradeStartDateTime).ToString("F3"));
 			} else {
 				builder.Append("???");
 			}
@@ -68,7 +70,7 @@ namespace Candlesticks
 
 			DateTime tradeEndDateTime = DateTime.Today.AddTicks(this.TradeEndTime.Ticks);
 			if (tradeEndDateTime < priceGettableTime) {
-				builder.Append(TimeOfDayPattern.GetPrice(tradeEndDateTime).ToString("F3"));
+				builder.Append(GetPrice(tradeEndDateTime).ToString("F3"));
 			} else {
 				builder.Append("???");
 			}
@@ -83,9 +85,27 @@ namespace Candlesticks
 			public float CheckEndPrice = float.NaN;
 
 			public string GetCheckResultDescription() {
-				return CheckStartPrice.ToString("F3") + "[" + Pattern.CheckStartTime + "]→"
-					+ CheckEndPrice.ToString("F3") + "[" + Pattern.CheckEndTime + "](" +
-					(CheckStartPrice < CheckEndPrice ? "+" : "") + (CheckEndPrice - CheckStartPrice).ToString("F3") + ")";
+				string priceFormat = GetPriceFormat();
+
+				return CheckStartPrice.ToString(priceFormat) + "[" + Pattern.CheckStartTime + "]→"
+					+ CheckEndPrice.ToString(priceFormat) + "[" + Pattern.CheckEndTime + "](" +
+					(CheckStartPrice < CheckEndPrice ? "+" : "") + (CheckEndPrice - CheckStartPrice).ToString(priceFormat) + ")";
+			}
+
+			private string GetPriceFormat() {
+				string priceFormat = null;
+				switch (Pattern.Instrument) {
+					case "USD_JPY":
+						priceFormat = "F3";
+						break;
+					case "EUR_USD":
+						priceFormat = "F5";
+						break;
+					default:
+						throw new Exception();
+				}
+
+				return priceFormat;
 			}
 
 			public bool IsInTradeTime {
@@ -95,14 +115,26 @@ namespace Candlesticks
 				}
 			}
 
+			public bool IsCheckFinished {
+				get {
+					return Pattern.CheckEndTime.Todays <= DateTime.Now;
+				}
+			}
+
 		}
 
-		private static float GetPrice(DateTime dateTime) {
-			return new CandlesticksGetter() {
-				Start = dateTime.AddMinutes(-1),
-				Granularity = "M10",
-				Count = 1
-			}.Execute().First().Close;
+		private float GetPrice(DateTime dateTime) {
+			Candlestick candlestick;
+			int n = 0;
+			do {
+				candlestick = new CandlesticksGetter() {
+					Start = dateTime.AddMinutes(--n),
+					Granularity = "M1",
+					Count = 1,
+					Instrument = this.Instrument
+				}.Execute().First();
+			} while (candlestick.IsNull);
+			return candlestick.Close;
 		}
 
 		public struct Time {

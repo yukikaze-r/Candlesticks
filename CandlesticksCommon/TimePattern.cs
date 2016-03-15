@@ -100,7 +100,7 @@ namespace Candlesticks
 		private static float GetPrice(DateTime dateTime) {
 			return new CandlesticksGetter() {
 				Start = dateTime.AddMinutes(-1),
-				Granularity = "M1",
+				Granularity = "M10",
 				Count = 1
 			}.Execute().First().Close;
 		}

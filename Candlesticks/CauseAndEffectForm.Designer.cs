@@ -26,6 +26,7 @@
 			this.dataGridView1 = new System.Windows.Forms.DataGridView();
 			this.taskStatus = new System.Windows.Forms.Label();
 			this.因果 = new System.Windows.Forms.Button();
+			this.因果EUR_USD = new System.Windows.Forms.Button();
 			((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
 			this.SuspendLayout();
 			// 
@@ -60,11 +61,22 @@
 			this.因果.UseVisualStyleBackColor = true;
 			this.因果.Click += new System.EventHandler(this.button1_Click);
 			// 
+			// 因果EUR_USD
+			// 
+			this.因果EUR_USD.Location = new System.Drawing.Point(118, 21);
+			this.因果EUR_USD.Name = "因果EUR_USD";
+			this.因果EUR_USD.Size = new System.Drawing.Size(75, 23);
+			this.因果EUR_USD.TabIndex = 3;
+			this.因果EUR_USD.Text = "EUR_USD";
+			this.因果EUR_USD.UseVisualStyleBackColor = true;
+			this.因果EUR_USD.Click += new System.EventHandler(this.因果EUR_USD_Click);
+			// 
 			// CauseAndEffectForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(837, 558);
+			this.Controls.Add(this.因果EUR_USD);
 			this.Controls.Add(this.因果);
 			this.Controls.Add(this.taskStatus);
 			this.Controls.Add(this.dataGridView1);
@@ -81,5 +93,6 @@
 		private System.Windows.Forms.DataGridView dataGridView1;
 		private System.Windows.Forms.Label taskStatus;
 		private System.Windows.Forms.Button 因果;
+		private System.Windows.Forms.Button 因果EUR_USD;
 	}
 }

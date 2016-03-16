@@ -59,6 +59,7 @@
 			this.ストリーミングテスト = new System.Windows.Forms.Button();
 			this.価格急変 = new System.Windows.Forms.Button();
 			this.マウステスト = new System.Windows.Forms.Button();
+			this.因果 = new System.Windows.Forms.Button();
 			((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
 			this.menuStrip1.SuspendLayout();
 			this.SuspendLayout();
@@ -412,11 +413,22 @@
 			this.マウステスト.UseVisualStyleBackColor = true;
 			this.マウステスト.Click += new System.EventHandler(this.マウステスト_Click);
 			// 
+			// 因果
+			// 
+			this.因果.Location = new System.Drawing.Point(123, 204);
+			this.因果.Name = "因果";
+			this.因果.Size = new System.Drawing.Size(75, 23);
+			this.因果.TabIndex = 32;
+			this.因果.Text = "因果";
+			this.因果.UseVisualStyleBackColor = true;
+			this.因果.Click += new System.EventHandler(this.因果_Click);
+			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(727, 693);
+			this.Controls.Add(this.因果);
 			this.Controls.Add(this.マウステスト);
 			this.Controls.Add(this.価格急変);
 			this.Controls.Add(this.ストリーミングテスト);
@@ -498,6 +510,7 @@
 		private System.Windows.Forms.Button 価格急変;
 		private System.Windows.Forms.ToolStripMenuItem ポジション傾向ToolStripMenuItem;
 		private System.Windows.Forms.Button マウステスト;
+		private System.Windows.Forms.Button 因果;
 	}
 }
 

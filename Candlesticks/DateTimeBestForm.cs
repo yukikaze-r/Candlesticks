@@ -10,26 +10,12 @@ using System.Windows.Forms;
 
 namespace Candlesticks {
 	public partial class DateTimeBestForm : Form {
-		private Report report;
-
 		public DateTimeBestForm() {
 			InitializeComponent();
 		}
 
 		private void RunTask(object sender, Action<Report> action) {
-			Task.Run(() => {
-				using (this.report = new Report() {
-					Name = ((Control)sender).Text,
-					BasePath = Setting.Instance.DataFilePath,
-					DataGridView = dataGridView1,
-					StatusControl = taskStatus,
-				}) {
-					try {
-						action(this.report);
-					} catch (ReportExistedException) {
-					}
-				}
-			});
+			Report.RunTask(sender, action, dataGridView1, taskStatus);
 		}
 
 		private IEnumerable<Candlestick> GetM30Candles(TimeSpan span) {

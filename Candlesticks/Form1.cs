@@ -426,22 +426,6 @@ namespace Candlesticks {
 
 		private void 日時ベスト(object sender, EventArgs ev) {
 			new DateTimeBestForm().Show();
-/*
-			RunTask(sender, (Report report) => {
-				report.Version = 6;
-//				report.IsForceOverride = false;
-				report.Comment = "夏時間";
-				report.SetHeader("start","end", "start", "end", "↑↑","↑↓","↓↑","↓↓");
-				foreach (var t in GetBestTradeTime((new CandlesticksReader().Read(DATA_PATH + @"\m30-5y.csv")), 100, true)) {
-					foreach (var time in t.Item1) {
-						report.Write(FormatHourMinute(time));
-					}
-					foreach (var c in t.Item2) {
-						report.Write(c);
-					}
-					report.WriteLine();
-				}
-			});*/
 		}
 		
 		private void 日時ベスト特定日時検証(object sender, EventArgs e) {
@@ -1256,6 +1240,10 @@ namespace Candlesticks {
 
 		private void マウステスト_Click(object sender, EventArgs e) {
 			new MouseTestForm().Show();
+		}
+
+		private void 因果_Click(object sender, EventArgs e) {
+			new CauseAndEffectForm().Show();
 		}
 	}
 }

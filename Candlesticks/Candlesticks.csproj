@@ -53,6 +53,12 @@
   <ItemGroup>
     <Compile Include="BestTradeTime.cs" />
     <Compile Include="CandlesticksReader.cs" />
+    <Compile Include="CauseAndEffectForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CauseAndEffectForm.Designer.cs">
+      <DependentUpon>CauseAndEffectForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="ChartForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -105,6 +111,9 @@
     <Compile Include="SignalForm.Designer.cs">
       <DependentUpon>SignalForm.cs</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="CauseAndEffectForm.resx">
+      <DependentUpon>CauseAndEffectForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="ChartForm.resx">
       <DependentUpon>ChartForm.cs</DependentUpon>
     </EmbeddedResource>

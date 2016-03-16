@@ -135,6 +135,22 @@ namespace Candlesticks {
 			rowIndex++;
 		}
 
+		public static void RunTask(object sender, Action<Report> action, DataGridView dataGridView, Control status) {
+			Task.Run(() => {
+				using (var report = new Report() {
+					Name = ((Control)sender).Text,
+					BasePath = Setting.Instance.DataFilePath,
+					DataGridView = dataGridView,
+					StatusControl = status,
+				}) {
+					try {
+						action(report);
+					} catch (ReportExistedException) {
+					}
+				}
+			});
+		}
+
 		#region IDisposable Support
 		private bool disposedValue = false;
 

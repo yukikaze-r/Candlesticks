@@ -210,7 +210,7 @@ namespace Candlesticks {
 		private void LoadChart(Chart chart, DateTime dateTime, OrderBookDao.Entity orderBook, OrderBookDao.Entity previousOrderBook, bool isLatestChart) {
 
 			PricePoints pricePoints = GetPricePoints(orderBook);
-			PricePoints previousPricePoints = GetPricePoints(previousOrderBook);
+			PricePoints previousPricePoints = previousOrderBook!=null ? GetPricePoints(previousOrderBook) : null;
 
 			chart.Series.Clear();
 			chart.ChartAreas.Clear();

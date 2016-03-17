@@ -75,11 +75,11 @@ namespace Candlesticks {
 			while (i < effectCandles.Count() && j < causeCandles.Count()) {
 				var effectCandle = effectCandles[i];
 				var causeCandle = causeCandles[j];
-				if (effectCandle.IsNull || effectCandle.DateTime < causeCandle.DateTime) {
+				if (effectCandle.IsNull || effectCandle.DateTime < causeCandle.DateTime || effectCandle.Close == effectCandle.Open) {
 					i++;
 					continue;
 				}
-				if (causeCandle.IsNull || effectCandle.DateTime > causeCandle.DateTime) {
+				if (causeCandle.IsNull || effectCandle.DateTime > causeCandle.DateTime || causeCandle.Close == causeCandle.Open) {
 					j++;
 					continue;
 				}

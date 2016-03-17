@@ -100,7 +100,59 @@ namespace Candlesticks {
 			}
 			report.WriteLine();
 		}
-		
+
+		private class CauseContext {
+			public Candlestick[] Candles;
+			public bool IsUp;
+			public int Index = 0;
+			public Candlestick CurrentCandle {
+				get {
+					return Candles[Index];
+				}
+			}
+			public bool IsMatch {
+				get {
+					return Candles[Index].IsUp() == IsUp;
+				}
+			}
+		}
+
+		private static void ReportEffectAndCauseCombination(Report report, List<CauseContext> causeContexts, bool effectIsUp) {
+			int prev = -1;
+			int matchCount = 0;
+			int total = 0;
+			while (causeContexts.Count(c => c.Index >= c.Candles.Count()) == 0) {
+				bool indexIncrement = false;
+				DateTime maxDateTime = causeContexts.Max(c => c.CurrentCandle.DateTime);
+				foreach (var causeContext in causeContexts) {
+					if (causeContext.CurrentCandle.IsNull || maxDateTime > causeContext.CurrentCandle.DateTime) {
+						causeContext.Index++;
+						indexIncrement = true;
+					}
+				}
+				if(indexIncrement) {
+					continue;
+				}
+				if (prev == 1) {
+					if (causeContexts[0].CurrentCandle.IsUp() == effectIsUp) {
+						matchCount++;
+					}
+					total++;
+				}
+				if (causeContexts.Count(c => !c.IsMatch) == 0) {
+					prev = 1;
+				} else {
+					prev = 0;
+				}
+
+				foreach (var causeContext in causeContexts) {
+					causeContext.Index++;
+				}
+			}
+			report.WriteLine(matchCount, total);
+			report.WriteLine();
+		}
+
 		private void 因果EUR_USD_Click(object sender, EventArgs e) {
 			RunTask(sender, (Report report) => {
 				using (DBUtils.OpenThreadConnection()) {
@@ -109,68 +161,55 @@ namespace Candlesticks {
 					report.Comment = "";
 					report.SetHeader("↑↑↑↑->↓", "total");
 
-					DateTime start = DateTime.Today.AddTicks(-new TimeSpan(365*5,0,0,0).Ticks);
+					DateTime start = DateTime.Today.AddTicks(-new TimeSpan(365 * 5, 0, 0, 0).Ticks);
 					DateTime end = DateTime.Today;
-					var effectCandles = new CandlesticksGetter() {
-						Instrument = "EUR_USD",
-						Granularity = "D",
-						Start = start,
-						End = end
-					}.Execute().ToList();
-					var causeCandlesList = new List<Candlestick[]>();
-					foreach (var cause in new string[] { "WTICO_USD", "US30_USD", "JP225_USD" }) {
+
+					var causeContexts = new List<CauseContext>();
+					foreach (var cause in new string[] { "EUR_USD", "WTICO_USD", "US30_USD", "JP225_USD" }) {
 						var causeCandles = new CandlesticksGetter() {
 							Instrument = cause,
 							Granularity = "D",
 							Start = start,
 							End = end
 						}.Execute().ToArray();
-						causeCandlesList.Add(causeCandles);
+						causeContexts.Add(new CauseContext() {
+							Candles = causeCandles,
+							IsUp = true
+						});
 					}
+					ReportEffectAndCauseCombination(report, causeContexts, false);
+				}
+			});
+		}
 
 
+		private void 因果USD_JPY_Click(object sender, EventArgs e) {
+			RunTask(sender, (Report report) => {
+				using (DBUtils.OpenThreadConnection()) {
+					report.Version = 1;
+					report.IsForceOverride = true;
+					report.Comment = "";
+					report.SetHeader("↑↓↓↓↓->↓", "total");
 
-					int effectIndex = 0;
-					int[] causeIndex = new int[causeCandlesList.Count()];
-					int prev = -1;
-					int downCount = 0;
-					int total = 0;
-					while (effectIndex < effectCandles.Count() && 
-						causeIndex.Zip(causeCandlesList,(index, causeCandles)=>index >= causeCandles.Count()).Count(b=>b)==0) {
+					DateTime start = DateTime.Today.AddTicks(-new TimeSpan(365, 0, 0, 0).Ticks);
+					DateTime end = DateTime.Today;
 
-						var effectCandle = effectCandles[effectIndex];
-						var causesCandle = causeIndex.Zip(causeCandlesList, (index, causeCandles) => causeCandles[index]).ToList();
-
-						if (effectCandle.IsNull || effectCandle.DateTime < causesCandle.Max(c=>c.DateTime)) {
-							effectIndex++;
-							continue;
-						}
-
-						for(int i=0; i<causeIndex.Count(); i++) {
-							if(causesCandle[i].IsNull || effectCandle.DateTime > causesCandle[i].DateTime) {
-								causeIndex[i]++;
-								continue;
-							}
-						}
-						if(prev == 1) {
-							if(!effectCandle.IsUp()) {
-								downCount++;
-							}
-							total++;
-						}
-						if(effectCandle.IsUp() && causesCandle.Count(c=>c.IsUp()==false)==0) {
-							prev = 1;
-						} else {
-							prev = 0;
-						}
-						effectIndex++;
-
-						for (int i = 0; i < causeIndex.Count(); i++) {
-							causeIndex[i]++;
-						}
+					var causeContexts = new List<CauseContext>();
+					var instruments = new string[] { "USD_JPY", "WTICO_USD", "US30_USD", "JP225_USD", "EUR_USD" };
+					var isUps = new bool[] { true,false,false,false,false };
+					foreach(var t in instruments.Zip(isUps,(i,isUp)=>new Tuple<string,bool>(i,isUp))) {
+						var causeCandles = new CandlesticksGetter() {
+							Instrument = t.Item1,
+							Granularity = "M1",
+							Start = start,
+							End = end
+						}.Execute().ToArray();
+						causeContexts.Add(new CauseContext() {
+							Candles = causeCandles,
+							IsUp = t.Item2
+						});
 					}
-					report.WriteLine(downCount, total);
-					report.WriteLine();
+					ReportEffectAndCauseCombination(report, causeContexts, false);
 				}
 			});
 		}

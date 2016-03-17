@@ -27,6 +27,7 @@
 			this.taskStatus = new System.Windows.Forms.Label();
 			this.因果 = new System.Windows.Forms.Button();
 			this.因果EUR_USD = new System.Windows.Forms.Button();
+			this.因果USD_JPY = new System.Windows.Forms.Button();
 			((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
 			this.SuspendLayout();
 			// 
@@ -36,10 +37,10 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-			this.dataGridView1.Location = new System.Drawing.Point(2, 216);
+			this.dataGridView1.Location = new System.Drawing.Point(-5, 81);
 			this.dataGridView1.Name = "dataGridView1";
 			this.dataGridView1.RowTemplate.Height = 21;
-			this.dataGridView1.Size = new System.Drawing.Size(836, 343);
+			this.dataGridView1.Size = new System.Drawing.Size(846, 372);
 			this.dataGridView1.TabIndex = 0;
 			// 
 			// taskStatus
@@ -71,11 +72,22 @@
 			this.因果EUR_USD.UseVisualStyleBackColor = true;
 			this.因果EUR_USD.Click += new System.EventHandler(this.因果EUR_USD_Click);
 			// 
+			// 因果USD_JPY
+			// 
+			this.因果USD_JPY.Location = new System.Drawing.Point(227, 21);
+			this.因果USD_JPY.Name = "因果USD_JPY";
+			this.因果USD_JPY.Size = new System.Drawing.Size(75, 23);
+			this.因果USD_JPY.TabIndex = 4;
+			this.因果USD_JPY.Text = "USD_JPY";
+			this.因果USD_JPY.UseVisualStyleBackColor = true;
+			this.因果USD_JPY.Click += new System.EventHandler(this.因果USD_JPY_Click);
+			// 
 			// CauseAndEffectForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(837, 558);
+			this.ClientSize = new System.Drawing.Size(838, 454);
+			this.Controls.Add(this.因果USD_JPY);
 			this.Controls.Add(this.因果EUR_USD);
 			this.Controls.Add(this.因果);
 			this.Controls.Add(this.taskStatus);
@@ -94,5 +106,6 @@
 		private System.Windows.Forms.Label taskStatus;
 		private System.Windows.Forms.Button 因果;
 		private System.Windows.Forms.Button 因果EUR_USD;
+		private System.Windows.Forms.Button 因果USD_JPY;
 	}
 }

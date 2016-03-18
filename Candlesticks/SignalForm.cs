@@ -56,7 +56,7 @@ namespace Candlesticks {
 					CheckStartTime = new TimeOfDayPattern.Time(0, 20),
 					CheckEndTime = new TimeOfDayPattern.Time(5, 40),
 					IsCheckUp = false,
-					TradeStartTime = new TimeOfDayPattern.Time(5, 50),
+					TradeStartTime = new TimeOfDayPattern.Time(5, 49),
 					TradeEndTime = new TimeOfDayPattern.Time(7, 10),
 					TradeType = TradeType.Ask
 				});

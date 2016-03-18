@@ -60,6 +60,7 @@
 			this.価格急変 = new System.Windows.Forms.Button();
 			this.マウステスト = new System.Windows.Forms.Button();
 			this.因果 = new System.Windows.Forms.Button();
+			this.チャート研究 = new System.Windows.Forms.Button();
 			((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
 			this.menuStrip1.SuspendLayout();
 			this.SuspendLayout();
@@ -423,11 +424,22 @@
 			this.因果.UseVisualStyleBackColor = true;
 			this.因果.Click += new System.EventHandler(this.因果_Click);
 			// 
+			// チャート研究
+			// 
+			this.チャート研究.Location = new System.Drawing.Point(122, 271);
+			this.チャート研究.Name = "チャート研究";
+			this.チャート研究.Size = new System.Drawing.Size(75, 23);
+			this.チャート研究.TabIndex = 33;
+			this.チャート研究.Text = "チャート研究";
+			this.チャート研究.UseVisualStyleBackColor = true;
+			this.チャート研究.Click += new System.EventHandler(this.チャート研究_Click);
+			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(727, 693);
+			this.Controls.Add(this.チャート研究);
 			this.Controls.Add(this.因果);
 			this.Controls.Add(this.マウステスト);
 			this.Controls.Add(this.価格急変);
@@ -511,6 +523,7 @@
 		private System.Windows.Forms.ToolStripMenuItem ポジション傾向ToolStripMenuItem;
 		private System.Windows.Forms.Button マウステスト;
 		private System.Windows.Forms.Button 因果;
+		private System.Windows.Forms.Button チャート研究;
 	}
 }
 

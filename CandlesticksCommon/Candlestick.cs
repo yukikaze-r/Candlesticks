@@ -19,6 +19,19 @@ namespace Candlesticks {
 			}
 		}
 
+		public float PriceRange {
+			get {
+				return High - Low;
+			}
+		}
+
+
+		public float BarRange {
+			get {
+				return Math.Abs(Open - Close);
+			}
+		}
+
 		public bool IsUp(float d=0) {
 			return Close > Open + d;
 		}

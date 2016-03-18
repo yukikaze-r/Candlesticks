@@ -1245,5 +1245,10 @@ namespace Candlesticks {
 		private void 因果_Click(object sender, EventArgs e) {
 			new CauseAndEffectForm().Show();
 		}
+
+		private void チャート研究_Click(object sender, EventArgs e) {
+			new ChartLabForm().Show();
+
+		}
 	}
 }

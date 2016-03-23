@@ -71,6 +71,11 @@ namespace Candlesticks
 			public Int64 Id;
 			public DateTime DateTime;
 			public float Rate;
+			public DateTime NormalizedDateTime {
+				get {
+					return new DateTime(DateTime.Year, DateTime.Month, DateTime.Day, DateTime.Hour, DateTime.Minute, 0, DateTime.Kind);
+				}
+			}
 
 			public IEnumerable<OrderBookPricePointDao.Entity> GetPricePointsOrderByPrice() {
 				return new OrderBookPricePointDao(Connection).GetByOrderBookOrderByPrice(Id);

@@ -61,6 +61,7 @@
 			this.マウステスト = new System.Windows.Forms.Button();
 			this.因果 = new System.Windows.Forms.Button();
 			this.チャート研究 = new System.Windows.Forms.Button();
+			this.OrderBook研究 = new System.Windows.Forms.Button();
 			((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
 			this.menuStrip1.SuspendLayout();
 			this.SuspendLayout();
@@ -294,14 +295,14 @@
             this.ウィンドウToolStripMenuItem});
 			this.menuStrip1.Location = new System.Drawing.Point(0, 0);
 			this.menuStrip1.Name = "menuStrip1";
-			this.menuStrip1.Size = new System.Drawing.Size(727, 26);
+			this.menuStrip1.Size = new System.Drawing.Size(727, 24);
 			this.menuStrip1.TabIndex = 24;
 			this.menuStrip1.Text = "menuStrip1";
 			// 
 			// 設定ToolStripMenuItem
 			// 
 			this.設定ToolStripMenuItem.Name = "設定ToolStripMenuItem";
-			this.設定ToolStripMenuItem.Size = new System.Drawing.Size(44, 22);
+			this.設定ToolStripMenuItem.Size = new System.Drawing.Size(43, 20);
 			this.設定ToolStripMenuItem.Text = "設定";
 			this.設定ToolStripMenuItem.Click += new System.EventHandler(this.設定ToolStripMenuItem_Click);
 			// 
@@ -313,34 +314,34 @@
             this.チャートToolStripMenuItem,
             this.ポジション傾向ToolStripMenuItem});
 			this.ウィンドウToolStripMenuItem.Name = "ウィンドウToolStripMenuItem";
-			this.ウィンドウToolStripMenuItem.Size = new System.Drawing.Size(80, 22);
+			this.ウィンドウToolStripMenuItem.Size = new System.Drawing.Size(60, 20);
 			this.ウィンドウToolStripMenuItem.Text = "ウィンドウ";
 			// 
 			// オーダーブックToolStripMenuItem
 			// 
 			this.オーダーブックToolStripMenuItem.Name = "オーダーブックToolStripMenuItem";
-			this.オーダーブックToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+			this.オーダーブックToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
 			this.オーダーブックToolStripMenuItem.Text = "オーダーブック";
 			this.オーダーブックToolStripMenuItem.Click += new System.EventHandler(this.オーダーブックToolStripMenuItem_Click);
 			// 
 			// シグナルToolStripMenuItem
 			// 
 			this.シグナルToolStripMenuItem.Name = "シグナルToolStripMenuItem";
-			this.シグナルToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+			this.シグナルToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
 			this.シグナルToolStripMenuItem.Text = "シグナル";
 			this.シグナルToolStripMenuItem.Click += new System.EventHandler(this.シグナルToolStripMenuItem_Click);
 			// 
 			// チャートToolStripMenuItem
 			// 
 			this.チャートToolStripMenuItem.Name = "チャートToolStripMenuItem";
-			this.チャートToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+			this.チャートToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
 			this.チャートToolStripMenuItem.Text = "チャート";
 			this.チャートToolStripMenuItem.Click += new System.EventHandler(this.チャートToolStripMenuItem_Click);
 			// 
 			// ポジション傾向ToolStripMenuItem
 			// 
 			this.ポジション傾向ToolStripMenuItem.Name = "ポジション傾向ToolStripMenuItem";
-			this.ポジション傾向ToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+			this.ポジション傾向ToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
 			this.ポジション傾向ToolStripMenuItem.Text = "ポジション傾向";
 			this.ポジション傾向ToolStripMenuItem.Click += new System.EventHandler(this.ポジション傾向ToolStripMenuItem_Click);
 			// 
@@ -434,11 +435,22 @@
 			this.チャート研究.UseVisualStyleBackColor = true;
 			this.チャート研究.Click += new System.EventHandler(this.チャート研究_Click);
 			// 
+			// OrderBook研究
+			// 
+			this.OrderBook研究.Location = new System.Drawing.Point(226, 271);
+			this.OrderBook研究.Name = "OrderBook研究";
+			this.OrderBook研究.Size = new System.Drawing.Size(108, 23);
+			this.OrderBook研究.TabIndex = 34;
+			this.OrderBook研究.Text = "OrderBook研究";
+			this.OrderBook研究.UseVisualStyleBackColor = true;
+			this.OrderBook研究.Click += new System.EventHandler(this.OrderBook研究_Click);
+			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(727, 693);
+			this.Controls.Add(this.OrderBook研究);
 			this.Controls.Add(this.チャート研究);
 			this.Controls.Add(this.因果);
 			this.Controls.Add(this.マウステスト);
@@ -524,6 +536,7 @@
 		private System.Windows.Forms.Button マウステスト;
 		private System.Windows.Forms.Button 因果;
 		private System.Windows.Forms.Button チャート研究;
+		private System.Windows.Forms.Button OrderBook研究;
 	}
 }
 

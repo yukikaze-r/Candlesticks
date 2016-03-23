@@ -95,6 +95,12 @@
     <Compile Include="OrderBookForm.Designer.cs">
       <DependentUpon>OrderBookForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="OrderBookLabForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="OrderBookLabForm.Designer.cs">
+      <DependentUpon>OrderBookLabForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="PositionsForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -137,6 +143,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="OrderBookForm.resx">
       <DependentUpon>OrderBookForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="OrderBookLabForm.resx">
+      <DependentUpon>OrderBookLabForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="PositionsForm.resx">
       <DependentUpon>PositionsForm.cs</DependentUpon>

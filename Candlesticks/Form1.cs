@@ -1250,5 +1250,10 @@ namespace Candlesticks {
 			new ChartLabForm().Show();
 
 		}
+
+		private void OrderBook研究_Click(object sender, EventArgs e) {
+			new OrderBookLabForm().Show();
+
+		}
 	}
 }

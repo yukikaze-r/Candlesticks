@@ -124,17 +124,13 @@ namespace Candlesticks
 		}
 
 		private float GetPrice(DateTime dateTime) {
-			Candlestick candlestick;
-			int n = 0;
-			do {
-				candlestick = new CandlesticksGetter() {
-					Start = dateTime.AddMinutes(--n),
-					Granularity = "M1",
-					Count = 1,
-					Instrument = this.Instrument
-				}.Execute().First();
-			} while (candlestick.IsNull);
-			return candlestick.Close;
+			return new CandlesticksGetter() {
+				Start = dateTime.AddMinutes(-10),
+				Granularity = "M1",
+				Count = 10,
+				Instrument = this.Instrument
+			}.Execute().Reverse().Where(c => !c.IsNull)
+				.Select(c => c.Close).DefaultIfEmpty(float.NaN).First();
 		}
 
 		public struct Time {

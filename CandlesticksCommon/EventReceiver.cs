@@ -15,11 +15,12 @@ namespace Candlesticks
 		public event Action<OrderBookUpdated> OrderBookUpdatedEvent = delegate { };
 
 		public void Execute() {
-			Console.WriteLine("receive start");
-			tcpClient = new TcpClient("localhost", 4444);
-			var reader = new BinaryReader(tcpClient.GetStream());
 
 			try {
+				Console.WriteLine("receive start");
+				tcpClient = new TcpClient("localhost", 4444);
+				var reader = new BinaryReader(tcpClient.GetStream());
+
 				while (true) {
 					int length = reader.ReadInt32();
 					byte[] body = reader.ReadBytes(length);

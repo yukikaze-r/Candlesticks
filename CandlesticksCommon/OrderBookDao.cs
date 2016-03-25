@@ -14,11 +14,13 @@ namespace Candlesticks
 			this.connection = connection;
 		}
 
-		public Int64 GetCountByDateTime(DateTime dateTime) {
+		public Int64 GetCountByDateTime(string instrument, DateTime dateTime) {
 			using (var cmd = new NpgsqlCommand()) {
 				cmd.Connection = connection;
-				cmd.CommandText = "select count(*) from order_book where date_time=:date_time";
+				cmd.CommandText = "select count(*) from order_book where instrument=:instrument and date_time=:date_time";
+				cmd.Parameters.Add(new NpgsqlParameter("instrument", DbType.String));
 				cmd.Parameters.Add(new NpgsqlParameter("date_time", DbType.DateTime));
+				cmd.Parameters["instrument"].Value = instrument;
 				cmd.Parameters["date_time"].Value = dateTime;
 				using (var dr = cmd.ExecuteReader()) {
 					if (dr.Read()) {
@@ -29,10 +31,12 @@ namespace Candlesticks
 			}
 		}
 
-		public IEnumerable<Entity> GetAllOrderByDateTimeDescendant() {
+		public IEnumerable<Entity> GetByInstrumentOrderByDateTimeDescendant(string instrument) {
 			using (var cmd = new NpgsqlCommand()) {
 				cmd.Connection = connection;
-				cmd.CommandText = "select id, date_time, rate from order_book order by date_time desc";
+				cmd.CommandText = "select id, date_time, rate from order_book where instrument=:instrument order by date_time desc ";
+				cmd.Parameters.Add(new NpgsqlParameter("instrument", DbType.String));
+				cmd.Parameters["instrument"].Value = instrument;
 				using (var dr = cmd.ExecuteReader()) {
 					while (dr.Read()) {
 						var entity = new Entity();
@@ -46,12 +50,14 @@ namespace Candlesticks
 			}
 		}
 
-		public Entity GetByDateTime(DateTime dateTime) {
+		public Entity GetByInstrumentAndDateTime(string instrument, DateTime dateTime) {
 			using (var cmd = new NpgsqlCommand()) {
 				cmd.Connection = connection;
-				cmd.CommandText = "select id, date_time, rate from order_book where date_time = :date_time";
+				cmd.CommandText = "select id, date_time, rate from order_book where instrument=:instrument and date_time=:date_time";
 				cmd.Parameters.Add(new NpgsqlParameter("date_time", DbType.DateTime));
+				cmd.Parameters.Add(new NpgsqlParameter("instrument", DbType.String));
 				cmd.Parameters["date_time"].Value = dateTime;
+				cmd.Parameters["instrument"].Value = instrument;
 				using (var dr = cmd.ExecuteReader()) {
 					while (dr.Read()) {
 						var entity = new Entity();
@@ -69,8 +75,10 @@ namespace Candlesticks
 		public class Entity {
 			public NpgsqlConnection Connection;
 			public Int64 Id;
+			public string Instrument;
 			public DateTime DateTime;
 			public float Rate;
+
 			public DateTime NormalizedDateTime {
 				get {
 					return new DateTime(DateTime.Year, DateTime.Month, DateTime.Day, DateTime.Hour, DateTime.Minute, 0, DateTime.Kind);

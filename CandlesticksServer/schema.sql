@@ -1,15 +1,21 @@
 ﻿create table order_book (
 	id bigserial primary key,
+	instrument text,
 	date_time timestamp with time zone,
-	rate numeric(6,3)
+	rate numeric(12,5)
 );
 
-create index order_book_date_time_idx on order_book(date_time desc);
+create index order_book_date_time_idx on order_book(instrument,date_time desc);
+
+alter table order_book add column instrument text;
+update order_book set instrument='USD_JPY';
+drop index order_book_date_time_idx;
+alter table order_book alter column rate type numeric(12,5);
 
 create table order_book_price_point (
 	id bigserial primary key,
 	order_book_id bigint,
-	price numeric(6,3),
+	price numeric(12,5),
 	os numeric(6,4),
 	ps numeric(6,4),
 	ol numeric(6,4),
@@ -17,6 +23,9 @@ create table order_book_price_point (
 );
 
 create index order_book_price_point_order_book_idx on order_book_price_point(order_book_id);
+
+alter table order_book_price_point alter column price type numeric(12,5);
+
 
 create table candlestick (
 	id bigserial primary key,

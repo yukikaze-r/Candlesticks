@@ -17,5 +17,8 @@ namespace Candlesticks
     public class OrderBookUpdated : ServerEvent {
 		[DataMember]
 		public DateTime DateTime;
+
+		[DataMember]
+		public string Instrument;
     }
 }

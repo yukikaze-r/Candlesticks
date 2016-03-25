@@ -12,6 +12,7 @@ namespace Candlesticks {
 	class OrderBookCollector {
 
 		private static int INTERVAL_MINUTE = 20;
+		private static string[] INSTRUMENTS = new string[] { "USD_JPY", "EUR_USD", "EUR_JPY"};
 
 		private EventServer eventServer;
 		private OandaAPI oandaApi;
@@ -22,11 +23,13 @@ namespace Candlesticks {
 
 			oandaApi = new OandaAPI();
 
-			var orderbook = oandaApi.GetOrderbookData(3600);
 
 			this.connection = DBUtils.OpenConnection();
 
-			SaveOrderbook(orderbook);
+			foreach(var instrument in INSTRUMENTS) {
+				var orderbook = oandaApi.GetOrderbookData(instrument, 3600);
+				SaveOrderbook(orderbook, instrument);
+			}
 
 			var now = DateTime.Now;
 			var millisecond = (now.Minute * 60 + now.Second) * 1000 + now.Millisecond;
@@ -53,8 +56,10 @@ namespace Candlesticks {
 				};
 				timer.Elapsed += Timer_Elapsed;
 				timer.Start();
-				for (int i = 0; SaveOrderbook(oandaApi.GetOrderbookData(3600)) == false && i < 3; i++) {
-					Thread.Sleep(1000);
+				foreach(var instrument in INSTRUMENTS) {
+					for (int i = 0; SaveOrderbook(oandaApi.GetOrderbookData(instrument,3600), instrument) == false && i < 3; i++) {
+						Thread.Sleep(1000);
+					}
 				}
 				Trace.WriteLine("Timer_FirstElapsed end");
 			} catch(Exception ex) {
@@ -65,8 +70,10 @@ namespace Candlesticks {
 		private void Timer_Elapsed(object sender, ElapsedEventArgs e) {
 			try {
 				Trace.WriteLine("Timer_Elapsed");
-				for(int i=0; SaveOrderbook(oandaApi.GetOrderbookData(3600)) == false && i<3; i++) {
-					Thread.Sleep(1000);
+				foreach (var instrument in INSTRUMENTS) {
+					for (int i = 0; SaveOrderbook(oandaApi.GetOrderbookData(instrument,3600),instrument) == false && i < 3; i++) {
+						Thread.Sleep(1000);
+					}
 				}
 				Trace.WriteLine("Timer_Elapsed end");
 			} catch (Exception ex) {
@@ -74,14 +81,14 @@ namespace Candlesticks {
 			}
 		}
 
-		private bool SaveOrderbook(Dictionary<DateTime,PricePoints> orderbook) {
+		private bool SaveOrderbook(Dictionary<DateTime,PricePoints> orderbook, string instrument) {
 			DateTime? lastUpdated = null;
 			Trace.WriteLine("order book count:"+orderbook.Keys.Count());
 			foreach (var time in orderbook.Keys.OrderBy(k => k)) {
-				if ( new OrderBookDao(connection).GetCountByDateTime(time) == 0) {
+				if ( new OrderBookDao(connection).GetCountByDateTime(instrument,time) == 0) {
 					Trace.WriteLine(time+" is not exists");
 					Trace.Flush();
-					SavePricePoints(time,orderbook[time]);
+					SavePricePoints(instrument, time, orderbook[time]);
 					lastUpdated = time;
 				} else {
 					Trace.WriteLine(time + " is exists");
@@ -89,21 +96,23 @@ namespace Candlesticks {
 			}
 
 			if (lastUpdated != null) {
-				eventServer.Send(new OrderBookUpdated() { DateTime = lastUpdated.Value });
+				eventServer.Send(new OrderBookUpdated() { Instrument = instrument, DateTime = lastUpdated.Value });
 				return true;
 			} else {
 				return false;
 			}
 		}
 
-		private void SavePricePoints(DateTime time, PricePoints pricePoints) {
+		private void SavePricePoints(string instrument, DateTime time, PricePoints pricePoints) {
 			using (var transaction = connection.BeginTransaction()) {
 				Int64 id = 0;
 				using (var cmd = new NpgsqlCommand()) {
 					cmd.Connection = connection;
-					cmd.CommandText = "insert into order_book(date_time,rate) values(:date_time,:rate) returning id";
+					cmd.CommandText = "insert into order_book(instrument,date_time,rate) values(:instrument,:date_time,:rate) returning id";
+					cmd.Parameters.Add(new NpgsqlParameter("instrument", DbType.String));
 					cmd.Parameters.Add(new NpgsqlParameter("date_time", DbType.DateTime));
 					cmd.Parameters.Add(new NpgsqlParameter("rate", DbType.Single));
+					cmd.Parameters["instrument"].Value = instrument;
 					cmd.Parameters["date_time"].Value = time;
 					cmd.Parameters["rate"].Value = pricePoints.rate;
 					id = (Int64)cmd.ExecuteScalar();

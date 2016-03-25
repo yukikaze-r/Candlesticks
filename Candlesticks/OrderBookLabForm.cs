@@ -21,7 +21,7 @@ namespace Candlesticks {
 		}
 
 		private IEnumerable<OrderBookDao.Entity> GetOrderBooks() {
-			foreach(var orderBook in new OrderBookDao(DBUtils.GetConnection()).GetAllOrderByDateTimeDescendant().Reverse().ToList()) {
+			foreach(var orderBook in new OrderBookDao(DBUtils.GetConnection()).GetByInstrumentOrderByDateTimeDescendant("USD_JPY").Reverse().ToList()) {
 				if(!new CandlesticksGetter() {
 					Granularity = "M10",
 					Start = orderBook.NormalizedDateTime.AddMinutes(-10),

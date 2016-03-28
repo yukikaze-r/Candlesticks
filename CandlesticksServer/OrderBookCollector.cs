@@ -22,7 +22,7 @@ namespace Candlesticks {
 
 			oandaApi = new OandaAPI();
 
-			var orderbook = oandaApi.GetOrderbookData(3600);
+			var orderbook = oandaApi.GetOrderbookData(86400);
 
 			this.connection = DBUtils.OpenConnection();
 

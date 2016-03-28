@@ -58,8 +58,8 @@ namespace Candlesticks {
 				timer.Start();
 				foreach(var instrument in INSTRUMENTS) {
 					for (int i = 0; SaveOrderbook(oandaApi.GetOrderbookData(instrument,3600), instrument) == false && i < 3; i++) {
-						Thread.Sleep(1000);
-					}
+					Thread.Sleep(1000);
+				}
 				}
 				Trace.WriteLine("Timer_FirstElapsed end");
 			} catch(Exception ex) {
@@ -72,8 +72,8 @@ namespace Candlesticks {
 				Trace.WriteLine("Timer_Elapsed");
 				foreach (var instrument in INSTRUMENTS) {
 					for (int i = 0; SaveOrderbook(oandaApi.GetOrderbookData(instrument,3600),instrument) == false && i < 3; i++) {
-						Thread.Sleep(1000);
-					}
+					Thread.Sleep(1000);
+				}
 				}
 				Trace.WriteLine("Timer_Elapsed end");
 			} catch (Exception ex) {

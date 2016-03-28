@@ -5,13 +5,13 @@ using System.Text;
 
 namespace Candlesticks
 {
-	delegate void PriceListener(DateTime dateTime, float bid, float ask);
+	delegate void PriceListener(string instrument, DateTime dateTime, float bid, float ask);
 
 	class PriceObserver
     {
 		private static Dictionary<string, PriceObserver> instances = new Dictionary<string, PriceObserver>();
 
-		public static PriceObserver Get(string instrument) {
+		public static PriceObserver Get(string instrument = "USD_JPY,EUR_JPY,EUR_USD") {
 			lock(typeof(PriceObserver)) {
 				if(!instances.ContainsKey(instrument)) {
 					instances[instrument] = new PriceObserver(instrument);
@@ -40,9 +40,9 @@ namespace Candlesticks
 			}
 		}
 
-		private void ReceivePrice(DateTime dateTime, float bid, float ask) {
+		private void ReceivePrice(string instrument, DateTime dateTime, float bid, float ask) {
 			lock(this) {
-				listeners.Invoke(dateTime, bid, ask);
+				listeners.Invoke(instrument, dateTime, bid, ask);
 			}
 		}
 

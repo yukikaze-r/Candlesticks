@@ -1,5 +1,6 @@
 ﻿using Npgsql;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -25,12 +26,16 @@ namespace Candlesticks {
 			public float GraphInterval;
 			public string AxisLabelFormat;
 
+			public float Bid;
+			public float Ask;
+			public DateTime LastPriceTime;
+
 			public override string ToString() {
 				return Name;
 			}
 		}
 
-		private static InstrumentInfo[] INSTRUMENTS = new InstrumentInfo[] {
+		private InstrumentInfo[] instruments = new InstrumentInfo[] {
 			new InstrumentInfo() {
 				Name = "USD_JPY",
 				GraphMinPrice = 105f,
@@ -53,33 +58,30 @@ namespace Candlesticks {
 				AxisLabelFormat = "f4",
 			},
 		};
-//			"USD_JPY", "EUR_JPY", "EUR_USD" };
 
 		private NpgsqlConnection connection = null;
 		private TcpClient tcpClient = null;
 		private Dictionary<string, List<OrderBookDao.Entity>> orderBooks = new Dictionary<string, List<OrderBookDao.Entity>>();
 		private Series streamPriceSeries = null;
 		private float latestPrice;
-		private OandaAPI oandaApi;
 		private Series latestVolumeSeries = null;
 		private List<Candlestick> latestS5Candles;
-		private object volumeCandlesLock = new object();
 		private Thread retriveVolumesThread = null;
 		private InstrumentInfo selectedInstrument = null;
 		private Dictionary<string, Dictionary<OrderBookDao.Entity, PricePoints>> pricePointsCache = null;
+		private BlockingCollection<Action> retriveVolumeQueue = new BlockingCollection<Action>();
 
 		public OrderBookForm() {
 			InitializeComponent();
 
-			foreach (var instrument in INSTRUMENTS) {
+			foreach (var instrument in instruments) {
 				comboBox1.Items.Add(instrument);
 			}
 		}
 
 		
 		private void OrderBookForm_Load(object sender, EventArgs ev) {
-
-			oandaApi = new OandaAPI();
+			
 			connection = DBUtils.OpenConnection();
 
 			comboBox1.SelectedIndex = 0;
@@ -96,39 +98,16 @@ namespace Candlesticks {
 			retriveVolumesThread = new Thread(new ThreadStart(RetriveVolumes));
 			retriveVolumesThread.Start();
 
-			PriceObserver.Get("USD_JPY").Observe(ReceivePrice);
+			PriceObserver.Get().Observe(ReceivePrice);
 		}
 
 		private void RetriveVolumes() {
-			while (volumeCandlesLock != null) {
-				Action invokeTarget = null;
-				lock (volumeCandlesLock) {
-					if (latestS5Candles == null) {
-						latestS5Candles = RetrieveS5Candles(orderBooks["USD_JPY"][0]);
-						/*						latestS5Candles = oandaApi.GetCandles(new DateTime(firstDateTime.Year, firstDateTime.Month, firstDateTime.Day, firstDateTime.Hour, firstDateTime.Minute, 0, DateTimeKind.Local),
-													DateTime.Now, "USD_JPY", "S5").ToList();*/
-						invokeTarget = new Action(() => {
-							if (orderBookList.SelectedIndex == 0) {
-								lock (volumeCandlesLock) {
-									if (latestS5Candles != null) {
-										LoadVolumeSeries(latestVolumeSeries, latestS5Candles);
-									}
-								}
-							}
-						});
-					} else {
-						invokeTarget = RetriveVolumeLatest();
-					}
+			while (true) {
+				var action = retriveVolumeQueue.Take();
+				if(action == null) {
+					break;
 				}
-				if(invokeTarget != null) {
-					Invoke(invokeTarget);
-				}
-
-				try {
-					Thread.Sleep(5000);
-				} catch(ThreadInterruptedException) {
-					return;
-				}
+				action();
 			}
 		}
 
@@ -168,7 +147,7 @@ namespace Candlesticks {
 		}
 
 		private Action RetriveVolumeLatest() {
-			var candle = oandaApi.GetCandles(1,"USD_JPY", "S5").First();
+			var candle = OandaAPI.Instance.GetCandles(1,"USD_JPY", "S5").First();
 			if(latestS5Candles.Where(c=>c.DateTime.Equals(candle.DateTime)).Count()==0) {
 				latestS5Candles.Add(candle.Candlestick);
 
@@ -204,17 +183,33 @@ namespace Candlesticks {
 			return n * VOLUME_PRICE_GRANURALITY;
 		}
 
-		private void ReceivePrice(DateTime dateTime,float bid, float ask) {
-			Invoke(new Action(() => {
-				timeLabel.Text = dateTime.ToString("M/d HH:mm:ss");
-				bidLabel.Text = bid.ToString("f3");
-				askLabel.Text = ask.ToString("f3");
-				if (streamPriceSeries != null) {
-					latestPrice = (bid + ask) / 2;
-					streamPriceSeries.Points[0].XValue = latestPrice;
-					streamPriceSeries.Points[1].XValue = latestPrice;
-				}
-			}));
+		private InstrumentInfo GetInstrumentInfo(string instrument) {
+			return instruments.Where(i => i.Name == instrument).First();
+		}
+
+		private void ReceivePrice(string instrument, DateTime dateTime,float bid, float ask) {
+			var info = GetInstrumentInfo(instrument);
+
+			info.Bid = bid;
+			info.Ask = ask;
+			info.LastPriceTime = dateTime;
+
+			if (selectedInstrument.Name == instrument) {
+				Invoke(new Action(() => {
+					UpdatePrice();
+				}));
+			}
+		}
+
+		private void UpdatePrice() {
+			timeLabel.Text = selectedInstrument.LastPriceTime.ToString("M/d HH:mm:ss");
+			bidLabel.Text = selectedInstrument.Bid.ToString("f3");
+			askLabel.Text = selectedInstrument.Ask.ToString("f3");
+			if (streamPriceSeries != null) {
+				latestPrice = (selectedInstrument.Bid + selectedInstrument.Ask) / 2;
+				streamPriceSeries.Points[0].XValue = latestPrice;
+				streamPriceSeries.Points[1].XValue = latestPrice;
+			}
 		}
 
 		private void OnOrderBookUpdated(OrderBookUpdated orderBookUpdated) {
@@ -226,10 +221,8 @@ namespace Candlesticks {
 					if (selectedIndex == 0) {
 						orderBookList.SelectedIndex = 0;
 					}
-				}));
-				lock (volumeCandlesLock) {
 					latestS5Candles = null;
-				}
+				}));
 			}
 		}
 		
@@ -255,6 +248,8 @@ namespace Candlesticks {
 				list.Insert(0, entity);
 			}
 		}
+
+		private HashSet<Task<List<Candlestick>>> getS5CandlesTasks = new HashSet<Task<List<Candlestick>>>();
 		
 		private void LoadChart(Chart chart, DateTime dateTime, OrderBookDao.Entity orderBook, OrderBookDao.Entity previousOrderBook, bool isLatestChart) {
 
@@ -304,15 +299,50 @@ namespace Candlesticks {
 			//				volumeSeries.SetCustomProperty("PointWidth", "0.5");
 			chart.Series.Add(volumeSeries);
 
+			var UISyncContext = TaskScheduler.FromCurrentSynchronizationContext();
+
 			if (isLatestChart) {
-				latestVolumeSeries = volumeSeries;
-				lock (volumeCandlesLock) {
-					if (latestS5Candles != null) {
-						LoadVolumeSeries(latestVolumeSeries,latestS5Candles);
-					}
-				}
+				if(latestS5Candles == null) {
+					latestVolumeSeries = volumeSeries;
+					retriveVolumeQueue.Add(() => {
+					var candlesticks = RetrieveS5Candles(orderBook);
+					Invoke(new Action(()=>{
+						latestS5Candles = candlesticks.ToList();
+						LoadVolumeSeries(volumeSeries, latestS5Candles);
+					}));
+				});
+			}
+
+				//				, UISyncContext);
+				/*
+								lock (volumeCandlesLock) {
+									if (latestS5Candles != null) {
+										LoadVolumeSeries(latestVolumeSeries,latestS5Candles);
+									}
+								}*/
 			} else {
-				LoadVolumeSeries(volumeSeries, RetrieveS5Candles(orderBook));
+				retriveVolumeQueue.Add(() => {
+					var candlesticks = RetrieveS5Candles(orderBook);
+					Invoke(new Action(() => {
+						latestS5Candles = candlesticks.ToList();
+						LoadVolumeSeries(volumeSeries, latestS5Candles);
+					}));
+				});
+
+/*
+					new TaskFactory().StartNew(() => RetrieveS5Candles(orderBook)).ContinueWith(candlesticks => {
+					latestS5Candles = candlesticks.Result.ToList();
+					LoadVolumeSeries(volumeSeries, latestS5Candles);
+				}, UISyncContext);*/
+
+/*
+				if (gettingVolumes == false) {
+					gettingVolumes = true;
+					RetrieveS5CandlesAsync(orderBook).ContinueWith(candlesticks => {
+						LoadVolumeSeries(volumeSeries, candlesticks.Result);
+						gettingVolumes = false;
+					}, UISyncContext);
+				}*/
 			}
 
 			Series seriesDeltaPos = new Series();
@@ -430,10 +460,12 @@ namespace Candlesticks {
 
 		private void splitContainer1_Panel1_Scroll(object sender, ScrollEventArgs e) {
 			splitContainer1.Panel2.HorizontalScroll.Value = splitContainer1.Panel1.HorizontalScroll.Value;
+			Setting.Instance.OrderBookScrollPositions[selectedInstrument.Name] = splitContainer1.Panel1.HorizontalScroll.Value;
 		}
 
 		private void splitContainer1_Panel2_Scroll(object sender, ScrollEventArgs e) {
 			splitContainer1.Panel1.HorizontalScroll.Value = splitContainer1.Panel2.HorizontalScroll.Value;
+			Setting.Instance.OrderBookScrollPositions[selectedInstrument.Name] = splitContainer1.Panel2.HorizontalScroll.Value;
 		}
 
 
@@ -485,6 +517,17 @@ namespace Candlesticks {
 //				Console.WriteLine("splitContainer1.Panel2.HorizontalScroll.Value" + splitContainer1.Panel2.HorizontalScroll.Value);
 		}
 
+
+		private void SetHorizonalScrollPosition(int x) {
+			var p = splitContainer1.Panel2.AutoScrollPosition;
+			p.X = x;
+			splitContainer1.Panel1.AutoScrollPosition = p;
+
+			p = splitContainer1.Panel2.AutoScrollPosition;
+			p.X = x;
+			splitContainer1.Panel2.AutoScrollPosition = p;
+		}
+
 		private void orderBookList_SelectedIndexChanged(object sender, EventArgs ev) {
 			try {
 				LoadChart(chart1, orderBookList.SelectedIndex);
@@ -492,12 +535,20 @@ namespace Candlesticks {
 					LoadChart(chart2, orderBookList.SelectedIndex + 1);
 				}
 				if (orderBookList.SelectedIndex == 0) {
-					splitContainer1.Update();
-					double scrollRatio = (orderBooks[selectedInstrument.Name][0].Rate - selectedInstrument.GraphMinPrice) / (selectedInstrument.GraphMaxPrice - selectedInstrument.GraphMinPrice);
-					int value = (int)((splitContainer1.Panel1.HorizontalScroll.Maximum - splitContainer1.Panel1.HorizontalScroll.Minimum) * scrollRatio + splitContainer1.Panel1.HorizontalScroll.Minimum - splitContainer1.Panel1.ClientSize.Width / 2);
-					Console.WriteLine("scrollRatio:" + scrollRatio + " value:" + value + " min:"+ splitContainer1.Panel1.HorizontalScroll.Minimum+ " max:" + splitContainer1.Panel1.HorizontalScroll.Maximum);
-					Console.WriteLine("scrollRatio:" + scrollRatio + " value:" + value + " min:" + splitContainer1.Panel2.HorizontalScroll.Minimum + " max:" + splitContainer1.Panel2.HorizontalScroll.Maximum);
-					splitContainer1.Panel2.HorizontalScroll.Value = splitContainer1.Panel1.HorizontalScroll.Value = value;
+//					splitContainer1.Update();
+					if (!Setting.Instance.OrderBookScrollPositions.ContainsKey(selectedInstrument.Name)) {
+						double scrollRatio = (orderBooks[selectedInstrument.Name][0].Rate - selectedInstrument.GraphMinPrice) / (selectedInstrument.GraphMaxPrice - selectedInstrument.GraphMinPrice);
+						int value = (int)((splitContainer1.Panel1.HorizontalScroll.Maximum - splitContainer1.Panel1.HorizontalScroll.Minimum) * scrollRatio + splitContainer1.Panel1.HorizontalScroll.Minimum - splitContainer1.Panel1.ClientSize.Width / 2);
+						Console.WriteLine("scrollRatio:" + scrollRatio + " value:" + value + " min:" + splitContainer1.Panel1.HorizontalScroll.Minimum + " max:" + splitContainer1.Panel1.HorizontalScroll.Maximum);
+						Console.WriteLine("scrollRatio:" + scrollRatio + " value:" + value + " min:" + splitContainer1.Panel2.HorizontalScroll.Minimum + " max:" + splitContainer1.Panel2.HorizontalScroll.Maximum);
+//						splitContainer1.Panel2.HorizontalScroll.Value = splitContainer1.Panel1.HorizontalScroll.Value = value;
+
+						SetHorizonalScrollPosition(value);
+						Setting.Instance.OrderBookScrollPositions.Add(selectedInstrument.Name, value);
+					} else {
+						SetHorizonalScrollPosition(Setting.Instance.OrderBookScrollPositions[selectedInstrument.Name]);
+					}
+
 				}
 
 
@@ -508,8 +559,9 @@ namespace Candlesticks {
 
 		private void OrderBookForm_FormClosing(object sender, FormClosingEventArgs e) {
 			Console.WriteLine("OrderBookForm_FormClosing");
-			PriceObserver.Get("USD_JPY").UnOnserve(ReceivePrice);
+			PriceObserver.Get().UnOnserve(ReceivePrice);
 			EventReceiver.Instance.OrderBookUpdatedEvent -= OnOrderBookUpdated;
+			Setting.Instance.Save();
 
 			if (connection != null) {
 				connection.Close();
@@ -519,10 +571,15 @@ namespace Candlesticks {
 				tcpClient.Close();
 				tcpClient = null;
 			}
-			if(oandaApi != null) {
+			if(retriveVolumeQueue != null) {
+				retriveVolumeQueue.Add(null);
+//				retriveVolumeQueue = null;
+			}
+
+/*			if(oandaApi != null) {
 				oandaApi.Dispose();
 				oandaApi = null;
-			}
+			}*/
 			if(retriveVolumesThread != null) {
 				retriveVolumesThread.Interrupt();
 				retriveVolumesThread = null;
@@ -533,6 +590,20 @@ namespace Candlesticks {
 			selectedInstrument = (InstrumentInfo) comboBox1.SelectedItem;
 			LoadOrderBookList(selectedInstrument.Name);
 			orderBookList.SelectedIndex = 0;
+			UpdatePrice();
+		}
+
+		private void timer1_Tick(object sender, EventArgs e) {
+			retriveVolumeQueue.Add(() => {
+				Action invokeTarget = null;
+				if (latestS5Candles == null) {
+				} else {
+					invokeTarget = RetriveVolumeLatest();
+				}
+				if (invokeTarget != null) {
+					Invoke(invokeTarget);
+				}
+			});
 		}
 	}
 }

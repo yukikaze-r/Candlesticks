@@ -22,7 +22,7 @@ namespace Candlesticks {
 		}
 
 		private void ChartForm_Load(object sender, EventArgs e) {
-			PriceObserver.Get(instrument).Observe(ReceivePrice);
+//			PriceObserver.Get(instrument).Observe(ReceivePrice);
 			oandaApi = new OandaAPI();
 			candles = oandaApi.GetCandles(100,instrument,granularity).ToList();
 
@@ -63,7 +63,7 @@ namespace Candlesticks {
 		}
 
 		private void ChartForm_FormClosed(object sender, FormClosedEventArgs e) {
-			PriceObserver.Get(instrument).Observe(ReceivePrice);
+//			PriceObserver.Get(instrument).Observe(ReceivePrice);
 			if (oandaApi != null) {
 				oandaApi.Dispose();
 			}

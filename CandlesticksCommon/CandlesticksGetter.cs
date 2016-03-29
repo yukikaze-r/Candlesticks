@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Candlesticks {
 	class CandlesticksGetter {
@@ -55,7 +56,7 @@ namespace Candlesticks {
 		public OandaAPI OandaAPI {
 			get {
 				if(oandaAPI == null) {
-					oandaAPI = new OandaAPI();
+					oandaAPI = OandaAPI.Instance;
 				}
 				return oandaAPI;
 			}
@@ -80,11 +81,14 @@ namespace Candlesticks {
 			} catch(NpgsqlException e) {
 				if(e.Code == "23505") {
 					Console.WriteLine(e.Message);
+					throw new RetryException();
 				} else {
 					throw e;
 				}
 			}
 		}
+
+		private class RetryException : Exception { }
 
 		private void SaveNullCandle(CandlestickDao dao, DateTime t) {
 			var entity = dao.CreateNewEntity();
@@ -102,6 +106,7 @@ namespace Candlesticks {
 			} catch (NpgsqlException e) {
 				if (e.Code == "23505") {
 					Console.WriteLine(e.Message);
+					throw new RetryException();
 				} else {
 					throw e;
 				}
@@ -117,29 +122,52 @@ namespace Candlesticks {
 			}
 
 			var dao = new CandlestickDao();
-			using(var transaction = DBUtils.GetConnection().BeginTransaction()) {
-				DateTime t = GetAlignTime(Start);
 
-				foreach (var entity in dao.GetBy(Instrument, Granularity, t, End).ToList()) {
-					if(entity.DateTime != t) {
-						foreach (var oandaCandle in GetCandles(t, entity.DateTime.AddSeconds(-1))) {
-							t = SaveAndAdd(result, granularitySpan, dao, t, oandaCandle);
+			while (true) {
+				try {
+					using (var transaction = DBUtils.GetConnection().BeginTransaction()) {
+						DateTime t = GetAlignTime(Start);
+
+						foreach (var entity in dao.GetBy(Instrument, Granularity, t, End).ToList()) {
+							if (entity.DateTime != t) {
+								foreach (var oandaCandle in GetCandles(t, entity.DateTime.AddSeconds(-1))) {
+									t = SaveAndAdd(result, granularitySpan, dao, t, oandaCandle);
+								}
+								FillNullCandles(result, granularitySpan, dao, t, entity.DateTime);
+								t = entity.DateTime;
+							}
+							result.Add(entity.Candlestick);
+							t = t.Add(granularitySpan);
 						}
-						FillNullCandles(result, granularitySpan, dao, t, entity.DateTime);
-						t = entity.DateTime;
+						if (t < End) {
+							foreach (var oandaCandle in GetCandles(t, End)) {
+								t = SaveAndAdd(result, granularitySpan, dao, t, oandaCandle);
+							}
+							FillNullCandles(result, granularitySpan, dao, t, End);
+						}
+						transaction.Commit();
 					}
-					result.Add(entity.Candlestick);
-					t = t.Add(granularitySpan);
+					break;
+				} catch (RetryException) {
+					continue;
 				}
-				if (t < End) {
-					foreach (var oandaCandle in GetCandles(t, End)) {
-						t = SaveAndAdd(result, granularitySpan, dao, t, oandaCandle);
-					}
-					FillNullCandles(result, granularitySpan, dao, t, End);
-				}
-				transaction.Commit();
 			}
 			return result;
+		}
+
+		public async Task<List<Candlestick>> ExecuteAsync() {
+			return await Task.Run(() => {
+				Console.WriteLine("ExecuteAsync Start");
+				try {
+					lock (this.GetType()) { // このメソッドが大量に同時実行されるとOpenThreadConnectionがタイムアウトする
+						using (DBUtils.OpenThreadConnection()) {
+							return Execute().ToList();
+						}
+					}
+				} finally {
+					Console.WriteLine("ExecuteAsync End");
+				}
+			});
 		}
 
 		private void FillNullCandles(List<Candlestick> result, TimeSpan granularitySpan, CandlestickDao dao, DateTime t, DateTime endTime) {

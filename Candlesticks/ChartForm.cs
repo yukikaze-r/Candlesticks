@@ -62,7 +62,7 @@ namespace Candlesticks {
 			}
 		}
 
-
+			
 		private void ChartForm_FormClosed(object sender, FormClosedEventArgs e) {
 			if (oandaApi != null) {
 				oandaApi.Dispose();

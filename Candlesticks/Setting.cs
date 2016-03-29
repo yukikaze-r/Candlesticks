@@ -21,9 +21,17 @@ namespace Candlesticks {
 				Port = (int)registryKey.GetValue("dbUserName",5432),
 				Password = (string)registryKey.GetValue("dbPassword"),
 			};
+			string s = (string)registryKey.GetValue("orderBookScrollPositions");
+			if(s != null) {
+				foreach (var instrumentPos in s.Split(',').Select(kv => kv.Split('='))) {
+					OrderBookScrollPositions[instrumentPos[0]] = int.Parse(instrumentPos[1]);
+				}
+			}
 			registryKey.Close();
+
 			this.MouseClickPositionUSD_JPY = LoadMouseClickPos("MousePosUsdJpy");
 			this.MouseClickPositionEUR_USD = LoadMouseClickPos("MousePosEurUsd");
+
 		}
 
 		private MouseClikPositoin LoadMouseClickPos(string subKeyName) {
@@ -45,6 +53,7 @@ namespace Candlesticks {
 			registryKey.SetValue("dbHost", this.DBConnection.Host);
 			registryKey.SetValue("dbPort", this.DBConnection.Port);
 			registryKey.SetValue("dbPassword", this.DBConnection.Password);
+			registryKey.SetValue("orderBookScrollPositions", string.Join(",",OrderBookScrollPositions.Select(kv=>kv.Key+"="+kv.Value)));
 			registryKey.Close();
 
 			SaveMouseClickPos(this.MouseClickPositionUSD_JPY, "MousePosUsdJpy");
@@ -106,5 +115,7 @@ namespace Candlesticks {
 			public Point Ask;
 			public Point Settle;
 		}
+
+		public Dictionary<string, int> OrderBookScrollPositions = new Dictionary<string, int>();
 	}
 }

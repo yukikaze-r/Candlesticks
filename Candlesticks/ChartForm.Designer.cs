@@ -23,83 +23,97 @@
 		/// the contents of this method with the code editor.
 		/// </summary>
 		private void InitializeComponent() {
-			System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea3 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-			System.Windows.Forms.DataVisualization.Charting.Legend legend3 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-			System.Windows.Forms.DataVisualization.Charting.Series series3 = new System.Windows.Forms.DataVisualization.Charting.Series();
-			this.comboBox1 = new System.Windows.Forms.ComboBox();
-			this.radioButton1 = new System.Windows.Forms.RadioButton();
-			this.radioButton2 = new System.Windows.Forms.RadioButton();
-			this.comboBox2 = new System.Windows.Forms.ComboBox();
+			System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea4 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+			System.Windows.Forms.DataVisualization.Charting.Legend legend4 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+			System.Windows.Forms.DataVisualization.Charting.Series series4 = new System.Windows.Forms.DataVisualization.Charting.Series();
+			this.instrument1ComboBox = new System.Windows.Forms.ComboBox();
+			this.candleRadioButton = new System.Windows.Forms.RadioButton();
+			this.lineRadioButton = new System.Windows.Forms.RadioButton();
+			this.instrument2ComboBox = new System.Windows.Forms.ComboBox();
 			this.chart1 = new System.Windows.Forms.DataVisualization.Charting.Chart();
+			this.granularityComboBox = new System.Windows.Forms.ComboBox();
 			((System.ComponentModel.ISupportInitialize)(this.chart1)).BeginInit();
 			this.SuspendLayout();
 			// 
-			// comboBox1
+			// instrument1ComboBox
 			// 
-			this.comboBox1.FormattingEnabled = true;
-			this.comboBox1.Location = new System.Drawing.Point(13, 11);
-			this.comboBox1.Name = "comboBox1";
-			this.comboBox1.Size = new System.Drawing.Size(121, 20);
-			this.comboBox1.TabIndex = 0;
+			this.instrument1ComboBox.FormattingEnabled = true;
+			this.instrument1ComboBox.Location = new System.Drawing.Point(13, 11);
+			this.instrument1ComboBox.Name = "instrument1ComboBox";
+			this.instrument1ComboBox.Size = new System.Drawing.Size(121, 20);
+			this.instrument1ComboBox.TabIndex = 0;
+			this.instrument1ComboBox.SelectedIndexChanged += new System.EventHandler(this.instrument1ComboBox_SelectedIndexChanged);
 			// 
-			// radioButton1
+			// candleRadioButton
 			// 
-			this.radioButton1.AutoSize = true;
-			this.radioButton1.Location = new System.Drawing.Point(277, 15);
-			this.radioButton1.Name = "radioButton1";
-			this.radioButton1.Size = new System.Drawing.Size(88, 16);
-			this.radioButton1.TabIndex = 1;
-			this.radioButton1.TabStop = true;
-			this.radioButton1.Text = "radioButton1";
-			this.radioButton1.UseVisualStyleBackColor = true;
+			this.candleRadioButton.AutoSize = true;
+			this.candleRadioButton.Location = new System.Drawing.Point(434, 15);
+			this.candleRadioButton.Name = "candleRadioButton";
+			this.candleRadioButton.Size = new System.Drawing.Size(88, 16);
+			this.candleRadioButton.TabIndex = 1;
+			this.candleRadioButton.TabStop = true;
+			this.candleRadioButton.Text = "radioButton1";
+			this.candleRadioButton.UseVisualStyleBackColor = true;
+			this.candleRadioButton.CheckedChanged += new System.EventHandler(this.candleRadioButton_CheckedChanged);
 			// 
-			// radioButton2
+			// lineRadioButton
 			// 
-			this.radioButton2.AutoSize = true;
-			this.radioButton2.Location = new System.Drawing.Point(372, 15);
-			this.radioButton2.Name = "radioButton2";
-			this.radioButton2.Size = new System.Drawing.Size(88, 16);
-			this.radioButton2.TabIndex = 2;
-			this.radioButton2.TabStop = true;
-			this.radioButton2.Text = "radioButton2";
-			this.radioButton2.UseVisualStyleBackColor = true;
+			this.lineRadioButton.AutoSize = true;
+			this.lineRadioButton.Location = new System.Drawing.Point(528, 15);
+			this.lineRadioButton.Name = "lineRadioButton";
+			this.lineRadioButton.Size = new System.Drawing.Size(88, 16);
+			this.lineRadioButton.TabIndex = 2;
+			this.lineRadioButton.TabStop = true;
+			this.lineRadioButton.Text = "radioButton2";
+			this.lineRadioButton.UseVisualStyleBackColor = true;
+			this.lineRadioButton.CheckedChanged += new System.EventHandler(this.lineRadioButton_CheckedChanged);
 			// 
-			// comboBox2
+			// instrument2ComboBox
 			// 
-			this.comboBox2.FormattingEnabled = true;
-			this.comboBox2.Location = new System.Drawing.Point(140, 11);
-			this.comboBox2.Name = "comboBox2";
-			this.comboBox2.Size = new System.Drawing.Size(121, 20);
-			this.comboBox2.TabIndex = 3;
+			this.instrument2ComboBox.FormattingEnabled = true;
+			this.instrument2ComboBox.Location = new System.Drawing.Point(140, 11);
+			this.instrument2ComboBox.Name = "instrument2ComboBox";
+			this.instrument2ComboBox.Size = new System.Drawing.Size(133, 20);
+			this.instrument2ComboBox.TabIndex = 3;
+			this.instrument2ComboBox.SelectedIndexChanged += new System.EventHandler(this.instrument2ComboBox_SelectedIndexChanged);
 			// 
 			// chart1
 			// 
 			this.chart1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			chartArea3.Name = "ChartArea1";
-			this.chart1.ChartAreas.Add(chartArea3);
-			legend3.Name = "Legend1";
-			this.chart1.Legends.Add(legend3);
+			chartArea4.Name = "ChartArea1";
+			this.chart1.ChartAreas.Add(chartArea4);
+			legend4.Name = "Legend1";
+			this.chart1.Legends.Add(legend4);
 			this.chart1.Location = new System.Drawing.Point(-1, 40);
 			this.chart1.Name = "chart1";
-			series3.ChartArea = "ChartArea1";
-			series3.Legend = "Legend1";
-			series3.Name = "Series1";
-			this.chart1.Series.Add(series3);
+			series4.ChartArea = "ChartArea1";
+			series4.Legend = "Legend1";
+			series4.Name = "Series1";
+			this.chart1.Series.Add(series4);
 			this.chart1.Size = new System.Drawing.Size(768, 362);
 			this.chart1.TabIndex = 4;
 			this.chart1.Text = "chart1";
+			// 
+			// granularityComboBox
+			// 
+			this.granularityComboBox.FormattingEnabled = true;
+			this.granularityComboBox.Location = new System.Drawing.Point(280, 11);
+			this.granularityComboBox.Name = "granularityComboBox";
+			this.granularityComboBox.Size = new System.Drawing.Size(109, 20);
+			this.granularityComboBox.TabIndex = 5;
 			// 
 			// ChartForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(765, 399);
+			this.Controls.Add(this.granularityComboBox);
 			this.Controls.Add(this.chart1);
-			this.Controls.Add(this.comboBox2);
-			this.Controls.Add(this.radioButton2);
-			this.Controls.Add(this.radioButton1);
-			this.Controls.Add(this.comboBox1);
+			this.Controls.Add(this.instrument2ComboBox);
+			this.Controls.Add(this.lineRadioButton);
+			this.Controls.Add(this.candleRadioButton);
+			this.Controls.Add(this.instrument1ComboBox);
 			this.Name = "ChartForm";
 			this.Text = "ChartForm";
 			this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.ChartForm_FormClosed);
@@ -112,10 +126,11 @@
 
 		#endregion
 
-		private System.Windows.Forms.ComboBox comboBox1;
-		private System.Windows.Forms.RadioButton radioButton1;
-		private System.Windows.Forms.RadioButton radioButton2;
-		private System.Windows.Forms.ComboBox comboBox2;
+		private System.Windows.Forms.ComboBox instrument1ComboBox;
+		private System.Windows.Forms.RadioButton candleRadioButton;
+		private System.Windows.Forms.RadioButton lineRadioButton;
+		private System.Windows.Forms.ComboBox instrument2ComboBox;
 		private System.Windows.Forms.DataVisualization.Charting.Chart chart1;
+		private System.Windows.Forms.ComboBox granularityComboBox;
 	}
 }

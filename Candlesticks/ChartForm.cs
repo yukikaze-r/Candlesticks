@@ -11,6 +11,8 @@ using System.Windows.Forms.DataVisualization.Charting;
 
 namespace Candlesticks {
 	public partial class ChartForm : Form {
+		private static string[] INSTRUMENTS = { "USD_JPY", "EUR_JPY", "EUR_USD", "US30_USD", "JP225_USD","EU50_EUR" };
+
 		private string instrument = "US30_USD";
 		private string granularity = "M1";
 		private OandaAPI oandaApi = null;
@@ -22,7 +24,9 @@ namespace Candlesticks {
 		}
 
 		private void ChartForm_Load(object sender, EventArgs e) {
-			PriceObserver.Get(instrument).Observe(ReceivePrice);
+
+
+
 			oandaApi = new OandaAPI();
 			candles = oandaApi.GetCandles(100,instrument,granularity).ToList();
 
@@ -58,15 +62,27 @@ namespace Candlesticks {
 			}
 		}
 
-		private void ReceivePrice(DateTime dateTime,float bid, float ask) {
-			
-		}
 
 		private void ChartForm_FormClosed(object sender, FormClosedEventArgs e) {
-			PriceObserver.Get(instrument).Observe(ReceivePrice);
 			if (oandaApi != null) {
 				oandaApi.Dispose();
 			}
+		}
+
+		private void instrument1ComboBox_SelectedIndexChanged(object sender, EventArgs e) {
+
+		}
+
+		private void instrument2ComboBox_SelectedIndexChanged(object sender, EventArgs e) {
+
+		}
+
+		private void candleRadioButton_CheckedChanged(object sender, EventArgs e) {
+
+		}
+
+		private void lineRadioButton_CheckedChanged(object sender, EventArgs e) {
+
 		}
 	}
 }

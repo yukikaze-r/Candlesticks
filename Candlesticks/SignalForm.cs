@@ -31,6 +31,7 @@ namespace Candlesticks {
 
 		private void SignalForm_Load(object sender, EventArgs e) {
 			using (DBUtils.OpenThreadConnection()) {
+				// 64.19%
 				patterns.Add(new TimeOfDayPattern() {
 					Instrument = "USD_JPY",
 					CheckStartTime = new TimeOfDayPattern.Time(7, 50),
@@ -41,16 +42,18 @@ namespace Candlesticks {
 					TradeType = TradeType.Bid
 				});
 
+				// 75.76%
 				patterns.Add(new TimeOfDayPattern() {
 					Instrument = "USD_JPY",
-					CheckStartTime = new TimeOfDayPattern.Time(0, 10),
-					CheckEndTime = new TimeOfDayPattern.Time(4, 30),
+					CheckStartTime = new TimeOfDayPattern.Time(0, 30),
+					CheckEndTime = new TimeOfDayPattern.Time(4, 50),
 					IsCheckUp = false,
-					TradeStartTime = new TimeOfDayPattern.Time(4, 30),
+					TradeStartTime = new TimeOfDayPattern.Time(4, 50),
 					TradeEndTime = new TimeOfDayPattern.Time(7, 10),
 					TradeType = TradeType.Ask
 				});
 
+				//73.78%
 				patterns.Add(new TimeOfDayPattern() {
 					Instrument = "USD_JPY",
 					CheckStartTime = new TimeOfDayPattern.Time(0, 20),
@@ -71,7 +74,18 @@ namespace Candlesticks {
 					TradeType = TradeType.Ask
 				});*/
 
+				// 62.87%
+				patterns.Add(new TimeOfDayPattern() {
+					Instrument = "USD_JPY",
+					CheckStartTime = new TimeOfDayPattern.Time(1, 30),
+					CheckEndTime = new TimeOfDayPattern.Time(4, 20),
+					IsCheckUp = false,
+					TradeStartTime = new TimeOfDayPattern.Time(9, 50),
+					TradeEndTime = new TimeOfDayPattern.Time(13, 10),
+					TradeType = TradeType.Bid
+				});
 
+				// 64.54%
 				patterns.Add(new TimeOfDayPattern() {
 					Instrument = "EUR_USD",
 					CheckStartTime = new TimeOfDayPattern.Time(8, 50),
@@ -82,6 +96,7 @@ namespace Candlesticks {
 					TradeType = TradeType.Ask
 				});
 
+				//63.98%
 				patterns.Add(new TimeOfDayPattern() {
 					Instrument = "EUR_USD",
 					CheckStartTime = new TimeOfDayPattern.Time(0, 50),
@@ -131,14 +146,20 @@ namespace Candlesticks {
 
 					TimeOfDayPattern.Signal signal;
 					bool isMatch = false;
+					bool isSuccessTrade;
+					cells["trade"].Value = pattern.GetTradeDescription(out isSuccessTrade);
 					if (pattern.IsMatch(out signal)) {
-						cells["trade"].Style.BackColor = signal.IsInTradeTime ? Color.Red : Color.Yellow;
+						if(isSuccessTrade) {
+							cells["trade"].Style.BackColor = Color.LightPink;
+						} else {
+							cells["trade"].Style.BackColor = signal.IsInTradeTime ? Color.Red : Color.Yellow;
+						}
 						isMatch = true;
 					} else {
 						cells["trade"].Style.BackColor = Color.White;
 						isMatch = false;
 					}
-					cells["trade"].Value = pattern.GetTradeDescription();
+
 					if (signal != null) {
 						if(isMatch) {
 							cells["match"].Value = "Matched!" + signal.GetCheckResultDescription();

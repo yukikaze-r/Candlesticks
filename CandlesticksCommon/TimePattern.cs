@@ -53,15 +53,17 @@ namespace Candlesticks
 				"の間に価格が" + (IsCheckUp ? "上がっていたら" : "下がっていたら");
 		}
 
-		public string GetTradeDescription() {
+		public string GetTradeDescription(out bool isSuccessTrade) {
 			DateTime priceGettableTime = DateTime.Now.AddSeconds(-5);
-
+			float tradeStartPrice = float.NaN;
+			float tradeEndPrice = float.NaN;
 			var builder = new StringBuilder();
 			builder.Append(this.TradeType);
 			builder.Append("-");
 			DateTime tradeStartDateTime = DateTime.Today.AddTicks(this.TradeStartTime.Ticks);
 			if (tradeStartDateTime < priceGettableTime) {
-				builder.Append(GetPrice(tradeStartDateTime).ToString("F3"));
+				tradeStartPrice = GetPrice(tradeStartDateTime);
+				builder.Append(tradeStartPrice.ToString("F3"));
 			} else {
 				builder.Append("???");
 			}
@@ -70,11 +72,22 @@ namespace Candlesticks
 
 			DateTime tradeEndDateTime = DateTime.Today.AddTicks(this.TradeEndTime.Ticks);
 			if (tradeEndDateTime < priceGettableTime) {
+				tradeEndPrice = GetPrice(tradeEndDateTime);
 				builder.Append(GetPrice(tradeEndDateTime).ToString("F3"));
 			} else {
 				builder.Append("???");
 			}
 			builder.Append("[" + this.TradeEndTime + "]");
+
+			if(tradeStartPrice != float.NaN && tradeEndPrice != float.NaN) {
+				if(TradeType == TradeType.Ask) {
+					isSuccessTrade = tradeStartPrice < tradeEndPrice;
+				} else {
+					isSuccessTrade = tradeStartPrice > tradeEndPrice;
+				}
+			} else {
+				isSuccessTrade = false;
+			}
 
 			return builder.ToString();
 		}
@@ -114,6 +127,7 @@ namespace Candlesticks
 					return Pattern.TradeStartTime.Todays <= now && now <= Pattern.TradeEndTime.Todays;
 				}
 			}
+			
 
 			public bool IsCheckFinished {
 				get {

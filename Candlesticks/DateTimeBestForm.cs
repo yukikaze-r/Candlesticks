@@ -169,5 +169,19 @@ namespace Candlesticks {
 				ReportGroupByTradeStartTime(report, bestTradeTime);
 			});
 		}
+
+		private void 日時ベスト正順通年5年10分足_Click(object sender, EventArgs e) {
+			RunTask(sender, (Report report) => {
+				report.Version = 1;
+				report.IsForceOverride = true;
+				report.Comment = "";
+				report.SetHeader("start", "end", "start", "end", "↑↑", "↑↓", "↓↑", "↓↓");
+				var bestTradeTime = new BestTradeTime(GetM10Candles(new TimeSpan(365 * 5, 0, 0, 0))) {
+					Granularity = new TimeSpan(0, 10, 0),
+					Comparator = f => (int)(Math.Max((double)f[0] / (f[0] + f[1]), (double)f[3] / (f[2] + f[3])) * 10000)
+			};
+				ReportGroupByTradeStartTime(report, bestTradeTime);
+			});
+		}
 	}
 }

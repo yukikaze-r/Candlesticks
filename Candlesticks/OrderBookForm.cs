@@ -25,6 +25,7 @@ namespace Candlesticks {
 			public float GraphMaxPrice;
 			public float GraphInterval;
 			public string AxisLabelFormat;
+			public float VolumePriceGranularity;
 
 			public float Bid;
 			public float Ask;
@@ -42,6 +43,7 @@ namespace Candlesticks {
 				GraphMaxPrice = 120f,
 				GraphInterval = 0.05f,
 				AxisLabelFormat = "f2",
+				VolumePriceGranularity = 0.01f,
 			},
 			new InstrumentInfo() {
 				Name = "EUR_JPY",
@@ -49,6 +51,7 @@ namespace Candlesticks {
 				GraphMaxPrice = 135f,
 				GraphInterval = 0.05f,
 				AxisLabelFormat = "f2",
+				VolumePriceGranularity = 0.01f,
 			},
 			new InstrumentInfo() {
 				Name = "EUR_USD",
@@ -56,6 +59,7 @@ namespace Candlesticks {
 				GraphMaxPrice = 1.2f,
 				GraphInterval = 0.0005f,
 				AxisLabelFormat = "f4",
+				VolumePriceGranularity = 0.0001f,
 			},
 		};
 
@@ -119,20 +123,20 @@ namespace Candlesticks {
 				return new CandlesticksGetter() {
 					Start = startDateTime,
 					End = startDateTime.AddMinutes(20),
-					Granularity = "S5"
+					Granularity = "S5",
+					Instrument = selectedInstrument.Name
 				}.Execute().ToList();
 			}
 		}
 
-		private readonly float VOLUME_PRICE_GRANURALITY = 0.01f;
 
 		private void LoadVolumeSeries(Series series, List<Candlestick> s5candles) {
 			Dictionary<float, float> priceVolumes = new Dictionary<float, float>();
 			foreach (var candle in s5candles) {
 				float min = GetRoundPrice(candle.Low);
 				float max = GetRoundPrice(candle.High);
-				float average = (float)candle.Volume / (int)((max - min + 1) / VOLUME_PRICE_GRANURALITY);
-				for (float i = min; i <= max; i += VOLUME_PRICE_GRANURALITY) {
+				float average = (float)candle.Volume / (int)((max - min + 1) / selectedInstrument.VolumePriceGranularity);
+				for (float i = min; i <= max; i += selectedInstrument.VolumePriceGranularity) {
 					if (priceVolumes.ContainsKey(i)) {
 						priceVolumes[i] += average;
 					} else {
@@ -142,45 +146,40 @@ namespace Candlesticks {
 			}
 			series.Points.Clear();
 			foreach (var price in priceVolumes.Keys.OrderBy(k => k)) {
-				series.Points.Add(new DataPoint(price, priceVolumes[price] / (100 * VOLUME_PRICE_GRANURALITY)));
+				series.Points.Add(new DataPoint(price, priceVolumes[price] / (100 * selectedInstrument.VolumePriceGranularity)));
 			}
 		}
 
-		private Action RetriveVolumeLatest() {
-			var candle = OandaAPI.Instance.GetCandles(1,"USD_JPY", "S5").First();
-			if(latestS5Candles.Where(c=>c.DateTime.Equals(candle.DateTime)).Count()==0) {
+		private void RetriveVolumeLatest() {
+			var candle = OandaAPI.Instance.GetCandles(1,selectedInstrument.Name, "S5").First();
+			Invoke(new Action(() => {
+				if (latestS5Candles.Where(c => c.DateTime.Equals(candle.DateTime)).Count() >= 1) {
+					return;
+				}
 				latestS5Candles.Add(candle.Candlestick);
 
-				return new Action(() => {
-					if (orderBookList.SelectedIndex == 0) {
-						volumeLabel.Text = candle.volume.ToString();
-						volumeLabel.ForeColor = candle.volume >= 10 ? Color.Red : (candle.volume >= 5 ? Color.Orange : (candle.volume >= 2 ? Color.Blue : Color.Gray));
-						float min = GetRoundPrice(candle.lowMid);
-						float max = GetRoundPrice(candle.highMid);
-						float average = (float)candle.volume / (int)((max - min + 1) / VOLUME_PRICE_GRANURALITY);
-						Console.WriteLine("candle lowMid:" + min + "(" + candle.lowMid+") highMid:" +max + "(" + candle.highMid+") volume:"+candle.volume+" avg:"+ average);
-						for (float i = min; i <= max; i += VOLUME_PRICE_GRANURALITY) {
-							DataPoint dp = latestVolumeSeries.Points.Where(p => p.XValue == i).FirstOrDefault();
-							if(dp == null) {
-								dp = new DataPoint(i, 0);
-								latestVolumeSeries.Points.Add(dp);
-							}
-							dp.YValues[0] += average / (100 * VOLUME_PRICE_GRANURALITY);
+				if (orderBookList.SelectedIndex == 0) {
+					volumeLabel.Text = candle.volume.ToString();
+					volumeLabel.ForeColor = candle.volume >= 10 ? Color.Red : (candle.volume >= 5 ? Color.Orange : (candle.volume >= 2 ? Color.Blue : Color.Gray));
+					float min = GetRoundPrice(candle.lowMid);
+					float max = GetRoundPrice(candle.highMid);
+					float average = (float)candle.volume / (int)((max - min + 1) / selectedInstrument.VolumePriceGranularity);
+					Console.WriteLine("candle lowMid:" + min + "(" + candle.lowMid+") highMid:" +max + "(" + candle.highMid+") volume:"+candle.volume+" avg:"+ average);
+					for (float i = min; i <= max; i += selectedInstrument.VolumePriceGranularity) {
+						DataPoint dp = latestVolumeSeries.Points.Where(p => p.XValue == i).FirstOrDefault();
+						if(dp == null) {
+							dp = new DataPoint(i, 0);
+							latestVolumeSeries.Points.Add(dp);
 						}
-
-
-						foreach (var dataPoint in latestVolumeSeries.Points.Where(p => min <= p.XValue && p.XValue <= max)) {
-//							dataPoint.YValues[0] += average / (100 * VOLUME_PRICE_GRANURALITY);
-						}
+						dp.YValues[0] += average / (100 * selectedInstrument.VolumePriceGranularity);
 					}
-				});
-			}
-			return null;
+				}
+			}));
 		}
 
 		private float GetRoundPrice(float price) {
-			int n = (int)((price + VOLUME_PRICE_GRANURALITY/2) / VOLUME_PRICE_GRANURALITY);
-			return n * VOLUME_PRICE_GRANURALITY;
+			int n = (int)((price + selectedInstrument.VolumePriceGranularity / 2) / selectedInstrument.VolumePriceGranularity);
+			return n * selectedInstrument.VolumePriceGranularity;
 		}
 
 		private InstrumentInfo GetInstrumentInfo(string instrument) {
@@ -217,11 +216,11 @@ namespace Candlesticks {
 			if (orderBookUpdated.Instrument == selectedInstrument.Name) {
 				Invoke(new Action(() => {
 					int selectedIndex = orderBookList.SelectedIndex;
+					latestS5Candles = null;
 					LoadOrderBookList(orderBookUpdated.Instrument, orderBookUpdated.DateTime);
 					if (selectedIndex == 0) {
 						orderBookList.SelectedIndex = 0;
 					}
-					latestS5Candles = null;
 				}));
 			}
 		}
@@ -248,8 +247,6 @@ namespace Candlesticks {
 				list.Insert(0, entity);
 			}
 		}
-
-		private HashSet<Task<List<Candlestick>>> getS5CandlesTasks = new HashSet<Task<List<Candlestick>>>();
 		
 		private void LoadChart(Chart chart, DateTime dateTime, OrderBookDao.Entity orderBook, OrderBookDao.Entity previousOrderBook, bool isLatestChart) {
 
@@ -324,8 +321,7 @@ namespace Candlesticks {
 				retriveVolumeQueue.Add(() => {
 					var candlesticks = RetrieveS5Candles(orderBook);
 					Invoke(new Action(() => {
-						latestS5Candles = candlesticks.ToList();
-						LoadVolumeSeries(volumeSeries, latestS5Candles);
+						LoadVolumeSeries(volumeSeries, candlesticks);
 					}));
 				});
 
@@ -588,22 +584,14 @@ namespace Candlesticks {
 		
 		private void comboBox1_SelectedIndexChanged(object sender, EventArgs e) {
 			selectedInstrument = (InstrumentInfo) comboBox1.SelectedItem;
+			latestS5Candles = null;
 			LoadOrderBookList(selectedInstrument.Name);
 			orderBookList.SelectedIndex = 0;
 			UpdatePrice();
 		}
 
 		private void timer1_Tick(object sender, EventArgs e) {
-			retriveVolumeQueue.Add(() => {
-				Action invokeTarget = null;
-				if (latestS5Candles == null) {
-				} else {
-					invokeTarget = RetriveVolumeLatest();
-				}
-				if (invokeTarget != null) {
-					Invoke(invokeTarget);
-				}
-			});
+			retriveVolumeQueue.Add(() => RetriveVolumeLatest());
 		}
 	}
 }

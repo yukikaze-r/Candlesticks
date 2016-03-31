@@ -153,6 +153,9 @@ namespace Candlesticks {
 		private void RetriveVolumeLatest() {
 			var candle = OandaAPI.Instance.GetCandles(1,selectedInstrument.Name, "S5").First();
 			Invoke(new Action(() => {
+				if(latestS5Candles == null) {
+					return;
+				}
 				if (latestS5Candles.Where(c => c.DateTime.Equals(candle.DateTime)).Count() >= 1) {
 					return;
 				}

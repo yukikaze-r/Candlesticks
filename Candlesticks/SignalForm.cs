@@ -96,6 +96,17 @@ namespace Candlesticks {
 					TradeType = TradeType.Ask
 				});
 
+				//62.9%
+				patterns.Add(new TimeOfDayPattern() {
+					Instrument = "EUR_USD",
+					CheckStartTime = new TimeOfDayPattern.Time(6, 50),
+					CheckEndTime = new TimeOfDayPattern.Time(7, 50),
+					IsCheckUp = true,
+					TradeStartTime = new TimeOfDayPattern.Time(11, 00),
+					TradeEndTime = new TimeOfDayPattern.Time(11, 30),
+					TradeType = TradeType.Ask
+				});
+
 				//63.98%
 				patterns.Add(new TimeOfDayPattern() {
 					Instrument = "EUR_USD",
@@ -106,6 +117,8 @@ namespace Candlesticks {
 					TradeEndTime = new TimeOfDayPattern.Time(7, 40),
 					TradeType = TradeType.Bid
 				});
+
+
 				/*
 				patterns.Add(new TimeOfDayPattern() {
 					CheckStartTime = new TimeOfDayPattern.Time(1, 50),

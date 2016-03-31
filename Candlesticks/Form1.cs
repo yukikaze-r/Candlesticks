@@ -425,7 +425,7 @@ namespace Candlesticks {
 
 
 		private void 日時ベスト(object sender, EventArgs ev) {
-			new DateTimeBestForm().Show();
+			new 日時ベスト正順通年5年10分足EUR_USD().Show();
 		}
 		
 		private void 日時ベスト特定日時検証(object sender, EventArgs e) {

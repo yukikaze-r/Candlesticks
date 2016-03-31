@@ -63,7 +63,7 @@ namespace Candlesticks
 			DateTime tradeStartDateTime = DateTime.Today.AddTicks(this.TradeStartTime.Ticks);
 			if (tradeStartDateTime < priceGettableTime) {
 				tradeStartPrice = GetPrice(tradeStartDateTime);
-				builder.Append(tradeStartPrice.ToString("F3"));
+				builder.Append(tradeStartPrice.ToString(GetPriceFormat()));
 			} else {
 				builder.Append("???");
 			}
@@ -73,7 +73,7 @@ namespace Candlesticks
 			DateTime tradeEndDateTime = DateTime.Today.AddTicks(this.TradeEndTime.Ticks);
 			if (tradeEndDateTime < priceGettableTime) {
 				tradeEndPrice = GetPrice(tradeEndDateTime);
-				builder.Append(GetPrice(tradeEndDateTime).ToString("F3"));
+				builder.Append(GetPrice(tradeEndDateTime).ToString(GetPriceFormat()));
 			} else {
 				builder.Append("???");
 			}
@@ -92,34 +92,35 @@ namespace Candlesticks
 			return builder.ToString();
 		}
 
+		public string GetPriceFormat() {
+			string priceFormat = null;
+			switch (Instrument) {
+				case "USD_JPY":
+					priceFormat = "F3";
+					break;
+				case "EUR_USD":
+					priceFormat = "F5";
+					break;
+				default:
+					throw new Exception();
+			}
+
+			return priceFormat;
+		}
+
 		public class Signal {
 			public TimeOfDayPattern Pattern;
 			public float CheckStartPrice = float.NaN;
 			public float CheckEndPrice = float.NaN;
 
 			public string GetCheckResultDescription() {
-				string priceFormat = GetPriceFormat();
+				string priceFormat = Pattern.GetPriceFormat();
 
 				return CheckStartPrice.ToString(priceFormat) + "[" + Pattern.CheckStartTime + "]→"
 					+ CheckEndPrice.ToString(priceFormat) + "[" + Pattern.CheckEndTime + "](" +
 					(CheckStartPrice < CheckEndPrice ? "+" : "") + (CheckEndPrice - CheckStartPrice).ToString(priceFormat) + ")";
 			}
 
-			private string GetPriceFormat() {
-				string priceFormat = null;
-				switch (Pattern.Instrument) {
-					case "USD_JPY":
-						priceFormat = "F3";
-						break;
-					case "EUR_USD":
-						priceFormat = "F5";
-						break;
-					default:
-						throw new Exception();
-				}
-
-				return priceFormat;
-			}
 
 			public bool IsInTradeTime {
 				get {

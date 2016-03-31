@@ -1,5 +1,5 @@
 ﻿namespace Candlesticks {
-	partial class DateTimeBestForm {
+	partial class 日時ベスト正順通年5年10分足EUR_USD {
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
@@ -33,6 +33,7 @@
 			this.日時ベスト通年5年10分足12時 = new System.Windows.Forms.Button();
 			this.日時ベスト通年5年10分足12時EUR_USD = new System.Windows.Forms.Button();
 			this.日時ベスト正順通年5年10分足 = new System.Windows.Forms.Button();
+			this.日時ベスト正順通年5年10分足EURUSD = new System.Windows.Forms.Button();
 			((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
 			this.SuspendLayout();
 			// 
@@ -121,7 +122,7 @@
 			// 
 			// 日時ベスト通年5年10分足12時EUR_USD
 			// 
-			this.日時ベスト通年5年10分足12時EUR_USD.Location = new System.Drawing.Point(33, 173);
+			this.日時ベスト通年5年10分足12時EUR_USD.Location = new System.Drawing.Point(331, 144);
 			this.日時ベスト通年5年10分足12時EUR_USD.Name = "日時ベスト通年5年10分足12時EUR_USD";
 			this.日時ベスト通年5年10分足12時EUR_USD.Size = new System.Drawing.Size(300, 23);
 			this.日時ベスト通年5年10分足12時EUR_USD.TabIndex = 8;
@@ -131,7 +132,7 @@
 			// 
 			// 日時ベスト正順通年5年10分足
 			// 
-			this.日時ベスト正順通年5年10分足.Location = new System.Drawing.Point(33, 202);
+			this.日時ベスト正順通年5年10分足.Location = new System.Drawing.Point(33, 173);
 			this.日時ベスト正順通年5年10分足.Name = "日時ベスト正順通年5年10分足";
 			this.日時ベスト正順通年5年10分足.Size = new System.Drawing.Size(266, 23);
 			this.日時ベスト正順通年5年10分足.TabIndex = 9;
@@ -139,11 +140,22 @@
 			this.日時ベスト正順通年5年10分足.UseVisualStyleBackColor = true;
 			this.日時ベスト正順通年5年10分足.Click += new System.EventHandler(this.日時ベスト正順通年5年10分足_Click);
 			// 
-			// DateTimeBestForm
+			// 日時ベスト正順通年5年10分足EURUSD
+			// 
+			this.日時ベスト正順通年5年10分足EURUSD.Location = new System.Drawing.Point(331, 173);
+			this.日時ベスト正順通年5年10分足EURUSD.Name = "日時ベスト正順通年5年10分足EURUSD";
+			this.日時ベスト正順通年5年10分足EURUSD.Size = new System.Drawing.Size(300, 23);
+			this.日時ベスト正順通年5年10分足EURUSD.TabIndex = 10;
+			this.日時ベスト正順通年5年10分足EURUSD.Text = "日時ベスト - 正順 - 通年 - 5年 - 10分足 - EUR_USD";
+			this.日時ベスト正順通年5年10分足EURUSD.UseVisualStyleBackColor = true;
+			this.日時ベスト正順通年5年10分足EURUSD.Click += new System.EventHandler(this.日時ベスト正順通年5年10分足EURUSD_Click);
+			// 
+			// 日時ベスト正順通年5年10分足EUR_USD
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(834, 684);
+			this.Controls.Add(this.日時ベスト正順通年5年10分足EURUSD);
 			this.Controls.Add(this.日時ベスト正順通年5年10分足);
 			this.Controls.Add(this.日時ベスト通年5年10分足12時EUR_USD);
 			this.Controls.Add(this.日時ベスト通年5年10分足12時);
@@ -154,7 +166,7 @@
 			this.Controls.Add(this.dataGridView1);
 			this.Controls.Add(this.日時ベスト通年5年);
 			this.Controls.Add(this.日時ベスト冬時間5年);
-			this.Name = "DateTimeBestForm";
+			this.Name = "日時ベスト正順通年5年10分足EUR_USD";
 			this.Text = "DateTimeBestForm";
 			((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
 			this.ResumeLayout(false);
@@ -174,5 +186,6 @@
 		private System.Windows.Forms.Button 日時ベスト通年5年10分足12時;
 		private System.Windows.Forms.Button 日時ベスト通年5年10分足12時EUR_USD;
 		private System.Windows.Forms.Button 日時ベスト正順通年5年10分足;
+		private System.Windows.Forms.Button 日時ベスト正順通年5年10分足EURUSD;
 	}
 }

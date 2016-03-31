@@ -107,8 +107,8 @@ namespace Candlesticks {
 					TradeType = TradeType.Ask
 				});
 				// 11:00-11:40の上昇確率
-				// !A && !B => 24.71%  => 75.29%の確率で下降？
-				// A && !B => 59.03%
+				// !A && !B => 42.86%
+				// A && !B => 57.76%
 				// !A && B => 53.82%
 				// A && B => 68.81%
 
@@ -165,7 +165,7 @@ namespace Candlesticks {
 					TimeOfDayPattern.Signal signal;
 					bool isMatch = false;
 					bool isSuccessTrade;
-					cells["trade"].Value = pattern.GetTradeDescription(out isSuccessTrade, DateTime.To);
+					cells["trade"].Value = pattern.GetTradeDescription(out isSuccessTrade, DateTime.Today);
 					if (pattern.IsMatch(out signal, DateTime.Today)) {
 						if(isSuccessTrade) {
 							cells["trade"].Style.BackColor = Color.LightPink;

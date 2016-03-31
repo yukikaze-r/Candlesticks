@@ -201,7 +201,7 @@ namespace Candlesticks {
 
 		private void EURUSD1100_1140_Click(object sender, EventArgs e) {
 			RunTask(sender, (Report report) => {
-				report.Version = 1;
+				report.Version = 2;
 				report.IsForceOverride = true;
 				report.Comment = "";
 				report.SetHeader("!p1 && !p2","match","p1 && !p2", "match", "!p1 && p2", "match", "p1 && p2", "match", "total");
@@ -247,9 +247,16 @@ namespace Candlesticks {
 
 				foreach (var date in dateSet) {
 					var m = new List<bool>();
+					bool isValid = true;
 					foreach (var p in patterns) {
 						TimeOfDayPattern.Signal signal;
 						m.Add(p.IsMatch(out signal, date));
+						if(signal == null || float.IsNaN(signal.CheckStartPrice) || float.IsNaN(signal.CheckEndPrice)) {
+							isValid = false;
+						}
+					}
+					if(!isValid) {
+						continue;
 					}
 					bool isSuccess;
 					patterns[0].GetTradeDescription(out isSuccess, date);
@@ -275,6 +282,90 @@ namespace Candlesticks {
 				report.WriteLine(r1, c1, r2, c2, r3, c3, r4, c4, total);
 			});
 
+		}
+
+		private void EURUSD1100_1140_rev_Click(object sender, EventArgs e) {
+			RunTask(sender, (Report report) => {
+				report.Version = 2;
+				report.IsForceOverride = true;
+				report.Comment = "";
+				report.SetHeader("!p1 && !p2", "match", "p1 && !p2", "match", "!p1 && p2", "match", "p1 && p2", "match", "total");
+
+				var dateTimePrice = new Dictionary<DateTime, float>();
+				var dateSet = new HashSet<DateTime>();
+				foreach (var c in GetM10Candles(new TimeSpan(365 * 5, 0, 0, 0), "EUR_USD")) {
+					if (c.IsNull) {
+						continue;
+					}
+					dateTimePrice[c.DateTime] = c.Open;
+					dateSet.Add(c.DateTime.Date);
+				}
+
+				Func<DateTime, float> getPrice = dateTime => dateTimePrice.ContainsKey(dateTime) ? dateTimePrice[dateTime] : float.NaN;
+
+				var patterns = new List<TimeOfDayPattern>();
+				patterns.Add(new TimeOfDayPattern() {
+					Instrument = "EUR_USD",
+					CheckStartTime = new TimeOfDayPattern.Time(8, 50),
+					CheckEndTime = new TimeOfDayPattern.Time(11, 00),
+					IsCheckUp = true,
+					TradeStartTime = new TimeOfDayPattern.Time(11, 00),
+					TradeEndTime = new TimeOfDayPattern.Time(11, 40),
+					TradeType = TradeType.Bid,
+					GetPrice = getPrice,
+				});
+
+				patterns.Add(new TimeOfDayPattern() {
+					Instrument = "EUR_USD",
+					CheckStartTime = new TimeOfDayPattern.Time(6, 50),
+					CheckEndTime = new TimeOfDayPattern.Time(7, 50),
+					IsCheckUp = false,
+					TradeStartTime = new TimeOfDayPattern.Time(11, 00),
+					TradeEndTime = new TimeOfDayPattern.Time(11, 30),
+					TradeType = TradeType.Bid,
+					GetPrice = getPrice,
+				});
+
+				int c1, c2, c3, c4, total;
+				int r1, r2, r3, r4;
+				r1 = r2 = r3 = r4 = c1 = c2 = c3 = c4 = total = 0;
+
+				foreach (var date in dateSet) {
+					var m = new List<bool>();
+					bool isValid = true;
+					foreach (var p in patterns) {
+						TimeOfDayPattern.Signal signal;
+						m.Add(p.IsMatch(out signal, date));
+						if (signal == null || float.IsNaN(signal.CheckStartPrice) || float.IsNaN(signal.CheckEndPrice)) {
+							isValid = false;
+						}
+					}
+					if (!isValid) {
+						continue;
+					}
+					bool isSuccess;
+					patterns[0].GetTradeDescription(out isSuccess, date);
+
+					total++;
+					if (!m[0] && !m[1]) {
+						c1++;
+						r1 += isSuccess ? 1 : 0;
+					}
+					if (m[0] && !m[1]) {
+						c2++;
+						r2 += isSuccess ? 1 : 0;
+					}
+					if (!m[0] && m[1]) {
+						c3++;
+						r3 += isSuccess ? 1 : 0;
+					}
+					if (m[0] && m[1]) {
+						c4++;
+						r4 += isSuccess ? 1 : 0;
+					}
+				}
+				report.WriteLine(r1, c1, r2, c2, r3, c3, r4, c4, total);
+			});
 		}
 	}
 }

@@ -85,7 +85,7 @@ namespace Candlesticks {
 					TradeType = TradeType.Bid
 				});
 
-				// 64.54%
+				// 64.54% ... A
 				patterns.Add(new TimeOfDayPattern() {
 					Instrument = "EUR_USD",
 					CheckStartTime = new TimeOfDayPattern.Time(8, 50),
@@ -96,7 +96,7 @@ namespace Candlesticks {
 					TradeType = TradeType.Ask
 				});
 
-				//62.9%
+				//62.9% ... B
 				patterns.Add(new TimeOfDayPattern() {
 					Instrument = "EUR_USD",
 					CheckStartTime = new TimeOfDayPattern.Time(6, 50),
@@ -106,6 +106,11 @@ namespace Candlesticks {
 					TradeEndTime = new TimeOfDayPattern.Time(11, 30),
 					TradeType = TradeType.Ask
 				});
+				// 11:00-11:40の上昇確率
+				// !A && !B => 24.71%  => 75.29%の確率で下降？
+				// A && !B => 59.03%
+				// !A && B => 53.82%
+				// A && B => 68.81%
 
 				//63.98%
 				patterns.Add(new TimeOfDayPattern() {
@@ -160,8 +165,8 @@ namespace Candlesticks {
 					TimeOfDayPattern.Signal signal;
 					bool isMatch = false;
 					bool isSuccessTrade;
-					cells["trade"].Value = pattern.GetTradeDescription(out isSuccessTrade);
-					if (pattern.IsMatch(out signal)) {
+					cells["trade"].Value = pattern.GetTradeDescription(out isSuccessTrade, DateTime.To);
+					if (pattern.IsMatch(out signal, DateTime.Today)) {
 						if(isSuccessTrade) {
 							cells["trade"].Style.BackColor = Color.LightPink;
 						} else {

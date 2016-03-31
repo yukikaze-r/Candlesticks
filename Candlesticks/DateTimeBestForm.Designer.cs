@@ -34,6 +34,7 @@
 			this.日時ベスト通年5年10分足12時EUR_USD = new System.Windows.Forms.Button();
 			this.日時ベスト正順通年5年10分足 = new System.Windows.Forms.Button();
 			this.日時ベスト正順通年5年10分足EURUSD = new System.Windows.Forms.Button();
+			this.EURUSD11001140 = new System.Windows.Forms.Button();
 			((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
 			this.SuspendLayout();
 			// 
@@ -150,11 +151,22 @@
 			this.日時ベスト正順通年5年10分足EURUSD.UseVisualStyleBackColor = true;
 			this.日時ベスト正順通年5年10分足EURUSD.Click += new System.EventHandler(this.日時ベスト正順通年5年10分足EURUSD_Click);
 			// 
+			// EURUSD11001140
+			// 
+			this.EURUSD11001140.Location = new System.Drawing.Point(653, 25);
+			this.EURUSD11001140.Name = "EURUSD11001140";
+			this.EURUSD11001140.Size = new System.Drawing.Size(169, 23);
+			this.EURUSD11001140.TabIndex = 11;
+			this.EURUSD11001140.Text = "EUR_USD 1100-1140";
+			this.EURUSD11001140.UseVisualStyleBackColor = true;
+			this.EURUSD11001140.Click += new System.EventHandler(this.EURUSD1100_1140_Click);
+			// 
 			// 日時ベスト正順通年5年10分足EUR_USD
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(834, 684);
+			this.Controls.Add(this.EURUSD11001140);
 			this.Controls.Add(this.日時ベスト正順通年5年10分足EURUSD);
 			this.Controls.Add(this.日時ベスト正順通年5年10分足);
 			this.Controls.Add(this.日時ベスト通年5年10分足12時EUR_USD);
@@ -187,5 +199,6 @@
 		private System.Windows.Forms.Button 日時ベスト通年5年10分足12時EUR_USD;
 		private System.Windows.Forms.Button 日時ベスト正順通年5年10分足;
 		private System.Windows.Forms.Button 日時ベスト正順通年5年10分足EURUSD;
+		private System.Windows.Forms.Button EURUSD11001140;
 	}
 }

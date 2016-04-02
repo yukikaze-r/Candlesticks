@@ -218,28 +218,53 @@ namespace Candlesticks {
 
 				Func<DateTime, float> getPrice = dateTime => dateTimePrice.ContainsKey(dateTime) ? dateTimePrice[dateTime] : float.NaN;
 
-				var patterns = new List<TimeOfDayPattern>();
-				patterns.Add(new TimeOfDayPattern() {
-					Instrument = "EUR_USD",
-					CheckStartTime = new TimeOfDayPattern.Time(8, 50),
-					CheckEndTime = new TimeOfDayPattern.Time(11, 00),
-					IsCheckUp = false,
-					TradeStartTime = new TimeOfDayPattern.Time(11, 00),
-					TradeEndTime = new TimeOfDayPattern.Time(11, 40),
-					TradeType = TradeType.Ask,
-					GetPrice = getPrice,
-				});
+				var patterns = new List<TradePattern>();
 
-				patterns.Add(new TimeOfDayPattern() {
-					Instrument = "EUR_USD",
-					CheckStartTime = new TimeOfDayPattern.Time(6, 50),
-					CheckEndTime = new TimeOfDayPattern.Time(7, 50),
-					IsCheckUp = true,
-					TradeStartTime = new TimeOfDayPattern.Time(11, 00),
-					TradeEndTime = new TimeOfDayPattern.Time(11, 30),
-					TradeType = TradeType.Ask,
-					GetPrice = getPrice,
-				});
+				patterns.Add(
+					new TradePattern() {
+						TradeCondition = new TimeOfDayPattern() {
+							Instrument = "EUR_USD",
+							CheckStartTime = new TimeSpan(8, 50, 0),
+							CheckEndTime = new TimeSpan(11, 00, 0),
+							IsCheckUp = false,
+						},
+						TradeOrders = new TimeTradeOrder[] {
+							new TimeTradeOrder() {
+								Instrument = "EUR_USD",
+								TradeType = TradeType.Ask,
+								Time = new TimeSpan(11, 00, 0),
+							},
+							new TimeTradeOrder() {
+								Instrument = "EUR_USD",
+								TradeType = TradeType.Settle,
+								Time = new TimeSpan(11, 40, 0),
+							}
+						}
+					}
+				);
+
+				patterns.Add(
+					new TradePattern() {
+						TradeCondition = new TimeOfDayPattern() {
+							Instrument = "EUR_USD",
+							CheckStartTime = new TimeSpan(6, 50, 0),
+							CheckEndTime = new TimeSpan(7, 50, 0),
+							IsCheckUp = true,
+						},
+						TradeOrders = new TimeTradeOrder[] {
+							new TimeTradeOrder() {
+								Instrument = "EUR_USD",
+								TradeType = TradeType.Ask,
+								Time = new TimeSpan(11, 00, 0),
+							},
+							new TimeTradeOrder() {
+								Instrument = "EUR_USD",
+								TradeType = TradeType.Settle,
+								Time = new TimeSpan(11, 30, 0),
+							}
+						}
+					}
+				);
 
 				int c1, c2, c3, c4, total;
 				int r1, r2, r3, r4;
@@ -249,17 +274,27 @@ namespace Candlesticks {
 					var m = new List<bool>();
 					bool isValid = true;
 					foreach (var p in patterns) {
-						TimeOfDayPattern.Signal signal;
-						m.Add(p.IsMatch(out signal, date));
-						if(signal == null || float.IsNaN(signal.CheckStartPrice) || float.IsNaN(signal.CheckEndPrice)) {
+						TradeContext c = new TradeContext() {
+							Instrument = p.TradeOrders[0].Instrument,
+							Date = date,
+							GetPrice = getPrice,
+						};
+						Signal signal;
+						m.Add(p.TradeCondition.IsMatch(out signal, c));
+						if(signal == null || signal.IsValid == false) {
 							isValid = false;
 						}
 					}
 					if(!isValid) {
 						continue;
 					}
-					bool isSuccess;
-					patterns[0].GetTradeDescription(out isSuccess, date);
+					TradeContext context = new TradeContext() {
+						Instrument = patterns[0].TradeOrders[0].Instrument,
+						Date = date,
+						GetPrice = getPrice,
+					};
+					patterns[0].DoTrade(context);
+					bool isSuccess = context.Profit > 0f;
 
 					total++;
 					if(!m[0] && !m[1]) {
@@ -303,28 +338,54 @@ namespace Candlesticks {
 
 				Func<DateTime, float> getPrice = dateTime => dateTimePrice.ContainsKey(dateTime) ? dateTimePrice[dateTime] : float.NaN;
 
-				var patterns = new List<TimeOfDayPattern>();
-				patterns.Add(new TimeOfDayPattern() {
-					Instrument = "EUR_USD",
-					CheckStartTime = new TimeOfDayPattern.Time(8, 50),
-					CheckEndTime = new TimeOfDayPattern.Time(11, 00),
-					IsCheckUp = true,
-					TradeStartTime = new TimeOfDayPattern.Time(11, 00),
-					TradeEndTime = new TimeOfDayPattern.Time(11, 40),
-					TradeType = TradeType.Bid,
-					GetPrice = getPrice,
-				});
 
-				patterns.Add(new TimeOfDayPattern() {
-					Instrument = "EUR_USD",
-					CheckStartTime = new TimeOfDayPattern.Time(6, 50),
-					CheckEndTime = new TimeOfDayPattern.Time(7, 50),
-					IsCheckUp = false,
-					TradeStartTime = new TimeOfDayPattern.Time(11, 00),
-					TradeEndTime = new TimeOfDayPattern.Time(11, 30),
-					TradeType = TradeType.Bid,
-					GetPrice = getPrice,
-				});
+				var patterns = new List<TradePattern>();
+
+				patterns.Add(
+					new TradePattern() {
+						TradeCondition = new TimeOfDayPattern() {
+							Instrument = "EUR_USD",
+							CheckStartTime = new TimeSpan(8, 50, 0),
+							CheckEndTime = new TimeSpan(11, 00, 0),
+							IsCheckUp = true,
+						},
+						TradeOrders = new TimeTradeOrder[] {
+							new TimeTradeOrder() {
+								Instrument = "EUR_USD",
+								TradeType = TradeType.Bid,
+								Time = new TimeSpan(11, 00, 0),
+							},
+							new TimeTradeOrder() {
+								Instrument = "EUR_USD",
+								TradeType = TradeType.Settle,
+								Time = new TimeSpan(11, 40, 0),
+							}
+						}
+					}
+				);
+
+				patterns.Add(
+					new TradePattern() {
+						TradeCondition = new TimeOfDayPattern() {
+							Instrument = "EUR_USD",
+							CheckStartTime = new TimeSpan(6, 50, 0),
+							CheckEndTime = new TimeSpan(7, 50, 0),
+							IsCheckUp = false,
+						},
+						TradeOrders = new TimeTradeOrder[] {
+							new TimeTradeOrder() {
+								Instrument = "EUR_USD",
+								TradeType = TradeType.Bid,
+								Time = new TimeSpan(11, 00, 0),
+							},
+							new TimeTradeOrder() {
+								Instrument = "EUR_USD",
+								TradeType = TradeType.Settle,
+								Time = new TimeSpan(11, 30, 0),
+							}
+						}
+					}
+				);
 
 				int c1, c2, c3, c4, total;
 				int r1, r2, r3, r4;
@@ -334,17 +395,27 @@ namespace Candlesticks {
 					var m = new List<bool>();
 					bool isValid = true;
 					foreach (var p in patterns) {
-						TimeOfDayPattern.Signal signal;
-						m.Add(p.IsMatch(out signal, date));
-						if (signal == null || float.IsNaN(signal.CheckStartPrice) || float.IsNaN(signal.CheckEndPrice)) {
+						TradeContext c = new TradeContext() {
+							Instrument = p.TradeOrders[0].Instrument,
+							Date = date,
+							GetPrice = getPrice,
+						};
+						Signal signal;
+						m.Add(p.TradeCondition.IsMatch(out signal, c));
+						if (signal == null || signal.IsValid == false) {
 							isValid = false;
 						}
 					}
 					if (!isValid) {
 						continue;
 					}
-					bool isSuccess;
-					patterns[0].GetTradeDescription(out isSuccess, date);
+					TradeContext context = new TradeContext() {
+						Instrument = patterns[0].TradeOrders[0].Instrument,
+						Date = date,
+						GetPrice = getPrice,
+					};
+					patterns[0].DoTrade(context);
+					bool isSuccess = context.Profit > 0f;
 
 					total++;
 					if (!m[0] && !m[1]) {

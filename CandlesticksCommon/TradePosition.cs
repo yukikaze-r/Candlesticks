@@ -14,8 +14,8 @@ namespace Candlesticks {
 		public float LowSettlementPrice;
 	}
 
-	enum TradeType {
-		Bid, Ask
+	public enum TradeType {
+		Bid, Ask, Settle
 	}
 
 	static class TradeTypeExt {

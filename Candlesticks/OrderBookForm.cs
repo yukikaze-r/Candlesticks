@@ -133,6 +133,9 @@ namespace Candlesticks {
 		private void LoadVolumeSeries(Series series, List<Candlestick> s5candles) {
 			Dictionary<float, float> priceVolumes = new Dictionary<float, float>();
 			foreach (var candle in s5candles) {
+				if(candle.IsNull) {
+					continue;
+				}
 				float min = GetRoundPrice(candle.Low);
 				float max = GetRoundPrice(candle.High);
 				float average = (float)candle.Volume / (int)((max - min + 1) / selectedInstrument.VolumePriceGranularity);

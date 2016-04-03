@@ -41,7 +41,7 @@ namespace Candlesticks {
 							CheckEndTime = new TimeSpan(8, 40, 0),
 							IsCheckUp = true,
 						},
-						TradeOrders = new TimeTradeOrder[] {
+						TradeOrders = new TradeOrders(
 							new TimeTradeOrder() {
 								Instrument = "USD_JPY",
 								TradeType = TradeType.Bid,
@@ -52,7 +52,7 @@ namespace Candlesticks {
 								TradeType = TradeType.Settle,
 								Time = new TimeSpan(11, 30, 0),
 							}
-						}
+						)
 					}
 				);
 
@@ -65,7 +65,7 @@ namespace Candlesticks {
 							CheckEndTime = new TimeSpan(4, 50, 0),
 							IsCheckUp = false,
 						},
-						TradeOrders = new TimeTradeOrder[] {
+						TradeOrders = new TradeOrders(
 							new TimeTradeOrder() {
 								Instrument = "USD_JPY",
 								TradeType = TradeType.Ask,
@@ -76,7 +76,7 @@ namespace Candlesticks {
 								TradeType = TradeType.Settle,
 								Time = new TimeSpan(7, 10, 0),
 							}
-						}
+						)
 					}
 				);
 
@@ -89,7 +89,7 @@ namespace Candlesticks {
 							CheckEndTime = new TimeSpan(5, 40, 0),
 							IsCheckUp = false,
 						},
-						TradeOrders = new TimeTradeOrder[] {
+						TradeOrders = new TradeOrders(
 							new TimeTradeOrder() {
 								Instrument = "USD_JPY",
 								TradeType = TradeType.Ask,
@@ -100,7 +100,7 @@ namespace Candlesticks {
 								TradeType = TradeType.Settle,
 								Time = new TimeSpan(7, 10, 0),
 							}
-						}
+						)
 					}
 				);
 
@@ -125,7 +125,7 @@ namespace Candlesticks {
 							CheckEndTime = new TimeSpan(4, 20, 0),
 							IsCheckUp = false,
 						},
-						TradeOrders = new TimeTradeOrder[] {
+						TradeOrders = new TradeOrders(
 							new TimeTradeOrder() {
 								Instrument = "USD_JPY",
 								TradeType = TradeType.Bid,
@@ -136,7 +136,7 @@ namespace Candlesticks {
 								TradeType = TradeType.Settle,
 								Time = new TimeSpan(13, 10, 0),
 							}
-						}
+						)
 					}
 				);
 
@@ -150,7 +150,7 @@ namespace Candlesticks {
 							CheckEndTime = new TimeSpan(11, 00, 0),
 							IsCheckUp = false,
 						},
-						TradeOrders = new TimeTradeOrder[] {
+						TradeOrders = new TradeOrders(
 							new TimeTradeOrder() {
 								Instrument = "EUR_USD",
 								TradeType = TradeType.Ask,
@@ -161,7 +161,7 @@ namespace Candlesticks {
 								TradeType = TradeType.Settle,
 								Time = new TimeSpan(11, 40, 0),
 							}
-						}
+						)
 					}
 				);
 
@@ -176,7 +176,7 @@ namespace Candlesticks {
 							CheckEndTime = new TimeSpan(7, 50, 0),
 							IsCheckUp = true,
 						},
-						TradeOrders = new TimeTradeOrder[] {
+						TradeOrders = new TradeOrders(
 							new TimeTradeOrder() {
 								Instrument = "EUR_USD",
 								TradeType = TradeType.Ask,
@@ -187,7 +187,7 @@ namespace Candlesticks {
 								TradeType = TradeType.Settle,
 								Time = new TimeSpan(11, 30, 0),
 							}
-						}
+						)
 					}
 				);
 				// 11:00-11:40の上昇確率
@@ -215,7 +215,7 @@ namespace Candlesticks {
 							},
 						},
 
-						TradeOrders = new TimeTradeOrder[] {
+						TradeOrders = new TradeOrders(
 							new TimeTradeOrder() {
 								Instrument = "EUR_USD",
 								TradeType = TradeType.Ask,
@@ -226,7 +226,7 @@ namespace Candlesticks {
 								TradeType = TradeType.Settle,
 								Time = new TimeSpan(11, 40, 0),
 							}
-						}
+						)
 					}
 				);
 
@@ -241,7 +241,7 @@ namespace Candlesticks {
 							CheckEndTime = new TimeSpan(4, 00, 0),
 							IsCheckUp = true,
 						},
-						TradeOrders = new TimeTradeOrder[] {
+						TradeOrders = new TradeOrders(
 							new TimeTradeOrder() {
 								Instrument = "EUR_USD",
 								TradeType = TradeType.Bid,
@@ -252,7 +252,7 @@ namespace Candlesticks {
 								TradeType = TradeType.Settle,
 								Time = new TimeSpan(7, 40, 0),
 							}
-						}
+						)
 					}
 				);
 
@@ -302,13 +302,13 @@ namespace Candlesticks {
 						Date = DateTime.Today
 					};
 
-					cells["trade"].Value = pattern.GetTradeDescription(tradeContext);
+					cells["trade"].Value = pattern.TradeOrders.GetTradeDescription(tradeContext);
 					if (pattern.TradeCondition.IsMatch(out signal, tradeContext)) {
-						pattern.DoTrade(tradeContext);
+						pattern.TradeOrders.DoTrade(tradeContext);
 						if (tradeContext.Profit > 0f) {
 							cells["trade"].Style.BackColor = Color.LightPink;
 						} else {
-							cells["trade"].Style.BackColor = pattern.IsInTradeTime ? Color.Red : Color.Yellow;
+							cells["trade"].Style.BackColor = pattern.TradeOrders.IsInTradeTime ? Color.Red : Color.Yellow;
 						}
 						isMatch = true;
 					} else {
@@ -341,7 +341,7 @@ namespace Candlesticks {
 			}
 		}
 
-		private void DoTrade(TimeTradeOrder[] orders) {
+		private void DoTrade(TradeOrders orders) {
 			DateTime now = DateTime.Now;
 			DateTime nowMinutes = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, 0, now.Kind);
 			foreach (var order in orders) {

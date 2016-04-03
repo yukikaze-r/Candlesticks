@@ -23,7 +23,7 @@ namespace Candlesticks {
 		}
 
 
-		private IEnumerable<Candlestick> GetM10Candles(TimeSpan span, string instrument="USD_JPY") {
+		private IEnumerable<Candlestick> GetM10Candles(TimeSpan span, string instrument = "USD_JPY") {
 			using (DBUtils.OpenThreadConnection()) {
 				return new CandlesticksGetter() {
 					Start = DateTime.Today.AddTicks(-span.Ticks),
@@ -59,6 +59,81 @@ namespace Candlesticks {
 		}
 
 
+		private void ReportMultiCondition(Report report, TradeOrders tradeOrders, TradeCondition[] conditions, IEnumerable<Candlestick> candles) {
+			report.SetHeader("condition","prifit rate","profit count","total match");
+
+			var dateTimePrice = new Dictionary<DateTime, float>();
+			var dateSet = new HashSet<DateTime>();
+			foreach (var c in candles) {
+				if (c.IsNull) {
+					continue;
+				}
+				dateTimePrice[c.DateTime] = c.Open;
+				dateSet.Add(c.DateTime.Date);
+			}
+			Func<DateTime, float> getPrice = dateTime => 
+				dateTimePrice.ContainsKey(dateTime) ? dateTimePrice[dateTime] : float.NaN;
+
+			int c1, c2, c3, c4, total;
+			int r1, r2, r3, r4;
+			r1 = r2 = r3 = r4 = c1 = c2 = c3 = c4 = total = 0;
+
+			foreach (var date in dateSet) {
+				var m = new List<bool>();
+				bool isValid = true;
+				foreach (var condition in conditions) {
+					TradeContext c = new TradeContext() {
+						Instrument = tradeOrders[0].Instrument,
+						Date = date,
+						GetPrice = getPrice,
+					};
+					Signal signal;
+					m.Add(condition.IsMatch(out signal, c));
+					if (signal == null || signal.IsValid == false) {
+						isValid = false;
+					}
+				}
+				if (!isValid) {
+					continue;
+				}
+				TradeContext context = new TradeContext() {
+					Instrument = tradeOrders[0].Instrument,
+					Date = date,
+					GetPrice = getPrice,
+				};
+				tradeOrders.DoTrade(context);
+				if(context.IsValid==false) {
+					continue;
+				}
+				bool isSuccess = context.Profit > 0f;
+
+				total++;
+				if (!m[0] && !m[1]) {
+					c1++;
+					r1 += isSuccess ? 1 : 0;
+				}
+				if (m[0] && !m[1]) {
+					c2++;
+					r2 += isSuccess ? 1 : 0;
+				}
+				if (!m[0] && m[1]) {
+					c3++;
+					r3 += isSuccess ? 1 : 0;
+				}
+				if (m[0] && m[1]) {
+					c4++;
+					r4 += isSuccess ? 1 : 0;
+				}
+			}
+			report.WriteLine("!p1 && !p2", (float)r1 / c1, r1, c1);
+			report.WriteLine("p1 && !p2", (float)r2 / c2, r2, c2);
+			report.WriteLine("!p1 && p2", (float)r3 / c3, r3, c3);
+			report.WriteLine("p1 && p2", (float)r4 / c4, r4, c4);
+			report.WriteLine("total", (float)(r1 + r2 + r3 + r4) / (c1 + c2 + c3 + c4), r1 + r2 + r3 + r4, c1 + c2 + c3 + c4);
+		}
+
+
+
 		private void 日時ベスト冬時間5年_Click(object sender, EventArgs e) {
 			RunTask(sender, (Report report) => {
 				report.Version = 6;
@@ -66,7 +141,8 @@ namespace Candlesticks {
 				report.Comment = "冬時間";
 				report.SetHeader("start", "end", "start", "end", "↑↑", "↑↓", "↓↑", "↓↓");
 				var bestTradeTime = new BestTradeTime(GetM30Candles(new TimeSpan(365 * 5, 0, 0, 0))) {
-					IsSummerTime = false };
+					IsSummerTime = false
+				};
 				foreach (var t in bestTradeTime.Calculate(100)) {
 
 					foreach (var time in t.Item1) {
@@ -162,7 +238,7 @@ namespace Candlesticks {
 				report.IsForceOverride = true;
 				report.Comment = "";
 				report.SetHeader("start", "end", "start", "end", "↑↑", "↑↓", "↓↑", "↓↓");
-				var bestTradeTime = new BestTradeTime(GetM10Candles(new TimeSpan(5 * 365, 0, 0, 0),"EUR_USD")) {
+				var bestTradeTime = new BestTradeTime(GetM10Candles(new TimeSpan(5 * 365, 0, 0, 0), "EUR_USD")) {
 					Granularity = new TimeSpan(0, 10, 0),
 					ShiftHour = 12,
 				};
@@ -190,131 +266,50 @@ namespace Candlesticks {
 				report.IsForceOverride = true;
 				report.Comment = "";
 				report.SetHeader("start", "end", "start", "end", "↑↑", "↑↓", "↓↑", "↓↓");
-				var bestTradeTime = new BestTradeTime(GetM10Candles(new TimeSpan(365 * 5, 0, 0, 0),"EUR_USD")) {
+				var bestTradeTime = new BestTradeTime(GetM10Candles(new TimeSpan(365 * 5, 0, 0, 0), "EUR_USD")) {
 					Granularity = new TimeSpan(0, 10, 0),
 					Comparator = f => (int)(Math.Max((double)f[0] / (f[0] + f[1]), (double)f[3] / (f[2] + f[3])) * 10000)
 				};
 				ReportGroupByTradeStartTime(report, bestTradeTime);
 			});
-
 		}
+
 
 		private void EURUSD1100_1140_Click(object sender, EventArgs e) {
 			RunTask(sender, (Report report) => {
 				report.Version = 2;
 				report.IsForceOverride = true;
 				report.Comment = "";
-				report.SetHeader("!p1 && !p2","match","p1 && !p2", "match", "!p1 && p2", "match", "p1 && p2", "match", "total");
 
-				var dateTimePrice = new Dictionary<DateTime, float>();
-				var dateSet = new HashSet<DateTime>();
-				foreach (var c in GetM10Candles(new TimeSpan(365 * 5, 0, 0, 0), "EUR_USD")) {
-					if(c.IsNull) {
-						continue;
-					}
-					dateTimePrice[c.DateTime] = c.Open;
-					dateSet.Add(c.DateTime.Date);
-				}
-
-				Func<DateTime, float> getPrice = dateTime => dateTimePrice.ContainsKey(dateTime) ? dateTimePrice[dateTime] : float.NaN;
-
-				var patterns = new List<TradePattern>();
-
-				patterns.Add(
-					new TradePattern() {
-						TradeCondition = new TimeOfDayPattern() {
-							Instrument = "EUR_USD",
-							CheckStartTime = new TimeSpan(8, 50, 0),
-							CheckEndTime = new TimeSpan(11, 00, 0),
-							IsCheckUp = false,
-						},
-						TradeOrders = new TimeTradeOrder[] {
-							new TimeTradeOrder() {
-								Instrument = "EUR_USD",
-								TradeType = TradeType.Ask,
-								Time = new TimeSpan(11, 00, 0),
-							},
-							new TimeTradeOrder() {
-								Instrument = "EUR_USD",
-								TradeType = TradeType.Settle,
-								Time = new TimeSpan(11, 40, 0),
-							}
-						}
+				var tradeOrders = new TradeOrders(
+					new TimeTradeOrder() {
+						Instrument = "EUR_USD",
+						TradeType = TradeType.Ask,
+						Time = new TimeSpan(11, 00, 0),
+					},
+					new TimeTradeOrder() {
+						Instrument = "EUR_USD",
+						TradeType = TradeType.Settle,
+						Time = new TimeSpan(11, 40, 0),
 					}
 				);
 
-				patterns.Add(
-					new TradePattern() {
-						TradeCondition = new TimeOfDayPattern() {
-							Instrument = "EUR_USD",
-							CheckStartTime = new TimeSpan(6, 50, 0),
-							CheckEndTime = new TimeSpan(7, 50, 0),
-							IsCheckUp = true,
-						},
-						TradeOrders = new TimeTradeOrder[] {
-							new TimeTradeOrder() {
-								Instrument = "EUR_USD",
-								TradeType = TradeType.Ask,
-								Time = new TimeSpan(11, 00, 0),
-							},
-							new TimeTradeOrder() {
-								Instrument = "EUR_USD",
-								TradeType = TradeType.Settle,
-								Time = new TimeSpan(11, 30, 0),
-							}
-						}
-					}
-				);
+				TradeCondition[] conditions = new TimeOfDayPattern[] {
+					new TimeOfDayPattern() {
+						Instrument = "EUR_USD",
+						CheckStartTime = new TimeSpan(8, 50, 0),
+						CheckEndTime = new TimeSpan(11, 00, 0),
+						IsCheckUp = false,
+					},
+					new TimeOfDayPattern() {
+						Instrument = "EUR_USD",
+						CheckStartTime = new TimeSpan(6, 50, 0),
+						CheckEndTime = new TimeSpan(7, 50, 0),
+						IsCheckUp = true,
+					},
+				};
 
-				int c1, c2, c3, c4, total;
-				int r1, r2, r3, r4;
-				r1 = r2 = r3 = r4 = c1 = c2 = c3 = c4 = total = 0;
-
-				foreach (var date in dateSet) {
-					var m = new List<bool>();
-					bool isValid = true;
-					foreach (var p in patterns) {
-						TradeContext c = new TradeContext() {
-							Instrument = p.TradeOrders[0].Instrument,
-							Date = date,
-							GetPrice = getPrice,
-						};
-						Signal signal;
-						m.Add(p.TradeCondition.IsMatch(out signal, c));
-						if(signal == null || signal.IsValid == false) {
-							isValid = false;
-						}
-					}
-					if(!isValid) {
-						continue;
-					}
-					TradeContext context = new TradeContext() {
-						Instrument = patterns[0].TradeOrders[0].Instrument,
-						Date = date,
-						GetPrice = getPrice,
-					};
-					patterns[0].DoTrade(context);
-					bool isSuccess = context.Profit > 0f;
-
-					total++;
-					if(!m[0] && !m[1]) {
-						c1++;
-						r1 += isSuccess ? 1 : 0;
-					}
-					if (m[0] && !m[1]) {
-						c2++;
-						r2 += isSuccess ? 1 : 0;
-					}
-					if (!m[0] && m[1]) {
-						c3++;
-						r3 += isSuccess ? 1 : 0;
-					}
-					if (m[0] && m[1]) {
-						c4++;
-						r4 += isSuccess ? 1 : 0;
-					}
-				}
-				report.WriteLine(r1, c1, r2, c2, r3, c3, r4, c4, total);
+				ReportMultiCondition(report, tradeOrders, conditions, GetM10Candles(new TimeSpan(365 * 5, 0, 0, 0), "EUR_USD"));
 			});
 
 		}
@@ -324,118 +319,74 @@ namespace Candlesticks {
 				report.Version = 2;
 				report.IsForceOverride = true;
 				report.Comment = "";
-				report.SetHeader("!p1 && !p2", "match", "p1 && !p2", "match", "!p1 && p2", "match", "p1 && p2", "match", "total");
 
-				var dateTimePrice = new Dictionary<DateTime, float>();
-				var dateSet = new HashSet<DateTime>();
-				foreach (var c in GetM10Candles(new TimeSpan(365 * 5, 0, 0, 0), "EUR_USD")) {
-					if (c.IsNull) {
-						continue;
-					}
-					dateTimePrice[c.DateTime] = c.Open;
-					dateSet.Add(c.DateTime.Date);
-				}
-
-				Func<DateTime, float> getPrice = dateTime => dateTimePrice.ContainsKey(dateTime) ? dateTimePrice[dateTime] : float.NaN;
-
-
-				var patterns = new List<TradePattern>();
-
-				patterns.Add(
-					new TradePattern() {
-						TradeCondition = new TimeOfDayPattern() {
-							Instrument = "EUR_USD",
-							CheckStartTime = new TimeSpan(8, 50, 0),
-							CheckEndTime = new TimeSpan(11, 00, 0),
-							IsCheckUp = true,
-						},
-						TradeOrders = new TimeTradeOrder[] {
-							new TimeTradeOrder() {
-								Instrument = "EUR_USD",
-								TradeType = TradeType.Bid,
-								Time = new TimeSpan(11, 00, 0),
-							},
-							new TimeTradeOrder() {
-								Instrument = "EUR_USD",
-								TradeType = TradeType.Settle,
-								Time = new TimeSpan(11, 40, 0),
-							}
-						}
+				var tradeOrders = new TradeOrders(
+					new TimeTradeOrder() {
+						Instrument = "EUR_USD",
+						TradeType = TradeType.Bid,
+						Time = new TimeSpan(11, 00, 0),
+					},
+					new TimeTradeOrder() {
+						Instrument = "EUR_USD",
+						TradeType = TradeType.Settle,
+						Time = new TimeSpan(11, 40, 0),
 					}
 				);
 
-				patterns.Add(
-					new TradePattern() {
-						TradeCondition = new TimeOfDayPattern() {
-							Instrument = "EUR_USD",
-							CheckStartTime = new TimeSpan(6, 50, 0),
-							CheckEndTime = new TimeSpan(7, 50, 0),
-							IsCheckUp = false,
-						},
-						TradeOrders = new TimeTradeOrder[] {
-							new TimeTradeOrder() {
-								Instrument = "EUR_USD",
-								TradeType = TradeType.Bid,
-								Time = new TimeSpan(11, 00, 0),
-							},
-							new TimeTradeOrder() {
-								Instrument = "EUR_USD",
-								TradeType = TradeType.Settle,
-								Time = new TimeSpan(11, 30, 0),
-							}
-						}
+				TradeCondition[] conditions = new TimeOfDayPattern[] {
+					new TimeOfDayPattern() {
+						Instrument = "EUR_USD",
+						CheckStartTime = new TimeSpan(8, 50, 0),
+						CheckEndTime = new TimeSpan(11, 00, 0),
+						IsCheckUp = true,
+					},
+					new TimeOfDayPattern() {
+						Instrument = "EUR_USD",
+						CheckStartTime = new TimeSpan(6, 50, 0),
+						CheckEndTime = new TimeSpan(7, 50, 0),
+						IsCheckUp = false,
+					},
+				};
+
+				ReportMultiCondition(report, tradeOrders, conditions, GetM10Candles(new TimeSpan(365 * 5, 0, 0, 0), "EUR_USD"));
+			});
+		}
+
+		private void USDJPY0550_0710_Click(object sender, EventArgs e) {
+			RunTask(sender, (Report report) => {
+				report.Version = 1;
+				report.IsForceOverride = true;
+				report.Comment = "";
+
+				var tradeOrders = new TradeOrders(
+					new TimeTradeOrder() {
+						Instrument = "USD_JPY",
+						TradeType = TradeType.Ask,
+						Time = new TimeSpan(5, 50, 0),
+					},
+					new TimeTradeOrder() {
+						Instrument = "USD_JPY",
+						TradeType = TradeType.Settle,
+						Time = new TimeSpan(7, 10, 0),
 					}
 				);
 
-				int c1, c2, c3, c4, total;
-				int r1, r2, r3, r4;
-				r1 = r2 = r3 = r4 = c1 = c2 = c3 = c4 = total = 0;
+				TradeCondition[] conditions = new TimeOfDayPattern[] {
+					new TimeOfDayPattern() {
+						Instrument = "USD_JPY",
+						CheckStartTime = new TimeSpan(0, 30, 0),
+						CheckEndTime = new TimeSpan(4, 50, 0),
+						IsCheckUp = false,
+					},
+					new TimeOfDayPattern() {
+						Instrument = "USD_JPY",
+						CheckStartTime = new TimeSpan(0, 20, 0),
+						CheckEndTime = new TimeSpan(5, 40, 0),
+						IsCheckUp = false,
+					},
+				};
 
-				foreach (var date in dateSet) {
-					var m = new List<bool>();
-					bool isValid = true;
-					foreach (var p in patterns) {
-						TradeContext c = new TradeContext() {
-							Instrument = p.TradeOrders[0].Instrument,
-							Date = date,
-							GetPrice = getPrice,
-						};
-						Signal signal;
-						m.Add(p.TradeCondition.IsMatch(out signal, c));
-						if (signal == null || signal.IsValid == false) {
-							isValid = false;
-						}
-					}
-					if (!isValid) {
-						continue;
-					}
-					TradeContext context = new TradeContext() {
-						Instrument = patterns[0].TradeOrders[0].Instrument,
-						Date = date,
-						GetPrice = getPrice,
-					};
-					patterns[0].DoTrade(context);
-					bool isSuccess = context.Profit > 0f;
-
-					total++;
-					if (!m[0] && !m[1]) {
-						c1++;
-						r1 += isSuccess ? 1 : 0;
-					}
-					if (m[0] && !m[1]) {
-						c2++;
-						r2 += isSuccess ? 1 : 0;
-					}
-					if (!m[0] && m[1]) {
-						c3++;
-						r3 += isSuccess ? 1 : 0;
-					}
-					if (m[0] && m[1]) {
-						c4++;
-						r4 += isSuccess ? 1 : 0;
-					}
-				}
-				report.WriteLine(r1, c1, r2, c2, r3, c3, r4, c4, total);
+				ReportMultiCondition(report, tradeOrders, conditions, GetM10Candles(new TimeSpan(365 * 5, 0, 0, 0), "USD_JPY"));
 			});
 		}
 	}

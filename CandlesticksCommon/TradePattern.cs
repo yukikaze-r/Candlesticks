@@ -7,14 +7,20 @@ namespace Candlesticks
 {
     public class TradePattern {
 		public TradeCondition TradeCondition;
-		public TimeTradeOrder[] TradeOrders;
+		public TradeOrders TradeOrders;
+	}
+
+	public class TradeOrders : List<TimeTradeOrder> {
+		public TradeOrders(params TimeTradeOrder [] orders) : base(orders) {
+						
+		}
 
 		public string GetTradeDescription(TradeContext tradeContext) {
-			return String.Join(" ",TradeOrders.Select(order => order.GetTradeDescription(tradeContext)));
+			return String.Join(" ", this.Select(order => order.GetTradeDescription(tradeContext)));
 		}
 
 		public void DoTrade(TradeContext tradeContext) {
-			foreach(var order in TradeOrders) {
+			foreach (var order in this) {
 				tradeContext.DoTrade(order.TradeType, order.Time);
 			}
 		}
@@ -22,8 +28,8 @@ namespace Candlesticks
 		public bool IsInTradeTime {
 			get {
 				DateTime now = DateTime.Now;
-				DateTime first = DateTime.Today.Add(TradeOrders.Min(o => o.Time));
-				DateTime last = DateTime.Today.Add(TradeOrders.Max(o => o.Time));
+				DateTime first = DateTime.Today.Add(this.Min(o => o.Time));
+				DateTime last = DateTime.Today.Add(this.Max(o => o.Time));
 				return first <= now && now <= last;
 			}
 		}
@@ -36,6 +42,7 @@ namespace Candlesticks
 		public DateTime Date;
 		public List<Tuple<TradeType, float>> positions = new List<Tuple<TradeType, float>>();
 		public float Profit = 0f;
+		public bool IsValid = true;
 
 		public TradeContext() {
 			GetPrice = GetPriceImpl;
@@ -43,7 +50,8 @@ namespace Candlesticks
 
 		public void DoTrade(TradeType tradeType, TimeSpan time) {
 			float currentPrice = GetPrice(Date.AddTicks(time.Ticks));
-			if(currentPrice == float.NaN) {
+			if(float.IsNaN(currentPrice)) {
+				IsValid = false;
 				return;
 			}
 			if (tradeType != TradeType.Settle) {

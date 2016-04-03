@@ -111,6 +111,9 @@ namespace Candlesticks {
 								}
 								float d1 = hml[e1].Open - hml[s1].Open;
 								float d2 = hml[e2].Open - hml[s2].Open;
+								if(d1 == 0 || d2 == 0) {
+									continue;
+								}
 
 								dayResult[(d1 >= 0 ? 0 : 2) + (d2 >= 0 ? 0 : 1)]++;
 							}

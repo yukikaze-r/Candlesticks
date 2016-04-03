@@ -36,6 +36,7 @@
 			this.日時ベスト正順通年5年10分足EURUSD = new System.Windows.Forms.Button();
 			this.EURUSD11001140 = new System.Windows.Forms.Button();
 			this.EURUSD1100_1140_rev = new System.Windows.Forms.Button();
+			this.USDJPY0550_0710 = new System.Windows.Forms.Button();
 			((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
 			this.SuspendLayout();
 			// 
@@ -172,11 +173,22 @@
 			this.EURUSD1100_1140_rev.UseVisualStyleBackColor = true;
 			this.EURUSD1100_1140_rev.Click += new System.EventHandler(this.EURUSD1100_1140_rev_Click);
 			// 
+			// USDJPY0550_0710
+			// 
+			this.USDJPY0550_0710.Location = new System.Drawing.Point(653, 113);
+			this.USDJPY0550_0710.Name = "USDJPY0550_0710";
+			this.USDJPY0550_0710.Size = new System.Drawing.Size(169, 23);
+			this.USDJPY0550_0710.TabIndex = 13;
+			this.USDJPY0550_0710.Text = "USD_JPY 0550-0710";
+			this.USDJPY0550_0710.UseVisualStyleBackColor = true;
+			this.USDJPY0550_0710.Click += new System.EventHandler(this.USDJPY0550_0710_Click);
+			// 
 			// 日時ベスト正順通年5年10分足EUR_USD
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(834, 684);
+			this.Controls.Add(this.USDJPY0550_0710);
 			this.Controls.Add(this.EURUSD1100_1140_rev);
 			this.Controls.Add(this.EURUSD11001140);
 			this.Controls.Add(this.日時ベスト正順通年5年10分足EURUSD);
@@ -213,5 +225,6 @@
 		private System.Windows.Forms.Button 日時ベスト正順通年5年10分足EURUSD;
 		private System.Windows.Forms.Button EURUSD11001140;
 		private System.Windows.Forms.Button EURUSD1100_1140_rev;
+		private System.Windows.Forms.Button USDJPY0550_0710;
 	}
 }

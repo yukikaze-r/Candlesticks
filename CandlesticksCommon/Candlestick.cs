@@ -7,15 +7,76 @@ using System.Threading.Tasks;
 namespace Candlesticks {
 	struct Candlestick {
 		public DateTime DateTime;
-		public float Open;
-		public float Close;
-		public float High;
-		public float Low;
-		public int Volume;
+
+		private float _open;
+		private float _close;
+		private float _high;
+		private float _low;
+		private int _volume;
+
+		public float Open {
+			get {
+				if(IsNull) {
+					throw new Exception("Null candlestick");
+				}
+				return _open;
+			}
+			set {
+				_open = value;
+			}
+		}
+
+		public float Close {
+			get {
+				if (IsNull) {
+					throw new Exception("Null candlestick");
+				}
+				return _close;
+			}
+			set {
+				_close = value;
+			}
+		}
+
+		public float High {
+			get {
+				if (IsNull) {
+					throw new Exception("Null candlestick");
+				}
+				return _high;
+			}
+			set {
+				_high = value;
+			}
+		}
+
+		public float Low {
+			get {
+				if (IsNull) {
+					throw new Exception("Null candlestick");
+				}
+				return _low;
+			}
+			set {
+				_low = value;
+			}
+		}
+
+		public int Volume {
+			get {
+				if (IsNull) {
+					throw new Exception("Null candlestick");
+				}
+				return _volume;
+			}
+			set {
+				_volume = value;
+			}
+		}
 
 		public bool IsNull {
 			get {
-				return Open == 0f;
+				return _open == 0f;
 			}
 		}
 

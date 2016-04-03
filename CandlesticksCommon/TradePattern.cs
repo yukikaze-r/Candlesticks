@@ -91,11 +91,14 @@ namespace Candlesticks
 		}
 
 		public bool IsMatch(out Signal signal, TradeContext tradeContext) {
-			signal = new AndSignal();
+			signal = null;
 			foreach(var c in TradeConditions) {
 				Signal s = null;
 				bool result = c.IsMatch(out s, tradeContext);
 				if(s != null) {
+					if(signal == null) {
+						signal = new AndSignal();
+					}
 					((AndSignal)signal).Add(s);
 				}
 				if(result == false) {

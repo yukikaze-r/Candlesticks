@@ -256,16 +256,6 @@ namespace Candlesticks {
 					}
 				);
 
-				/*
-				patterns.Add(new TimeOfDayPattern() {
-					CheckStartTime = new TimeOfDayPattern.Time(1, 50),
-					CheckEndTime = new TimeOfDayPattern.Time(3, 20),
-					IsCheckUp = true,
-					TradeStartTime = new TimeOfDayPattern.Time(3, 20),
-					TradeEndTime = new TimeOfDayPattern.Time(3, 22),
-					TradeType = TradeType.Ask
-				});*/
-
 				this.signalDataGrid.Columns.Add("pattern", "パターン");
 				this.signalDataGrid.Columns.Add("match", "マッチ状況");
 				this.signalDataGrid.Columns.Add("trade", "トレード");

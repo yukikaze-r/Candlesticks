@@ -197,6 +197,9 @@ namespace Candlesticks {
 				count = (end - start).Ticks / granularitySpan.Ticks;
 				DateTime e = start.AddTicks(granularitySpan.Ticks * Math.Min(count, 5000));
 				foreach (var c in this.OandaAPI.GetCandles(start, e, Instrument, Granularity)) {
+					if(c.DateTime < start) {
+						continue;
+					}
 					yield return c;
 				}
 				start = e;

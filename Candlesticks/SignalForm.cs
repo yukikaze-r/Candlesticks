@@ -154,7 +154,7 @@ namespace Candlesticks {
 							new TimeTradeOrder() {
 								Instrument = "EUR_USD",
 								TradeType = TradeType.Ask,
-								Time = new TimeSpan(11, 00, 0),
+								Time = new TimeSpan(11, 01, 0),
 							},
 							new TimeTradeOrder() {
 								Instrument = "EUR_USD",
@@ -165,7 +165,7 @@ namespace Candlesticks {
 					}
 				);
 
-
+				/*
 
 				//62.9% ... B
 				patterns.Add(
@@ -190,6 +190,7 @@ namespace Candlesticks {
 						)
 					}
 				);
+				*/
 				// 11:00-11:40の上昇確率
 				// !A && !B => 42.86%
 				// A && !B => 57.76%
@@ -256,6 +257,7 @@ namespace Candlesticks {
 					}
 				);
 
+				
 				this.signalDataGrid.Columns.Add("pattern", "パターン");
 				this.signalDataGrid.Columns.Add("match", "マッチ状況");
 				this.signalDataGrid.Columns.Add("trade", "トレード");

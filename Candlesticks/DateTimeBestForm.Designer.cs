@@ -37,6 +37,7 @@
 			this.EURUSD11001140 = new System.Windows.Forms.Button();
 			this.EURUSD1100_1140_rev = new System.Windows.Forms.Button();
 			this.USDJPY0550_0710 = new System.Windows.Forms.Button();
+			this.日時ベスト通年複合5年10分足 = new System.Windows.Forms.Button();
 			((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
 			this.SuspendLayout();
 			// 
@@ -67,17 +68,17 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-			this.dataGridView1.Location = new System.Drawing.Point(0, 282);
+			this.dataGridView1.Location = new System.Drawing.Point(0, 346);
 			this.dataGridView1.Name = "dataGridView1";
 			this.dataGridView1.ReadOnly = true;
 			this.dataGridView1.RowTemplate.Height = 21;
-			this.dataGridView1.Size = new System.Drawing.Size(836, 404);
+			this.dataGridView1.Size = new System.Drawing.Size(836, 340);
 			this.dataGridView1.TabIndex = 2;
 			// 
 			// taskStatus
 			// 
 			this.taskStatus.AutoSize = true;
-			this.taskStatus.Location = new System.Drawing.Point(-2, 267);
+			this.taskStatus.Location = new System.Drawing.Point(-2, 331);
 			this.taskStatus.Name = "taskStatus";
 			this.taskStatus.Size = new System.Drawing.Size(35, 12);
 			this.taskStatus.TabIndex = 3;
@@ -183,11 +184,22 @@
 			this.USDJPY0550_0710.UseVisualStyleBackColor = true;
 			this.USDJPY0550_0710.Click += new System.EventHandler(this.USDJPY0550_0710_Click);
 			// 
+			// 日時ベスト通年複合5年10分足
+			// 
+			this.日時ベスト通年複合5年10分足.Location = new System.Drawing.Point(33, 217);
+			this.日時ベスト通年複合5年10分足.Name = "日時ベスト通年複合5年10分足";
+			this.日時ベスト通年複合5年10分足.Size = new System.Drawing.Size(266, 23);
+			this.日時ベスト通年複合5年10分足.TabIndex = 14;
+			this.日時ベスト通年複合5年10分足.Text = "日時ベスト - 通年 - 複合 - 5年 - 10分足";
+			this.日時ベスト通年複合5年10分足.UseVisualStyleBackColor = true;
+			this.日時ベスト通年複合5年10分足.Click += new System.EventHandler(this.日時ベスト通年複合5年10分足_Click);
+			// 
 			// 日時ベスト正順通年5年10分足EUR_USD
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(834, 684);
+			this.Controls.Add(this.日時ベスト通年複合5年10分足);
 			this.Controls.Add(this.USDJPY0550_0710);
 			this.Controls.Add(this.EURUSD1100_1140_rev);
 			this.Controls.Add(this.EURUSD11001140);
@@ -226,5 +238,6 @@
 		private System.Windows.Forms.Button EURUSD11001140;
 		private System.Windows.Forms.Button EURUSD1100_1140_rev;
 		private System.Windows.Forms.Button USDJPY0550_0710;
+		private System.Windows.Forms.Button 日時ベスト通年複合5年10分足;
 	}
 }

@@ -128,15 +128,21 @@ namespace Candlesticks {
 			foreach(var c in l) {
 				if(isOpen) {
 					result.DateTime = c.DateTime;
-					result.Open = c.Open;
+					if(c.IsNull) {
+						result.Open = 0;
+					} else {
+						result.Open = c.Open;
+					}
 					isOpen = false;
 				}
 				if (c.IsNull) {
 					continue;
 				}
 				result.Close = c.Close;
-				result.High = Math.Max(result.High, c.High);
-				result.Low = Math.Min(result.Low, c.Low);
+				if(result.IsNull == false) {
+					result.High = Math.Max(result.High, c.High);
+					result.Low = Math.Min(result.Low, c.Low);
+				}
 			}
 			if(isOpen) {
 				throw new Exception();

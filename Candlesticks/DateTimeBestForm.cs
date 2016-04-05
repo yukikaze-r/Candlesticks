@@ -34,6 +34,7 @@ namespace Candlesticks {
 			}
 		}
 
+
 		private static void ReportGroupByTradeStartTime(Report report, BestTradeTime bestTradeTime) {
 			var dict = new Dictionary<int, List<Tuple<int[], int[]>>>();
 			foreach (var t in bestTradeTime.Calculate()) {
@@ -132,7 +133,63 @@ namespace Candlesticks {
 			report.WriteLine("total", (float)(r1 + r2 + r3 + r4) / (c1 + c2 + c3 + c4), r1 + r2 + r3 + r4, c1 + c2 + c3 + c4);
 		}
 
+		private static bool IsIntersect(int[] range1, int [] range2) {
+			if (range1[0] == range2[0] && range1[1] == range2[1]) {
+				return true;
+			}
+			if (range2[0] < range1[1] && range1[1] < range2[1]) {
+				return true;
+			}
+			if (range1[0] < range2[1] && range2[1] < range1[1]) {
+				return true;
+			}
+			if (range2[0] < range1[0] && range1[0] < range2[1]) {
+				return true;
+			}
+			if (range1[0] < range2[0] && range2[0] < range1[1]) {
+				return true;
+			}
+			return false;
+		}
 
+		private static void ReportGroupByTradeStartAndEndTime(Report report, BestTradeTime bestTradeTime) {
+			var dict = new Dictionary<int[], List<Tuple<int[], int[]>>>();
+			foreach (var t in bestTradeTime.Calculate()) {
+				if(bestTradeTime.Comparator(t.Item2) < 5500) {
+					continue;
+				}
+				int tradeStartTime = t.Item1[2];
+				int tradeEndTime = t.Item1[3];
+				int[] key = new int[] { tradeStartTime, tradeEndTime };
+				if (!dict.ContainsKey(key)) {
+					dict[key] = new List<Tuple<int[], int[]>>();
+				}
+				dict[key].Add(t);
+			}
+			var list = new List<Tuple<int[], int[]>>();
+			foreach (var tuples in dict.Values) {
+				int[] pre = null;
+				foreach (var t in tuples.OrderByDescending(t => bestTradeTime.Comparator(t.Item2))) {
+					if(pre != null) {
+						if(IsIntersect(pre,t.Item1)) {
+							continue;
+						}
+					}
+					pre = t.Item1;
+					list.Add(t);
+				}
+			}
+
+			foreach (var t in list.OrderByDescending(t => bestTradeTime.Comparator(t.Item2)).Take(10000)) {
+				foreach (var time in t.Item1) {
+					report.Write(bestTradeTime.HMString(time));
+				}
+				foreach (var c in t.Item2) {
+					report.Write(c);
+				}
+				report.WriteLine();
+			}
+		}
 
 		private void 日時ベスト冬時間5年_Click(object sender, EventArgs e) {
 			RunTask(sender, (Report report) => {
@@ -388,6 +445,25 @@ namespace Candlesticks {
 
 				ReportMultiCondition(report, tradeOrders, conditions, GetM10Candles(new TimeSpan(365 * 5, 0, 0, 0), "USD_JPY"));
 			});
+		}
+
+		private void 日時ベスト通年複合5年10分足_Click(object sender, EventArgs e) {
+			RunTask(sender, (Report report) => {
+				report.Version = 1;
+				report.IsForceOverride = true;
+				report.Comment = "";
+				report.SetHeader("start", "end", "start", "end", "↑↑", "↑↓", "↓↑", "↓↓");
+				var bestTradeTime = new BestTradeTime(GetM30Candles(new TimeSpan(365 * 5, 0, 0, 0))) {
+					Granularity = new TimeSpan(0, 10, 0),
+					Comparator = f => {
+						double s1 = f[0] + f[1];
+						double s2 = f[2] + f[3];
+						return (int)(Math.Max(Math.Max(f[0] / s1, f[1] / s1), Math.Max(f[2] / s2, f[3] / s2)) * 10000);
+					}
+				};
+				ReportGroupByTradeStartAndEndTime(report, bestTradeTime);
+			});
+
 		}
 	}
 }

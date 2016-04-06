@@ -447,23 +447,45 @@ namespace Candlesticks {
 			});
 		}
 
+		private static float GetDoubleCheckProbability(int [] s) {
+			float result = 0;
+			for (int i = 0; i < 8; i += 2) {
+				float p0 = (float)s[i] / (s[i] + s[i+1]);
+				float p1 = 1 - p0;
+				result = Math.Max(result, p0);
+				result = Math.Max(result, p1);
+			}
+			return result;
+		}
+
 		private void 日時ベスト通年複合5年10分足_Click(object sender, EventArgs e) {
 			RunTask(sender, (Report report) => {
-				report.Version = 1;
+				report.Version = 3;
 				report.IsForceOverride = true;
-				report.Comment = "";
-				report.SetHeader("start", "end", "start", "end", "↑↑", "↑↓", "↓↑", "↓↓");
-				var bestTradeTime = new BestTradeTime(GetM30Candles(new TimeSpan(365 * 5, 0, 0, 0))) {
+				report.Comment = "USDJPY_0450_0710_夏時間";
+				report.SetHeader("start", "end", "start", "end", "↑↑↑", "↑↑↓", "↑↓↑", "↑↓↓", "↓↑↑", "↓↑↓", "↓↓↑", "↓↓↓","rate");
+				var bestTradeTime = new BestTradeTime(GetM10Candles(new TimeSpan(365 * 5, 0, 0, 0))) {
 					Granularity = new TimeSpan(0, 10, 0),
-					Comparator = f => {
-						double s1 = f[0] + f[1];
-						double s2 = f[2] + f[3];
-						return (int)(Math.Max(Math.Max(f[0] / s1, f[1] / s1), Math.Max(f[2] / s2, f[3] / s2)) * 10000);
-					}
+					IsSummerTime = true
 				};
-				ReportGroupByTradeStartAndEndTime(report, bestTradeTime);
+				List<Tuple<int[], int[], float>> list = new List<Tuple<int[], int[], float>>();
+				foreach(var t in bestTradeTime.CalculateDoubleCheckRange(new TimeSpan(4, 50, 0), new TimeSpan(7, 10, 0))) {
+					var p = GetDoubleCheckProbability(t.Item2);
+					if(p < 0.55f) {
+						continue;
+					}
+					list.Add(new Tuple<int[],int[],float>(t.Item1, t.Item2, p));
+				}
+				foreach(var t in list.OrderByDescending(t => t.Item3).Take(1000)) {
+					foreach(var checkTime in t.Item1) {
+						report.Write(bestTradeTime.HMString(checkTime));
+					}
+					foreach (var count in t.Item2) {
+						report.Write(count);
+					}
+					report.WriteLine(t.Item3);
+				}
 			});
-
 		}
 	}
 }

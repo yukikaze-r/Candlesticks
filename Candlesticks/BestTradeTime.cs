@@ -70,7 +70,7 @@ namespace Candlesticks {
 			return result;
 		}
 
-		private int GetArrayIndex(TimeSpan span) {
+		public int GetArrayIndex(TimeSpan span) {
 			return (int)(span.Ticks / Granularity.Ticks);
 		}
 
@@ -129,5 +129,49 @@ namespace Candlesticks {
 
 		}
 
+		public IEnumerable<Tuple<int[], int[]>> CalculateDoubleCheckRange(TimeSpan tradeStart, TimeSpan tradeEnd) {
+			List<Candlestick[]> candlesticksEachDate = GetCandlesticksEachDate();
+			int dayLength = GetArrayIndex(new TimeSpan(1, 0, 0, 0));
+			int searchLength = GetArrayIndex(new TimeSpan(0, 6, 0, 0));
+
+			int s3 = GetArrayIndex(tradeStart);
+			int e3 = GetArrayIndex(tradeEnd);
+
+			int progress = 0;
+
+			for (int s1 = 0; s1 < s3; s1++) {
+				int newProg = s1 * 100 / s3;
+				if(progress < newProg) {
+					Console.WriteLine(newProg+"%");
+					progress = newProg;
+				}
+				int e1Max = Math.Min(s1 + searchLength, s3);
+				for (int e1 = s1 + 1; e1 <= e1Max; e1++) {
+					for (int s2 = s1 + 1; s2 < s3; s2++) {
+						int e2Max = Math.Min(s2 + searchLength, s3);
+						for (int e2 = s2 + 1; e2 <= e2Max; e2++) {
+							if(s1 == s2 || e1 == e2) {
+								continue;
+							}
+							int[] dayResult = new int[8];
+							foreach (var hml in candlesticksEachDate) {
+								if (hml[e1].IsNull || hml[s1].IsNull || hml[s2].IsNull || hml[e2].IsNull || hml[s3].IsNull || hml[e3].IsNull) {
+									continue;
+								}
+								float d1 = hml[e1].Open - hml[s1].Open;
+								float d2 = hml[e2].Open - hml[s2].Open;
+								float d3 = hml[e3].Open - hml[s3].Open;
+								if (d1 == 0 || d2 == 0 || d3 == 0) {
+									continue;
+								}
+
+								dayResult[(d1 > 0 ? 0 : 4) + (d2 > 0 ? 0 : 2) + (d3 > 0 ? 0 : 1)]++;
+							}
+							yield return new Tuple<int[], int[]>(new int[] { s1, e1, s2, e2 }, dayResult);
+						}
+					}
+				}
+			}
+		}
 	}
 }

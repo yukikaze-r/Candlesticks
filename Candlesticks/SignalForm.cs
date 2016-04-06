@@ -32,39 +32,61 @@ namespace Candlesticks {
 
 		private void SignalForm_Load(object sender, EventArgs e) {
 			using (DBUtils.OpenThreadConnection()) {
-				// 64.19%
+
+				// 81.56%
 				patterns.Add(
 					new TradePattern() {
-						TradeCondition = new TimeOfDayPattern() {
-							Instrument = "USD_JPY",
-							CheckStartTime = new TimeSpan(7, 50, 0),
-							CheckEndTime = new TimeSpan(8, 40, 0),
-							IsCheckUp = true,
+						TradeCondition = new TradeConditionAnd() {
+							TradeConditions = new TradeCondition[] {
+								new TimeOfDayPattern() {
+									Instrument = "USD_JPY",
+									CheckStartTime = new TimeSpan(0, 30, 0),
+									CheckEndTime = new TimeSpan(4, 50, 0),
+									IsCheckUp = false,
+								},
+								new TimeOfDayPattern() {
+									Instrument = "USD_JPY",
+									CheckStartTime = new TimeSpan(3, 20, 0),
+									CheckEndTime = new TimeSpan(3, 30, 0),
+									IsCheckUp = false,
+								},
+							},
 						},
 						TradeOrders = new TradeOrders(
 							new TimeTradeOrder() {
 								Instrument = "USD_JPY",
-								TradeType = TradeType.Bid,
-								Time = new TimeSpan(8, 50, 0),
+								TradeType = TradeType.Ask,
+								Time = new TimeSpan(4, 50, 0),
 							},
 							new TimeTradeOrder() {
 								Instrument = "USD_JPY",
 								TradeType = TradeType.Settle,
-								Time = new TimeSpan(11, 30, 0),
+								Time = new TimeSpan(7, 10, 0),
 							}
 						)
 					}
 				);
 
-				// 75.76%
+				// 83.08%
 				patterns.Add(
 					new TradePattern() {
-						TradeCondition = new TimeOfDayPattern() {
-							Instrument = "USD_JPY",
-							CheckStartTime = new TimeSpan(0, 30, 0),
-							CheckEndTime = new TimeSpan(4, 50, 0),
-							IsCheckUp = false,
+						TradeCondition = new TradeConditionAnd() {
+							TradeConditions = new TradeCondition[] {
+								new TimeOfDayPattern() {
+									Instrument = "USD_JPY",
+									CheckStartTime = new TimeSpan(1, 00, 0),
+									CheckEndTime = new TimeSpan(3, 40, 0),
+									IsCheckUp = false,
+								},
+								new TimeOfDayPattern() {
+									Instrument = "USD_JPY",
+									CheckStartTime = new TimeSpan(3, 50, 0),
+									CheckEndTime = new TimeSpan(4, 20, 0),
+									IsCheckUp = false,
+								},
+							},
 						},
+
 						TradeOrders = new TradeOrders(
 							new TimeTradeOrder() {
 								Instrument = "USD_JPY",
@@ -116,6 +138,29 @@ namespace Candlesticks {
 					TradeType = TradeType.Ask
 				});*/
 
+				// 64.19%
+				patterns.Add(
+					new TradePattern() {
+						TradeCondition = new TimeOfDayPattern() {
+							Instrument = "USD_JPY",
+							CheckStartTime = new TimeSpan(7, 50, 0),
+							CheckEndTime = new TimeSpan(8, 40, 0),
+							IsCheckUp = true,
+						},
+						TradeOrders = new TradeOrders(
+							new TimeTradeOrder() {
+								Instrument = "USD_JPY",
+								TradeType = TradeType.Bid,
+								Time = new TimeSpan(8, 50, 0),
+							},
+							new TimeTradeOrder() {
+								Instrument = "USD_JPY",
+								TradeType = TradeType.Settle,
+								Time = new TimeSpan(11, 30, 0),
+							}
+						)
+					}
+				);
 				// 62.87%
 				patterns.Add(
 					new TradePattern() {

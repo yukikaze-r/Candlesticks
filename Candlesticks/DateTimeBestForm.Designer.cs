@@ -186,7 +186,7 @@
 			// 
 			// 日時ベスト通年複合5年10分足
 			// 
-			this.日時ベスト通年複合5年10分足.Location = new System.Drawing.Point(33, 217);
+			this.日時ベスト通年複合5年10分足.Location = new System.Drawing.Point(33, 230);
 			this.日時ベスト通年複合5年10分足.Name = "日時ベスト通年複合5年10分足";
 			this.日時ベスト通年複合5年10分足.Size = new System.Drawing.Size(266, 23);
 			this.日時ベスト通年複合5年10分足.TabIndex = 14;
